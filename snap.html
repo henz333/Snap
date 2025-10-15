@@ -50,7 +50,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background: #fff; /* MATCH HEADER BACKGROUND TO BLEND */
+      background: #fff;
       margin-top: 0;
       padding-top: 0;
       position: relative;
@@ -61,7 +61,7 @@
       width: 100%;
       max-width: 480px;
       overflow: hidden;
-      background: transparent; /* NO BACKGROUND */
+      background: transparent;
     }
 
     video {
@@ -95,6 +95,8 @@
       border-radius: 50%;
       pointer-events: none;
       transition: background 0.2s ease, top 0.3s ease, left 0.3s ease;
+      /* Center the circle relative to its position */
+      transform: translate(-50%, -50%);
     }
 
     footer {
@@ -199,34 +201,49 @@
     }
 
     function handleOrientation(event) {
-      // gamma = left/right tilt (-90 to 90), beta = front/back tilt (-180 to 180)
       const gamma = event.gamma;
       const beta = event.beta;
 
       if (gamma === null || beta === null) return;
 
-      // Determine orientation: landscape if abs(gamma) > abs(beta)
       isLandscape = Math.abs(gamma) > Math.abs(beta);
 
       updateLevelContainer();
 
-      const maxOffset = (isLandscape ? videoContainer.clientHeight : videoContainer.clientWidth) * 0.25;
+      // Get container size and indicator size
+      const containerRect = levelContainer.getBoundingClientRect();
+      const indicatorSize = levelIndicator.offsetWidth; // 12px width & height
 
       if (isLandscape) {
-        // Move vertically based on beta (front/back tilt)
+        // Vertical movement along container height (80% of video container height)
+        const containerHeight = containerRect.height;
+        const halfHeight = containerHeight / 2;
+
+        // Clamp beta between -30 and 30 degrees
         const clampedBeta = Math.max(-30, Math.min(30, beta));
+
+        // Map -30..30 to pixel range inside the line but keep indicator fully visible
+        const maxOffset = halfHeight - (indicatorSize / 2);
         const offset = (clampedBeta / 30) * maxOffset;
-        levelIndicator.style.top = `calc(50% + ${offset}px)`;
+
+        // Position level indicator vertically with centered horizontal
+        levelIndicator.style.top = `${50 + (offset / containerHeight) * 100}%`;
         levelIndicator.style.left = '50%';
       } else {
-        // Move horizontally based on gamma (left/right tilt)
+        // Horizontal movement along container width (80% of video container width)
+        const containerWidth = containerRect.width;
+        const halfWidth = containerWidth / 2;
+
         const clampedGamma = Math.max(-30, Math.min(30, gamma));
+
+        const maxOffset = halfWidth - (indicatorSize / 2);
         const offset = (clampedGamma / 30) * maxOffset;
-        levelIndicator.style.left = `calc(50% + ${offset}px)`;
+
+        levelIndicator.style.left = `${50 + (offset / containerWidth) * 100}%`;
         levelIndicator.style.top = '50%';
       }
 
-      // Change color when close to balanced
+      // Change color when balanced within ~2 degrees
       if (isLandscape ? Math.abs(beta) < 2 : Math.abs(gamma) < 2) {
         levelIndicator.style.background = '#00ff99';
       } else {
