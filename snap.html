@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>SNAP - Take a Photo</title>
 
-  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins:wght@600&display=swap" rel="stylesheet" />
 
   <style>
@@ -18,6 +17,7 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      user-select: none;
     }
 
     header {
@@ -31,6 +31,7 @@
       font-weight: 700;
       font-size: 1.5rem;
       color: #007aff;
+      flex-shrink: 0;
     }
 
     main {
@@ -45,7 +46,6 @@
       object-fit: cover;
     }
 
-    /* === Level Line === */
     .level-container {
       position: absolute;
       top: 50%;
@@ -55,6 +55,7 @@
       background: rgba(255, 255, 255, 0.5);
       transform: translate(-50%, -50%);
       z-index: 10;
+      pointer-events: none;
     }
 
     .level-indicator {
@@ -67,10 +68,26 @@
       border-radius: 50%;
       transform: translate(-50%, -50%);
       transition: background 0.2s ease;
+      pointer-events: none;
     }
 
     .level-indicator.level {
       background: #00ff99;
+    }
+
+    .perm-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      padding: 10px 15px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 1rem;
+      background: #007aff;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      z-index: 20;
     }
 
     footer {
@@ -96,7 +113,6 @@
       background: linear-gradient(145deg, #0051a8, #007aff);
       transform: translateY(-2px);
     }
-
     #capture-btn:active {
       transform: translateY(0);
     }
@@ -119,31 +135,31 @@
   </style>
 </head>
 <body>
-
   <header>SNAP</header>
-
   <main>
     <video id="video" autoplay playsinline></video>
 
-    <!-- Leveling UI -->
     <div class="level-container">
       <div class="level-indicator" id="levelIndicator"></div>
     </div>
 
+    <button class="perm-button" id="permBtn">Enable Level Guide</button>
+
     <p id="error-message" role="alert" aria-live="assertive"></p>
   </main>
-
   <footer>
     <button id="capture-btn" aria-label="Take photo"></button>
   </footer>
 
   <script>
     const video = document.getElementById('video');
-    const captureBtn = document.getElementById('capture-btn');
     const levelIndicator = document.getElementById('levelIndicator');
     const errorMessage = document.getElementById('error-message');
+    const permBtn = document.getElementById('permBtn');
+    const captureBtn = document.getElementById('capture-btn');
 
-    // Start back camera
+    let orientationPermissionGranted = false;
+
     async function startCamera() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -159,27 +175,52 @@
       }
     }
 
-    // Tilt level movement
-    window.addEventListener('deviceorientation', (event) => {
-      const gamma = event.gamma; // left/right tilt
-      const maxOffset = 40; // max pixels to move left or right
+    function handleOrientation(event) {
+      if (!orientationPermissionGranted) return;
 
-      if (gamma !== null) {
-        const clamped = Math.max(-30, Math.min(30, gamma)); // clamp tilt
-        const percent = clamped / 30; // -1 to 1
-        const offset = percent * maxOffset;
+      const gamma = event.gamma; // left-right tilt
+      if (gamma === null) return;
 
-        levelIndicator.style.left = `calc(50% + ${offset}px)`;
+      const maxOffset = window.innerWidth * 0.25; // adjust as needed
 
-        if (Math.abs(gamma) < 2) {
-          levelIndicator.classList.add('level');
-        } else {
-          levelIndicator.classList.remove('level');
+      const clamped = Math.max(-30, Math.min(30, gamma));
+      const offset = (clamped / 30) * maxOffset;
+
+      levelIndicator.style.left = `calc(50% + ${offset}px)`;
+
+      if (Math.abs(clamped) < 2) {
+        levelIndicator.classList.add('level');
+      } else {
+        levelIndicator.classList.remove('level');
+      }
+    }
+
+    // Request permission for DeviceOrientation on iOS
+    permBtn.addEventListener('click', async () => {
+      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        try {
+          const response = await DeviceOrientationEvent.requestPermission();
+          if (response === 'granted') {
+            orientationPermissionGranted = true;
+            window.addEventListener('deviceorientation', handleOrientation);
+            permBtn.style.display = 'none'; // hide button after granted
+          } else {
+            errorMessage.textContent = 'Permission for motion/orientation was denied.';
+            errorMessage.style.display = 'block';
+          }
+        } catch (err) {
+          console.error('Permission request error:', err);
+          errorMessage.textContent = 'Permission request failed.';
+          errorMessage.style.display = 'block';
         }
+      } else {
+        // permission not needed (for other browsers)
+        orientationPermissionGranted = true;
+        window.addEventListener('deviceorientation', handleOrientation);
+        permBtn.style.display = 'none';
       }
     });
 
-    // Capture photo
     captureBtn.addEventListener('click', () => {
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth;
@@ -194,8 +235,8 @@
       newWindow.document.close();
     });
 
+    // Start camera
     startCamera();
   </script>
-
 </body>
 </html>
