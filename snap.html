@@ -24,7 +24,6 @@
     body {
       display: flex;
       flex-direction: column;
-      height: 100vh;
     }
 
     header {
@@ -62,6 +61,7 @@
       width: 100%;
       max-width: 480px;
       overflow: hidden;
+      background: transparent;
     }
 
     video {
@@ -277,7 +277,6 @@
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      // Save image locally (optional)
       const imageData = canvas.toDataURL('image/png');
       localStorage.setItem(`snap-photo-${photoCount + 1}`, imageData);
 
@@ -289,7 +288,7 @@
       }
 
       if (photoCount >= 4) {
-        window.location.href = "editor.html"; // redirect after 4 photos
+        window.location.href = "editor.html"; // replace with your editor page later
       }
     });
 
