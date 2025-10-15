@@ -15,10 +15,13 @@
       height: 100%;
       font-family: 'Open Sans', sans-serif;
       background: #f5f5f7;
-      display: flex;
-      flex-direction: column;
       overflow: hidden;
       user-select: none;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
     }
 
     header {
@@ -37,20 +40,22 @@
     }
 
     main {
-      flex: 1;
+      flex-grow: 1;
       display: flex;
       justify-content: center;
       align-items: center;
       background: black;
       position: relative;
       padding: 10px 0;
+      /* Leave space at bottom for footer */
+      margin-bottom: 120px;
     }
 
     /* Container to preserve aspect ratio */
     .video-container {
       position: relative;
       width: 100%;
-      max-width: 480px; /* max width for bigger screens */
+      max-width: 480px;
       background: black;
       border-radius: 12px;
       overflow: hidden;
@@ -90,13 +95,17 @@
     }
 
     footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
       height: 120px;
       background: #fff;
       box-shadow: 0 -2px 8px rgba(0,0,0,0.12);
       display: flex;
       justify-content: center;
       align-items: center;
-      flex-shrink: 0;
+      z-index: 50;
     }
 
     #capture-btn {
@@ -107,6 +116,7 @@
       border-radius: 50%;
       cursor: pointer;
       transition: background 0.3s ease, transform 0.1s ease;
+      box-shadow: none; /* removed shadow */
     }
 
     #capture-btn:hover {
@@ -196,16 +206,13 @@
         video.srcObject = stream;
 
         video.onloadedmetadata = () => {
-          // Get actual video stream size
           const settings = stream.getVideoTracks()[0].getSettings();
           const { width, height } = settings;
 
           if (width && height) {
-            // Calculate aspect ratio and set container height accordingly
             const aspectRatio = height / width;
             videoContainer.style.height = `${videoContainer.clientWidth * aspectRatio}px`;
           } else {
-            // fallback: use 4:3 ratio if no info
             videoContainer.style.height = `${videoContainer.clientWidth * 3 / 4}px`;
           }
         };
@@ -238,7 +245,6 @@
 
     startCamera();
 
-    // Handle resizing to keep aspect ratio if window resizes
     window.addEventListener('resize', () => {
       if (video.srcObject) {
         const track = video.srcObject.getVideoTracks()[0];
