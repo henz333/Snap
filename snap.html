@@ -41,12 +41,17 @@
       border: none;
       padding: 4px;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .icon-button img {
       width: 28px;
       height: 28px;
       object-fit: contain;
+      user-select: none;
+      pointer-events: none;
     }
 
     main {
@@ -140,7 +145,7 @@
   <header>
     <span>SNAP</span>
     <button id="permBtn" class="icon-button" aria-label="Enable Level">
-      <img src="https://cdn-icons-png.flaticon.com/512/8058/8058185.png" alt="Ruler Icon">
+      <img id="rulerIcon" src="https://cdn-icons-png.flaticon.com/512/8058/8058185.png" alt="Ruler Icon">
     </button>
   </header>
 
@@ -163,6 +168,7 @@
     const captureBtn = document.getElementById('capture-btn');
     const levelIndicator = document.getElementById('levelIndicator');
     const permBtn = document.getElementById('permBtn');
+    const rulerIcon = document.getElementById('rulerIcon');
     const errorMessage = document.getElementById('error-message');
 
     let orientationPermissionGranted = false;
@@ -211,7 +217,9 @@
           if (response === 'granted') {
             orientationPermissionGranted = true;
             window.addEventListener('deviceorientation', handleOrientation);
-            permBtn.style.display = 'none';
+            permBtn.style.display = 'none'; // hide button after granted
+            // Change icon to green version (or keep visible and change source if you want it visible)
+            rulerIcon.src = "https://cdn-icons-png.flaticon.com/512/8058/8058159.png";
           } else {
             errorMessage.textContent = 'Permission for motion/orientation was denied.';
             errorMessage.style.display = 'block';
@@ -225,6 +233,7 @@
         orientationPermissionGranted = true;
         window.addEventListener('deviceorientation', handleOrientation);
         permBtn.style.display = 'none';
+        rulerIcon.src = "https://cdn-icons-png.flaticon.com/512/8058/8058159.png";
       }
     });
 
