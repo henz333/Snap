@@ -26,7 +26,7 @@
       background: #fff;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
       padding: 0 20px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.12);
       font-family: 'Poppins', sans-serif;
@@ -34,24 +34,6 @@
       font-size: 1.5rem;
       color: #007aff;
       flex-shrink: 0;
-    }
-
-    .icon-button {
-      background: none;
-      border: none;
-      padding: 4px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .icon-button img {
-      width: 28px;
-      height: 28px;
-      object-fit: contain;
-      user-select: none;
-      pointer-events: none;
     }
 
     main {
@@ -84,15 +66,11 @@
       left: 50%;
       width: 12px;
       height: 12px;
-      background: white;
+      background: #00ff99;
       border-radius: 50%;
       transform: translate(-50%, -50%);
-      transition: background 0.2s ease;
       pointer-events: none;
-    }
-
-    .level-indicator.level {
-      background: #00ff99;
+      transition: background 0.2s ease;
     }
 
     footer {
@@ -143,10 +121,7 @@
 <body>
 
   <header>
-    <span>SNAP</span>
-    <button id="permBtn" class="icon-button" aria-label="Enable Level">
-      <img id="rulerIcon" src="https://cdn-icons-png.flaticon.com/512/8058/8058185.png" alt="Ruler Icon">
-    </button>
+    SNAP
   </header>
 
   <main>
@@ -167,30 +142,9 @@
     const video = document.getElementById('video');
     const captureBtn = document.getElementById('capture-btn');
     const levelIndicator = document.getElementById('levelIndicator');
-    const permBtn = document.getElementById('permBtn');
-    const rulerIcon = document.getElementById('rulerIcon');
     const errorMessage = document.getElementById('error-message');
 
-    let orientationPermissionGranted = false;
-
-    async function startCamera() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { exact: "environment" } },
-          audio: false
-        });
-        video.srcObject = stream;
-        errorMessage.style.display = 'none';
-      } catch (err) {
-        console.error('Camera error:', err);
-        errorMessage.textContent = 'Camera access denied or unavailable.';
-        errorMessage.style.display = 'block';
-      }
-    }
-
     function handleOrientation(event) {
-      if (!orientationPermissionGranted) return;
-
       const gamma = event.gamma;
       if (gamma === null) return;
 
@@ -201,41 +155,30 @@
       levelIndicator.style.left = `calc(50% + ${offset}px)`;
 
       if (Math.abs(clamped) < 2) {
-        levelIndicator.classList.add('level');
+        levelIndicator.style.background = '#00ff99';
       } else {
-        levelIndicator.classList.remove('level');
+        levelIndicator.style.background = 'white';
       }
     }
 
-    permBtn.addEventListener('click', async () => {
-      if (
-        typeof DeviceOrientationEvent !== 'undefined' &&
-        typeof DeviceOrientationEvent.requestPermission === 'function'
-      ) {
-        try {
-          const response = await DeviceOrientationEvent.requestPermission();
-          if (response === 'granted') {
-            orientationPermissionGranted = true;
-            window.addEventListener('deviceorientation', handleOrientation);
-            permBtn.style.display = 'none'; // hide button after granted
-            // Change icon to green version (or keep visible and change source if you want it visible)
-            rulerIcon.src = "https://cdn-icons-png.flaticon.com/512/8058/8058159.png";
-          } else {
-            errorMessage.textContent = 'Permission for motion/orientation was denied.';
-            errorMessage.style.display = 'block';
-          }
-        } catch (err) {
-          console.error('Permission request error:', err);
-          errorMessage.textContent = 'Permission request failed.';
-          errorMessage.style.display = 'block';
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { exact: "environment" } },
+          audio: false
+        });
+        video.srcObject = stream;
+        errorMessage.style.display = 'none';
+
+        if (window.DeviceOrientationEvent) {
+          window.addEventListener('deviceorientation', handleOrientation);
         }
-      } else {
-        orientationPermissionGranted = true;
-        window.addEventListener('deviceorientation', handleOrientation);
-        permBtn.style.display = 'none';
-        rulerIcon.src = "https://cdn-icons-png.flaticon.com/512/8058/8058159.png";
+      } catch (err) {
+        console.error('Camera error:', err);
+        errorMessage.textContent = 'Camera access denied or unavailable.';
+        errorMessage.style.display = 'block';
       }
-    });
+    }
 
     captureBtn.addEventListener('click', () => {
       const canvas = document.createElement('canvas');
