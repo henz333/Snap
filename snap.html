@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial‑scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>SNAP - Take a Photo</title>
 
   <!-- Google Fonts -->
@@ -10,16 +10,14 @@
 
   <style>
     * { box-sizing: border-box; }
-    body, html {
+    html, body {
       margin: 0;
       height: 100%;
-      background: #f5f5f7;
       font-family: 'Open Sans', sans-serif;
-      color: #1c1c1e;
+      background: #f5f5f7;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      user-select: none;
     }
 
     header {
@@ -33,14 +31,12 @@
       font-weight: 700;
       font-size: 1.5rem;
       color: #007aff;
-      flex-shrink: 0;
     }
 
     main {
       flex: 1;
       position: relative;
       background: black;
-      overflow: hidden;
     }
 
     video {
@@ -49,22 +45,32 @@
       object-fit: cover;
     }
 
-    /* Overlay line */
-    .level-line {
+    /* === Level Line === */
+    .level-container {
       position: absolute;
-      left: 50%;
       top: 50%;
+      left: 50%;
       width: 80%;
       height: 2px;
-      background: rgba(255, 255, 255, 0.7);
-      transform-origin: center center;
-      pointer-events: none;
-      z-index: 5;
+      background: rgba(255, 255, 255, 0.5);
+      transform: translate(-50%, -50%);
+      z-index: 10;
+    }
+
+    .level-indicator {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 12px;
+      height: 12px;
+      background: white;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
       transition: background 0.2s ease;
     }
 
-    .level-line.locked {
-      background: #FFD700; /* gold/color when level */
+    .level-indicator.level {
+      background: #00ff99;
     }
 
     footer {
@@ -74,7 +80,6 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      flex-shrink: 0;
     }
 
     #capture-btn {
@@ -85,14 +90,13 @@
       border-radius: 50%;
       cursor: pointer;
       transition: background 0.3s ease, transform 0.1s ease;
-      user-select: none;
-      box-shadow: none;
     }
 
     #capture-btn:hover {
       background: linear-gradient(145deg, #0051a8, #007aff);
       transform: translateY(-2px);
     }
+
     #capture-btn:active {
       transform: translateY(0);
     }
@@ -110,34 +114,36 @@
       text-align: center;
       max-width: 90%;
       display: none;
-      z-index: 10;
-    }
-
-    @media (min-width: 600px) {
-      header { font-size: 2rem; }
-      #capture-btn { width: 88px; height: 88px; }
-      footer { height: 140px; }
+      z-index: 20;
     }
   </style>
 </head>
 <body>
+
   <header>SNAP</header>
+
   <main>
     <video id="video" autoplay playsinline></video>
-    <div class="level-line" id="levelLine"></div>
+
+    <!-- Leveling UI -->
+    <div class="level-container">
+      <div class="level-indicator" id="levelIndicator"></div>
+    </div>
+
     <p id="error-message" role="alert" aria-live="assertive"></p>
   </main>
+
   <footer>
     <button id="capture-btn" aria-label="Take photo"></button>
   </footer>
 
   <script>
     const video = document.getElementById('video');
-    const errorMessage = document.getElementById('error-message');
     const captureBtn = document.getElementById('capture-btn');
-    const levelLine = document.getElementById('levelLine');
+    const levelIndicator = document.getElementById('levelIndicator');
+    const errorMessage = document.getElementById('error-message');
 
-    // Start camera (back)
+    // Start back camera
     async function startCamera() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
@@ -147,52 +153,49 @@
         video.srcObject = stream;
         errorMessage.style.display = 'none';
       } catch (err) {
-        console.error('Error accessing camera:', err);
+        console.error('Camera error:', err);
         errorMessage.textContent = 'Camera access denied or unavailable.';
         errorMessage.style.display = 'block';
       }
     }
 
-    // Handle device tilt
-    function handleOrientation(event) {
-      // gamma = left-to-right tilt, beta = front-back tilt
-      const gamma = event.gamma || 0;
-      const beta = event.beta || 0;
+    // Tilt level movement
+    window.addEventListener('deviceorientation', (event) => {
+      const gamma = event.gamma; // left/right tilt
+      const maxOffset = 40; // max pixels to move left or right
 
-      // Use gamma for horizontal tilt
-      // Limit degrees so the line doesn't rotate too far
-      const maxTilt = 30; // degrees
-      let tilt = gamma;
-      if (tilt > maxTilt) tilt = maxTilt;
-      if (tilt < -maxTilt) tilt = -maxTilt;
+      if (gamma !== null) {
+        const clamped = Math.max(-30, Math.min(30, gamma)); // clamp tilt
+        const percent = clamped / 30; // -1 to 1
+        const offset = percent * maxOffset;
 
-      levelLine.style.transform = `translate(-50%, -50%) rotate(${tilt}deg)`;
+        levelIndicator.style.left = `calc(50% + ${offset}px)`;
 
-      // If tilt is small (near zero), “lock” it
-      const threshold = 3; // degrees tolerance
-      if (Math.abs(tilt) < threshold) {
-        levelLine.classList.add('locked');
-      } else {
-        levelLine.classList.remove('locked');
+        if (Math.abs(gamma) < 2) {
+          levelIndicator.classList.add('level');
+        } else {
+          levelIndicator.classList.remove('level');
+        }
       }
-    }
+    });
 
-    window.addEventListener('deviceorientation', handleOrientation);
-
+    // Capture photo
     captureBtn.addEventListener('click', () => {
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const imgDataUrl = canvas.toDataURL('image/png');
+
+      const imageUrl = canvas.toDataURL('image/png');
       const newWindow = window.open();
       newWindow.document.write('<title>Captured Photo</title>');
-      newWindow.document.write(`<img src="${imgDataUrl}" style="width:100%;height:auto;">`);
+      newWindow.document.write(`<img src="${imageUrl}" style="width:100%;height:auto;">`);
       newWindow.document.close();
     });
 
     startCamera();
   </script>
+
 </body>
 </html>
