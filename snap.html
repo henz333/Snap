@@ -9,16 +9,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins:wght@600&display=swap" rel="stylesheet" />
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
     html, body {
       margin: 0;
       height: 100%;
       font-family: 'Open Sans', sans-serif;
       background: #f5f5f7;
       overflow: hidden;
-      user-select: none;
     }
 
     body {
@@ -38,8 +35,6 @@
       font-size: 1.3rem;
       color: #007aff;
       flex-shrink: 0;
-      z-index: 10;
-      border-bottom: none;
     }
 
     .photo-count {
@@ -70,7 +65,6 @@
       height: 100%;
       object-fit: cover;
       display: block;
-      background: transparent;
     }
 
     .level-container {
@@ -122,14 +116,6 @@
       background: linear-gradient(145deg, #ff3b30, #b3201c);
     }
 
-    #capture-btn:hover {
-      transform: translateY(-2px);
-    }
-
-    #capture-btn:active {
-      transform: translateY(0);
-    }
-
     #error-message {
       position: absolute;
       top: 50%;
@@ -161,8 +147,7 @@
         <div class="level-indicator" id="levelIndicator"></div>
       </div>
     </div>
-
-    <p id="error-message" role="alert" aria-live="assertive"></p>
+    <p id="error-message"></p>
   </main>
 
   <footer>
@@ -181,6 +166,9 @@
     let isLandscape = false;
     let photoCount = 0;
 
+    // Clear session if page is reloaded (restart session)
+    sessionStorage.clear();
+
     function updateLevelContainer() {
       if (isLandscape) {
         levelContainer.style.width = '2px';
@@ -194,7 +182,6 @@
     function handleOrientation(event) {
       const gamma = event.gamma;
       const beta = event.beta;
-
       if (gamma === null || beta === null) return;
 
       isLandscape = Math.abs(gamma) > Math.abs(beta);
@@ -204,52 +191,41 @@
       const indicatorSize = levelIndicator.offsetWidth;
 
       if (isLandscape) {
-        const containerHeight = containerRect.height;
         const clampedBeta = Math.max(-30, Math.min(30, beta));
-        const maxOffset = (containerHeight / 2) - (indicatorSize / 2);
+        const maxOffset = (containerRect.height / 2) - (indicatorSize / 2);
         const offset = (clampedBeta / 30) * maxOffset;
         levelIndicator.style.top = `calc(50% + ${offset}px)`;
         levelIndicator.style.left = '50%';
       } else {
-        const containerWidth = containerRect.width;
         const clampedGamma = Math.max(-30, Math.min(30, gamma));
-        const maxOffset = (containerWidth / 2) - (indicatorSize / 2);
+        const maxOffset = (containerRect.width / 2) - (indicatorSize / 2);
         const offset = (clampedGamma / 30) * maxOffset;
         levelIndicator.style.left = `calc(50% + ${offset}px)`;
         levelIndicator.style.top = '50%';
       }
 
-      if (isLandscape ? Math.abs(beta) < 2 : Math.abs(gamma) < 2) {
-        levelIndicator.style.background = '#00ff99';
-      } else {
-        levelIndicator.style.background = 'white';
-      }
+      levelIndicator.style.background =
+        (isLandscape ? Math.abs(beta) < 2 : Math.abs(gamma) < 2)
+          ? '#00ff99' : 'white';
     }
 
     async function startCamera() {
       try {
-        const constraints = {
+        const stream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: { exact: "environment" },
             width: { ideal: 1920 },
             height: { ideal: 1080 }
           },
           audio: false
-        };
-
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        });
         video.srcObject = stream;
 
         video.onloadedmetadata = () => {
-          const settings = stream.getVideoTracks()[0].getSettings();
-          const { width, height } = settings;
-
-          if (width && height) {
-            const aspectRatio = height / width;
-            videoContainer.style.height = `${videoContainer.clientWidth * aspectRatio}px`;
-          } else {
-            videoContainer.style.height = `${videoContainer.clientWidth * 3 / 4}px`;
-          }
+          const track = stream.getVideoTracks()[0];
+          const settings = track.getSettings();
+          const aspectRatio = settings.height / settings.width;
+          videoContainer.style.height = `${videoContainer.clientWidth * aspectRatio}px`;
         };
 
         errorMessage.style.display = 'none';
@@ -258,7 +234,6 @@
           window.addEventListener('deviceorientation', handleOrientation);
         }
       } catch (err) {
-        console.error('Camera error:', err);
         errorMessage.textContent = 'Camera access denied or unavailable.';
         errorMessage.style.display = 'block';
       }
@@ -270,43 +245,25 @@
       canvas.height = video.videoHeight;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
       const imageData = canvas.toDataURL('image/png');
 
       photoCount++;
       photoCounterText.textContent = photoCount;
 
-      // Save each photo separately
-      localStorage.setItem(`snap-photo-${photoCount}`, imageData);
+      // Save to sessionStorage
+      sessionStorage.setItem(`snap-photo-${photoCount}`, imageData);
 
       if (photoCount === 3) {
-        captureBtn.classList.add('red');
+        captureBtn.classList.add('red'); // Indicate last photo
       }
 
-      if (photoCount >= 4) {
-        window.location.href = 'editor.html'; // To be created
+      if (photoCount === 4) {
+        // Redirect after final photo
+        window.location.href = 'editor.html';
       }
     });
 
     startCamera();
-
-    // Clear any old photos on page load
-    for (let i = 1; i <= 4; i++) {
-      localStorage.removeItem(`snap-photo-${i}`);
-    }
-
-    window.addEventListener('resize', () => {
-      if (video.srcObject) {
-        const track = video.srcObject.getVideoTracks()[0];
-        if (track) {
-          const settings = track.getSettings();
-          if (settings.width && settings.height) {
-            const aspectRatio = settings.height / settings.width;
-            videoContainer.style.height = `${videoContainer.clientWidth * aspectRatio}px`;
-          }
-        }
-      }
-    });
   </script>
 
 </body>
