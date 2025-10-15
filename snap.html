@@ -32,17 +32,20 @@
       background: #fff;
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
       padding: 0 20px;
-      margin-bottom: 0;
-      border-bottom: none;
       font-family: 'Poppins', sans-serif;
       font-weight: 700;
-      font-size: 1.5rem;
+      font-size: 1.3rem;
       color: #007aff;
       flex-shrink: 0;
-      position: relative;
       z-index: 10;
+    }
+
+    .photo-count {
+      font-size: 0.9rem;
+      color: #333;
+      font-family: 'Open Sans', sans-serif;
     }
 
     main {
@@ -51,8 +54,6 @@
       justify-content: center;
       align-items: center;
       background: #fff;
-      margin-top: 0;
-      padding-top: 0;
       position: relative;
     }
 
@@ -61,7 +62,6 @@
       width: 100%;
       max-width: 480px;
       overflow: hidden;
-      background: transparent;
     }
 
     video {
@@ -72,7 +72,6 @@
       background: transparent;
     }
 
-    /* Level line container */
     .level-container {
       position: absolute;
       top: 50%;
@@ -83,10 +82,8 @@
       transform: translate(-50%, -50%);
       z-index: 10;
       pointer-events: none;
-      transition: all 0.3s ease;
     }
 
-    /* Level indicator circle */
     .level-indicator {
       position: absolute;
       width: 12px;
@@ -94,8 +91,6 @@
       background: #00ff99;
       border-radius: 50%;
       pointer-events: none;
-      transition: background 0.2s ease, top 0.3s ease, left 0.3s ease;
-      /* Center the circle relative to its position */
       transform: translate(-50%, -50%);
     }
 
@@ -106,7 +101,6 @@
       right: 0;
       height: 120px;
       background: #fff;
-      box-shadow: 0 -2px 8px rgba(0,0,0,0.12);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -121,11 +115,13 @@
       border-radius: 50%;
       cursor: pointer;
       transition: background 0.3s ease, transform 0.1s ease;
-      box-shadow: none;
+    }
+
+    #capture-btn.red {
+      background: linear-gradient(145deg, #ff3b30, #b3201c);
     }
 
     #capture-btn:hover {
-      background: linear-gradient(145deg, #0051a8, #007aff);
       transform: translateY(-2px);
     }
 
@@ -153,7 +149,8 @@
 <body>
 
   <header>
-    SNAP
+    <div>SNAP</div>
+    <div class="photo-count">Photos: <span id="photoCounter">0</span>/4</div>
   </header>
 
   <main>
@@ -179,19 +176,19 @@
     const levelContainer = document.getElementById('levelContainer');
     const errorMessage = document.getElementById('error-message');
     const videoContainer = document.getElementById('videoContainer');
+    const photoCounterText = document.getElementById('photoCounter');
 
     let isLandscape = false;
+    let photoCount = 0;
 
     function updateLevelContainer() {
       if (isLandscape) {
-        // Landscape mode: vertical line
         levelContainer.style.width = '2px';
         levelContainer.style.height = '80%';
         levelContainer.style.top = '50%';
         levelContainer.style.left = '50%';
         levelContainer.style.transform = 'translate(-50%, -50%)';
       } else {
-        // Portrait mode: horizontal line
         levelContainer.style.width = '80%';
         levelContainer.style.height = '2px';
         levelContainer.style.top = '50%';
@@ -207,43 +204,27 @@
       if (gamma === null || beta === null) return;
 
       isLandscape = Math.abs(gamma) > Math.abs(beta);
-
       updateLevelContainer();
 
-      // Get container size and indicator size
       const containerRect = levelContainer.getBoundingClientRect();
-      const indicatorSize = levelIndicator.offsetWidth; // 12px width & height
+      const indicatorSize = levelIndicator.offsetWidth;
 
       if (isLandscape) {
-        // Vertical movement along container height (80% of video container height)
         const containerHeight = containerRect.height;
-        const halfHeight = containerHeight / 2;
-
-        // Clamp beta between -30 and 30 degrees
         const clampedBeta = Math.max(-30, Math.min(30, beta));
-
-        // Map -30..30 to pixel range inside the line but keep indicator fully visible
-        const maxOffset = halfHeight - (indicatorSize / 2);
+        const maxOffset = (containerHeight / 2) - (indicatorSize / 2);
         const offset = (clampedBeta / 30) * maxOffset;
-
-        // Position level indicator vertically with centered horizontal
-        levelIndicator.style.top = `${50 + (offset / containerHeight) * 100}%`;
+        levelIndicator.style.top = `calc(50% + ${offset}px)`;
         levelIndicator.style.left = '50%';
       } else {
-        // Horizontal movement along container width (80% of video container width)
         const containerWidth = containerRect.width;
-        const halfWidth = containerWidth / 2;
-
         const clampedGamma = Math.max(-30, Math.min(30, gamma));
-
-        const maxOffset = halfWidth - (indicatorSize / 2);
+        const maxOffset = (containerWidth / 2) - (indicatorSize / 2);
         const offset = (clampedGamma / 30) * maxOffset;
-
-        levelIndicator.style.left = `${50 + (offset / containerWidth) * 100}%`;
+        levelIndicator.style.left = `calc(50% + ${offset}px)`;
         levelIndicator.style.top = '50%';
       }
 
-      // Change color when balanced within ~2 degrees
       if (isLandscape ? Math.abs(beta) < 2 : Math.abs(gamma) < 2) {
         levelIndicator.style.background = '#00ff99';
       } else {
@@ -296,11 +277,20 @@
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      const imageUrl = canvas.toDataURL('image/png');
-      const newWindow = window.open();
-      newWindow.document.write('<title>Captured Photo</title>');
-      newWindow.document.write(`<img src="${imageUrl}" style="width:100%;height:auto;">`);
-      newWindow.document.close();
+      // Save image locally (optional)
+      const imageData = canvas.toDataURL('image/png');
+      localStorage.setItem(`snap-photo-${photoCount + 1}`, imageData);
+
+      photoCount++;
+      photoCounterText.textContent = photoCount;
+
+      if (photoCount === 3) {
+        captureBtn.classList.add('red');
+      }
+
+      if (photoCount >= 4) {
+        window.location.href = "editor.html"; // redirect after 4 photos
+      }
     });
 
     startCamera();
