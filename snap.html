@@ -72,6 +72,7 @@
       background: transparent;
     }
 
+    /* Level line container */
     .level-container {
       position: absolute;
       top: 50%;
@@ -82,19 +83,18 @@
       transform: translate(-50%, -50%);
       z-index: 10;
       pointer-events: none;
+      transition: all 0.3s ease;
     }
 
+    /* Level indicator circle */
     .level-indicator {
       position: absolute;
-      top: 50%;
-      left: 50%;
       width: 12px;
       height: 12px;
       background: #00ff99;
       border-radius: 50%;
-      transform: translate(-50%, -50%);
       pointer-events: none;
-      transition: background 0.2s ease;
+      transition: background 0.2s ease, top 0.3s ease, left 0.3s ease;
     }
 
     footer {
@@ -158,7 +158,7 @@
     <div class="video-container" id="videoContainer">
       <video id="video" autoplay playsinline></video>
 
-      <div class="level-container">
+      <div class="level-container" id="levelContainer">
         <div class="level-indicator" id="levelIndicator"></div>
       </div>
     </div>
@@ -174,20 +174,60 @@
     const video = document.getElementById('video');
     const captureBtn = document.getElementById('capture-btn');
     const levelIndicator = document.getElementById('levelIndicator');
+    const levelContainer = document.getElementById('levelContainer');
     const errorMessage = document.getElementById('error-message');
     const videoContainer = document.getElementById('videoContainer');
 
+    let isLandscape = false;
+
+    function updateLevelContainer() {
+      if (isLandscape) {
+        // Landscape mode: vertical line
+        levelContainer.style.width = '2px';
+        levelContainer.style.height = '80%';
+        levelContainer.style.top = '50%';
+        levelContainer.style.left = '50%';
+        levelContainer.style.transform = 'translate(-50%, -50%)';
+      } else {
+        // Portrait mode: horizontal line
+        levelContainer.style.width = '80%';
+        levelContainer.style.height = '2px';
+        levelContainer.style.top = '50%';
+        levelContainer.style.left = '50%';
+        levelContainer.style.transform = 'translate(-50%, -50%)';
+      }
+    }
+
     function handleOrientation(event) {
+      // gamma = left/right tilt (-90 to 90), beta = front/back tilt (-180 to 180)
       const gamma = event.gamma;
-      if (gamma === null) return;
+      const beta = event.beta;
 
-      const maxOffset = videoContainer.clientWidth * 0.25;
-      const clamped = Math.max(-30, Math.min(30, gamma));
-      const offset = (clamped / 30) * maxOffset;
+      if (gamma === null || beta === null) return;
 
-      levelIndicator.style.left = `calc(50% + ${offset}px)`;
+      // Determine orientation: landscape if abs(gamma) > abs(beta)
+      isLandscape = Math.abs(gamma) > Math.abs(beta);
 
-      if (Math.abs(clamped) < 2) {
+      updateLevelContainer();
+
+      const maxOffset = (isLandscape ? videoContainer.clientHeight : videoContainer.clientWidth) * 0.25;
+
+      if (isLandscape) {
+        // Move vertically based on beta (front/back tilt)
+        const clampedBeta = Math.max(-30, Math.min(30, beta));
+        const offset = (clampedBeta / 30) * maxOffset;
+        levelIndicator.style.top = `calc(50% + ${offset}px)`;
+        levelIndicator.style.left = '50%';
+      } else {
+        // Move horizontally based on gamma (left/right tilt)
+        const clampedGamma = Math.max(-30, Math.min(30, gamma));
+        const offset = (clampedGamma / 30) * maxOffset;
+        levelIndicator.style.left = `calc(50% + ${offset}px)`;
+        levelIndicator.style.top = '50%';
+      }
+
+      // Change color when close to balanced
+      if (isLandscape ? Math.abs(beta) < 2 : Math.abs(gamma) < 2) {
         levelIndicator.style.background = '#00ff99';
       } else {
         levelIndicator.style.background = 'white';
