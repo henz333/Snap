@@ -2,115 +2,153 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>SNAP - Take a Photo</title>
-  
+
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins:wght@600&display=swap" rel="stylesheet" />
-  
+
   <style>
-    /* Reset and base styles */
+    /* Reset */
+    * {
+      box-sizing: border-box;
+    }
     body, html {
       margin: 0;
       height: 100%;
-      font-family: 'Open Sans', sans-serif;
       background-color: #f5f5f7;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      font-family: 'Open Sans', sans-serif;
       color: #1c1c1e;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       user-select: none;
-      padding: 20px;
-      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
 
-    h1 {
+    /* Top bar */
+    header {
+      height: 60px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
       font-family: 'Poppins', sans-serif;
       font-weight: 700;
-      font-size: 2rem;
+      font-size: 1.5rem;
       color: #007aff;
-      margin-bottom: 20px;
-      text-align: center;
+      user-select: none;
+      flex-shrink: 0;
     }
 
-    /* Video container */
-    #video-container {
+    /* Main container holding video */
+    main {
+      flex: 1;
       position: relative;
-      width: 100%;
-      max-width: 400px;
-      aspect-ratio: 4 / 3;
-      background: #000;
-      border-radius: 20px;
+      background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       overflow: hidden;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     }
 
-    /* Video element */
+    /* Video styling */
     video {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: 20px;
-      background: black;
+      /* For smoother rounded edges if needed */
+      /* border-radius: 12px; */
+      user-select: none;
     }
 
-    /* Capture button */
+    /* Bottom bar */
+    footer {
+      height: 120px;
+      background: #fff;
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.12);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    /* Capture button - circular with Apple style */
     #capture-btn {
-      margin-top: 30px;
-      padding: 16px 60px;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-      font-size: 1.4rem;
-      color: #fff;
+      width: 72px;
+      height: 72px;
       background: linear-gradient(145deg, #007aff, #0051a8);
+      border-radius: 50%;
       border: none;
-      border-radius: 9999px;
-      cursor: pointer;
       box-shadow:
-        0 4px 6px rgba(0, 122, 255, 0.3),
-        inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+        0 6px 10px rgba(0, 122, 255, 0.4),
+        inset 0 -3px 0 rgba(0, 0, 0, 0.3);
+      cursor: pointer;
       transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.1s ease;
-      letter-spacing: 0.03em;
       user-select: none;
     }
 
     #capture-btn:hover {
       background: linear-gradient(145deg, #0051a8, #007aff);
       box-shadow:
-        0 6px 8px rgba(0, 122, 255, 0.45),
-        inset 0 -2px 0 rgba(0, 0, 0, 0.3);
+        0 8px 14px rgba(0, 122, 255, 0.6),
+        inset 0 -3px 0 rgba(0, 0, 0, 0.4);
       transform: translateY(-2px);
     }
 
     #capture-btn:active {
       transform: translateY(0);
       box-shadow:
-        0 3px 4px rgba(0, 122, 255, 0.25),
-        inset 0 2px 4px rgba(0, 0, 0, 0.25);
+        0 4px 6px rgba(0, 122, 255, 0.3),
+        inset 0 3px 6px rgba(0, 0, 0, 0.35);
     }
 
-    /* Error message */
+    /* Error message styling */
     #error-message {
-      margin-top: 20px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       color: #d32f2f;
       font-weight: 600;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 12px 24px;
+      border-radius: 12px;
       text-align: center;
+      max-width: 90%;
+      user-select: none;
+      display: none;
+      z-index: 10;
+    }
+
+    @media (min-width: 600px) {
+      header {
+        font-size: 2rem;
+      }
+      #capture-btn {
+        width: 88px;
+        height: 88px;
+      }
+      footer {
+        height: 140px;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>SNAP - Take a Photo</h1>
 
-  <div id="video-container">
+  <header>SNAP</header>
+
+  <main>
     <video id="video" autoplay playsinline></video>
-  </div>
+    <p id="error-message" role="alert" aria-live="assertive"></p>
+  </main>
 
-  <button id="capture-btn">Take Photo</button>
-
-  <p id="error-message" role="alert" aria-live="assertive"></p>
+  <footer>
+    <button id="capture-btn" aria-label="Take photo"></button>
+  </footer>
 
   <script>
     const video = document.getElementById('video');
@@ -118,12 +156,11 @@
 
     async function startCamera() {
       try {
-        // Request back (environment) camera
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: { exact: 'environment' },
-            width: { ideal: 1280 },
-            height: { ideal: 960 },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
           },
           audio: false
         });
@@ -131,6 +168,7 @@
       } catch (err) {
         console.error('Error accessing camera:', err);
         errorMessage.textContent = 'Camera access denied or unavailable.';
+        errorMessage.style.display = 'block';
       }
     }
 
