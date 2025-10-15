@@ -9,7 +9,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins:wght@600&display=swap" rel="stylesheet" />
 
   <style>
-    /* Reset */
     * {
       box-sizing: border-box;
     }
@@ -27,7 +26,6 @@
       overflow: hidden;
     }
 
-    /* Top bar */
     header {
       height: 60px;
       background: #fff;
@@ -43,7 +41,6 @@
       flex-shrink: 0;
     }
 
-    /* Main container holding video */
     main {
       flex: 1;
       position: relative;
@@ -54,7 +51,6 @@
       overflow: hidden;
     }
 
-    /* Video styling */
     video {
       width: 100%;
       height: 100%;
@@ -62,18 +58,61 @@
       user-select: none;
     }
 
-    /* Bottom bar */
     footer {
-      height: 120px;
+      height: 160px;
       background: #fff;
       box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.12);
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
+      justify-content: center;
       flex-shrink: 0;
+      gap: 12px;
+      padding: 10px 20px;
     }
 
-    /* Capture button - clean perfect circle, no shadows */
+    #controls {
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      color: #333;
+      font-weight: 600;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    select {
+      font-family: 'Open Sans', sans-serif;
+      font-weight: 600;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1.5px solid #ccc;
+      cursor: pointer;
+      outline-offset: 2px;
+      transition: border-color 0.2s ease;
+    }
+
+    select:focus {
+      border-color: #007aff;
+      box-shadow: 0 0 6px rgba(0, 122, 255, 0.5);
+    }
+
     #capture-btn {
       width: 72px;
       height: 72px;
@@ -94,7 +133,6 @@
       transform: translateY(0);
     }
 
-    /* Error message styling */
     #error-message {
       position: absolute;
       top: 50%;
@@ -121,7 +159,7 @@
         height: 88px;
       }
       footer {
-        height: 140px;
+        height: 180px;
       }
     }
   </style>
@@ -136,36 +174,115 @@
   </main>
 
   <footer>
+    <div id="controls">
+      <label for="flash-toggle">
+        <input type="checkbox" id="flash-toggle" />
+        Flash (Torch)
+      </label>
+      <label for="fps-select">
+        FPS:
+        <select id="fps-select" aria-label="Select frame rate">
+          <option value="30" selected>30</option>
+          <option value="60">60</option>
+        </select>
+      </label>
+    </div>
     <button id="capture-btn" aria-label="Take photo"></button>
   </footer>
 
   <script>
     const video = document.getElementById('video');
     const errorMessage = document.getElementById('error-message');
+    const flashToggle = document.getElementById('flash-toggle');
+    const fpsSelect = document.getElementById('fps-select');
+    const captureBtn = document.getElementById('capture-btn');
 
-    async function startCamera() {
+    let currentStream = null;
+    let videoTrack = null;
+    let torchAvailable = false;
+
+    async function startCamera(fps = 30, torchOn = false) {
+      // Stop old stream if exists
+      if (currentStream) {
+        currentStream.getTracks().forEach(track => track.stop());
+      }
+
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
+        const constraints = {
           video: {
             facingMode: { exact: 'environment' },
             width: { ideal: 1920 },
             height: { ideal: 1080 },
+            frameRate: { ideal: fps },
           },
           audio: false
-        });
-        video.srcObject = stream;
+        };
+
+        currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = currentStream;
+
+        videoTrack = currentStream.getVideoTracks()[0];
+
+        // Check if torch is supported
+        const imageCapture = new ImageCapture(videoTrack);
+        const capabilities = await imageCapture.getPhotoCapabilities();
+        torchAvailable = capabilities.torch || false;
+
+        if (!torchAvailable) {
+          flashToggle.disabled = true;
+          flashToggle.checked = false;
+        } else {
+          flashToggle.disabled = false;
+          // Apply torch if requested
+          await setTorch(torchOn);
+        }
+
+        errorMessage.style.display = 'none';
       } catch (err) {
         console.error('Error accessing camera:', err);
         errorMessage.textContent = 'Camera access denied or unavailable.';
         errorMessage.style.display = 'block';
+        flashToggle.disabled = true;
+        flashToggle.checked = false;
       }
     }
 
-    startCamera();
+    async function setTorch(on) {
+      if (!videoTrack) return;
+      const capabilities = videoTrack.getCapabilities();
+      if (!capabilities.torch) {
+        // Torch not supported
+        flashToggle.disabled = true;
+        flashToggle.checked = false;
+        return;
+      }
+      try {
+        await videoTrack.applyConstraints({ advanced: [{ torch: on }] });
+      } catch (err) {
+        console.warn('Torch control failed:', err);
+        flashToggle.checked = false;
+      }
+    }
 
-    document.getElementById('capture-btn').addEventListener('click', () => {
+    // Event listeners for controls
+
+    flashToggle.addEventListener('change', async () => {
+      if (!torchAvailable) return;
+      await setTorch(flashToggle.checked);
+    });
+
+    fpsSelect.addEventListener('change', () => {
+      // Restart camera with new FPS, keep torch off because restarting stream disables torch
+      startCamera(parseInt(fpsSelect.value), false);
+      flashToggle.checked = false;
+    });
+
+    captureBtn.addEventListener('click', () => {
       alert('Capture functionality coming soon!');
     });
+
+    // Start camera initially at 30fps, torch off
+    startCamera(30, false);
   </script>
 </body>
 </html>
