@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SNAP App</title>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins:wght@600&display=swap" rel="stylesheet" />
+  
+  <style>
+    /* Reset and base styles */
+    body, html {
+      height: 100%;
+      margin: 0;
+      font-family: 'Open Sans', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #333;
+      user-select: none;
+    }
+
+    /* Button styling */
+    .start-button {
+      padding: 18px 50px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 1.6rem;
+      color: white;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 8px 15px rgba(118, 75, 162, 0.3);
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .start-button:hover {
+      background: linear-gradient(135deg, #764ba2, #667eea);
+      box-shadow: 0 12px 20px rgba(118, 75, 162, 0.5);
+    }
+
+    /* Optional subtle scaling on click */
+    .start-button:active {
+      transform: scale(0.97);
+      transition: transform 0.1s ease;
+    }
+  </style>
+</head>
+<body>
+  <button class="start-button" onclick="location.href='snap.html'">Start SNAP</button>
+</body>
+</html>
