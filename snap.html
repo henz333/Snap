@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SNAP - Take a Photo</title>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins:wght@600&display=swap" rel="stylesheet" />
+  
+  <style>
+    /* Reset and base styles */
+    body, html {
+      margin: 0;
+      height: 100%;
+      font-family: 'Open Sans', sans-serif;
+      background-color: #f5f5f7;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #1c1c1e;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      user-select: none;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 2rem;
+      color: #007aff;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    /* Video container */
+    #video-container {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      aspect-ratio: 4 / 3;
+      background: #000;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Video element */
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 20px;
+      background: black;
+    }
+
+    /* Capture button */
+    #capture-btn {
+      margin-top: 30px;
+      padding: 16px 60px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 1.4rem;
+      color: #fff;
+      background: linear-gradient(145deg, #007aff, #0051a8);
+      border: none;
+      border-radius: 9999px;
+      cursor: pointer;
+      box-shadow:
+        0 4px 6px rgba(0, 122, 255, 0.3),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+      transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.1s ease;
+      letter-spacing: 0.03em;
+      user-select: none;
+    }
+
+    #capture-btn:hover {
+      background: linear-gradient(145deg, #0051a8, #007aff);
+      box-shadow:
+        0 6px 8px rgba(0, 122, 255, 0.45),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.3);
+      transform: translateY(-2px);
+    }
+
+    #capture-btn:active {
+      transform: translateY(0);
+      box-shadow:
+        0 3px 4px rgba(0, 122, 255, 0.25),
+        inset 0 2px 4px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Error message */
+    #error-message {
+      margin-top: 20px;
+      color: #d32f2f;
+      font-weight: 600;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>SNAP - Take a Photo</h1>
+
+  <div id="video-container">
+    <video id="video" autoplay playsinline></video>
+  </div>
+
+  <button id="capture-btn">Take Photo</button>
+
+  <p id="error-message" role="alert" aria-live="assertive"></p>
+
+  <script>
+    const video = document.getElementById('video');
+    const errorMessage = document.getElementById('error-message');
+
+    async function startCamera() {
+      try {
+        // Request camera with ideal constraints for photo booth (front camera preferred)
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: 'user', // front camera if available
+            width: { ideal: 1280 },
+            height: { ideal: 960 },
+          },
+          audio: false
+        });
+        video.srcObject = stream;
+      } catch (err) {
+        console.error('Error accessing camera:', err);
+        errorMessage.textContent = 'Camera access denied or unavailable.';
+      }
+    }
+
+    // Start camera on load
+    startCamera();
+
+    // Placeholder for capture button (to be implemented)
+    document.getElementById('capture-btn').addEventListener('click', () => {
+      alert('Capture functionality coming soon!');
+    });
+  </script>
+</body>
+</html>
