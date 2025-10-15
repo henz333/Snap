@@ -5,10 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>SNAP - Take a Photo</title>
 
+  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins:wght@600&display=swap" rel="stylesheet" />
 
+  <!-- Font Awesome for Ruler Icon -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    integrity="sha512-mJ8nAqgN2mnAEfFlYl4qv0/dHbZk9ScqBzFu5TCBCG4p0Ro4GH7Oq6kQFYXOK0TfCgTbQEtKawgaJ1Cto+Ajig=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+
   <style>
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
+
     html, body {
       margin: 0;
       height: 100%;
@@ -25,13 +38,32 @@
       background: #fff;
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
+      padding: 0 20px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.12);
       font-family: 'Poppins', sans-serif;
       font-weight: 700;
       font-size: 1.5rem;
       color: #007aff;
       flex-shrink: 0;
+    }
+
+    .icon-button {
+      background: none;
+      border: none;
+      font-size: 1.25rem;
+      color: #007aff;
+      cursor: pointer;
+      padding: 8px;
+      transition: transform 0.2s ease;
+    }
+
+    .icon-button:hover {
+      transform: scale(1.1);
+    }
+
+    .icon-button:active {
+      transform: scale(0.95);
     }
 
     main {
@@ -46,13 +78,14 @@
       object-fit: cover;
     }
 
+    /* Level Guide */
     .level-container {
       position: absolute;
       top: 50%;
       left: 50%;
       width: 80%;
       height: 2px;
-      background: rgba(255, 255, 255, 0.5);
+      background: rgba(255, 255, 255, 0.4);
       transform: translate(-50%, -50%);
       z-index: 10;
       pointer-events: none;
@@ -73,21 +106,6 @@
 
     .level-indicator.level {
       background: #00ff99;
-    }
-
-    .perm-button {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      padding: 10px 15px;
-      font-family: 'Poppins', sans-serif;
-      font-size: 1rem;
-      background: #007aff;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      z-index: 20;
     }
 
     footer {
@@ -113,6 +131,7 @@
       background: linear-gradient(145deg, #0051a8, #007aff);
       transform: translateY(-2px);
     }
+
     #capture-btn:active {
       transform: translateY(0);
     }
@@ -135,28 +154,35 @@
   </style>
 </head>
 <body>
-  <header>SNAP</header>
+
+  <header>
+    <span>SNAP</span>
+    <button id="permBtn" class="icon-button" aria-label="Enable Level">
+      <i class="fas fa-ruler-horizontal"></i>
+    </button>
+  </header>
+
   <main>
     <video id="video" autoplay playsinline></video>
 
+    <!-- Level Guide UI -->
     <div class="level-container">
       <div class="level-indicator" id="levelIndicator"></div>
     </div>
 
-    <button class="perm-button" id="permBtn">Enable Level Guide</button>
-
     <p id="error-message" role="alert" aria-live="assertive"></p>
   </main>
+
   <footer>
     <button id="capture-btn" aria-label="Take photo"></button>
   </footer>
 
   <script>
     const video = document.getElementById('video');
-    const levelIndicator = document.getElementById('levelIndicator');
-    const errorMessage = document.getElementById('error-message');
-    const permBtn = document.getElementById('permBtn');
     const captureBtn = document.getElementById('capture-btn');
+    const levelIndicator = document.getElementById('levelIndicator');
+    const permBtn = document.getElementById('permBtn');
+    const errorMessage = document.getElementById('error-message');
 
     let orientationPermissionGranted = false;
 
@@ -178,11 +204,10 @@
     function handleOrientation(event) {
       if (!orientationPermissionGranted) return;
 
-      const gamma = event.gamma; // left-right tilt
+      const gamma = event.gamma;
       if (gamma === null) return;
 
-      const maxOffset = window.innerWidth * 0.25; // adjust as needed
-
+      const maxOffset = window.innerWidth * 0.25;
       const clamped = Math.max(-30, Math.min(30, gamma));
       const offset = (clamped / 30) * maxOffset;
 
@@ -195,15 +220,18 @@
       }
     }
 
-    // Request permission for DeviceOrientation on iOS
+    // Request motion permission (iOS)
     permBtn.addEventListener('click', async () => {
-      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      if (
+        typeof DeviceOrientationEvent !== 'undefined' &&
+        typeof DeviceOrientationEvent.requestPermission === 'function'
+      ) {
         try {
           const response = await DeviceOrientationEvent.requestPermission();
           if (response === 'granted') {
             orientationPermissionGranted = true;
             window.addEventListener('deviceorientation', handleOrientation);
-            permBtn.style.display = 'none'; // hide button after granted
+            permBtn.style.display = 'none';
           } else {
             errorMessage.textContent = 'Permission for motion/orientation was denied.';
             errorMessage.style.display = 'block';
@@ -214,7 +242,7 @@
           errorMessage.style.display = 'block';
         }
       } else {
-        // permission not needed (for other browsers)
+        // Android/desktop
         orientationPermissionGranted = true;
         window.addEventListener('deviceorientation', handleOrientation);
         permBtn.style.display = 'none';
@@ -235,8 +263,8 @@
       newWindow.document.close();
     });
 
-    // Start camera
     startCamera();
   </script>
+
 </body>
 </html>
