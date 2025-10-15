@@ -118,10 +118,10 @@
 
     async function startCamera() {
       try {
-        // Request camera with ideal constraints for photo booth (front camera preferred)
+        // Request back (environment) camera
         const stream = await navigator.mediaDevices.getUserMedia({
           video: {
-            facingMode: 'user', // front camera if available
+            facingMode: { exact: 'environment' },
             width: { ideal: 1280 },
             height: { ideal: 960 },
           },
@@ -134,10 +134,8 @@
       }
     }
 
-    // Start camera on load
     startCamera();
 
-    // Placeholder for capture button (to be implemented)
     document.getElementById('capture-btn').addEventListener('click', () => {
       alert('Capture functionality coming soon!');
     });
