@@ -8,20 +8,10 @@
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins:wght@600&display=swap" rel="stylesheet" />
 
-  <!-- Font Awesome for Ruler Icon -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-    integrity="sha512-mJ8nAqgN2mnAEfFlYl4qv0/dHbZk9ScqBzFu5TCBCG4p0Ro4GH7Oq6kQFYXOK0TfCgTbQEtKawgaJ1Cto+Ajig=="
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"
-  />
-
   <style>
     * {
       box-sizing: border-box;
     }
-
     html, body {
       margin: 0;
       height: 100%;
@@ -32,7 +22,6 @@
       overflow: hidden;
       user-select: none;
     }
-
     header {
       height: 60px;
       background: #fff;
@@ -47,38 +36,26 @@
       color: #007aff;
       flex-shrink: 0;
     }
-
     .icon-button {
       background: none;
       border: none;
-      font-size: 1.25rem;
-      color: #007aff;
+      padding: 4px;
       cursor: pointer;
-      padding: 8px;
-      transition: transform 0.2s ease;
     }
-
-    .icon-button:hover {
-      transform: scale(1.1);
+    .icon-button img {
+      width: 28px;
+      height: auto;
     }
-
-    .icon-button:active {
-      transform: scale(0.95);
-    }
-
     main {
       flex: 1;
       position: relative;
       background: black;
     }
-
     video {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
-
-    /* Level Guide */
     .level-container {
       position: absolute;
       top: 50%;
@@ -90,7 +67,6 @@
       z-index: 10;
       pointer-events: none;
     }
-
     .level-indicator {
       position: absolute;
       top: 50%;
@@ -103,11 +79,9 @@
       transition: background 0.2s ease;
       pointer-events: none;
     }
-
     .level-indicator.level {
       background: #00ff99;
     }
-
     footer {
       height: 120px;
       background: #fff;
@@ -116,7 +90,6 @@
       justify-content: center;
       align-items: center;
     }
-
     #capture-btn {
       width: 72px;
       height: 72px;
@@ -126,16 +99,13 @@
       cursor: pointer;
       transition: background 0.3s ease, transform 0.1s ease;
     }
-
     #capture-btn:hover {
       background: linear-gradient(145deg, #0051a8, #007aff);
       transform: translateY(-2px);
     }
-
     #capture-btn:active {
       transform: translateY(0);
     }
-
     #error-message {
       position: absolute;
       top: 50%;
@@ -158,14 +128,13 @@
   <header>
     <span>SNAP</span>
     <button id="permBtn" class="icon-button" aria-label="Enable Level">
-      <i class="fas fa-ruler-horizontal"></i>
+      <img src="ruler-icon.svg" alt="Ruler Icon">
     </button>
   </header>
 
   <main>
     <video id="video" autoplay playsinline></video>
 
-    <!-- Level Guide UI -->
     <div class="level-container">
       <div class="level-indicator" id="levelIndicator"></div>
     </div>
@@ -220,7 +189,6 @@
       }
     }
 
-    // Request motion permission (iOS)
     permBtn.addEventListener('click', async () => {
       if (
         typeof DeviceOrientationEvent !== 'undefined' &&
@@ -242,7 +210,6 @@
           errorMessage.style.display = 'block';
         }
       } else {
-        // Android/desktop
         orientationPermissionGranted = true;
         window.addEventListener('deviceorientation', handleOrientation);
         permBtn.style.display = 'none';
@@ -265,6 +232,5 @@
 
     startCamera();
   </script>
-
 </body>
 </html>
