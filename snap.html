@@ -39,7 +39,6 @@
       color: #007aff;
       flex-shrink: 0;
       z-index: 10;
-      border-bottom: none;
     }
 
     .photo-count {
@@ -157,6 +156,7 @@
   <main>
     <div class="video-container" id="videoContainer">
       <video id="video" autoplay playsinline></video>
+
       <div class="level-container" id="levelContainer">
         <div class="level-indicator" id="levelIndicator"></div>
       </div>
@@ -185,9 +185,15 @@
       if (isLandscape) {
         levelContainer.style.width = '2px';
         levelContainer.style.height = '80%';
+        levelContainer.style.top = '50%';
+        levelContainer.style.left = '50%';
+        levelContainer.style.transform = 'translate(-50%, -50%)';
       } else {
         levelContainer.style.width = '80%';
         levelContainer.style.height = '2px';
+        levelContainer.style.top = '50%';
+        levelContainer.style.left = '50%';
+        levelContainer.style.transform = 'translate(-50%, -50%)';
       }
     }
 
@@ -272,28 +278,21 @@
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
       const imageData = canvas.toDataURL('image/png');
+      localStorage.setItem(`snap-photo-${photoCount + 1}`, imageData);
 
       photoCount++;
       photoCounterText.textContent = photoCount;
-
-      // Save each photo separately
-      localStorage.setItem(`snap-photo-${photoCount}`, imageData);
 
       if (photoCount === 3) {
         captureBtn.classList.add('red');
       }
 
       if (photoCount >= 4) {
-        window.location.href = 'editor.html'; // To be created
+        window.location.href = "editor.html"; // replace with your editor page later
       }
     });
 
     startCamera();
-
-    // Clear any old photos on page load
-    for (let i = 1; i <= 4; i++) {
-      localStorage.removeItem(`snap-photo-${i}`);
-    }
 
     window.addEventListener('resize', () => {
       if (video.srcObject) {
