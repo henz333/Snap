@@ -63,41 +63,10 @@
       background: #fff;
       box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.12);
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       flex-shrink: 0;
-      gap: 12px;
       padding: 10px 20px;
-    }
-
-    #controls {
-      width: 100%;
-      max-width: 200px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 0.9rem;
-      color: #333;
-      font-weight: 600;
-      font-family: 'Poppins', sans-serif;
-    }
-
-    select {
-      font-family: 'Open Sans', sans-serif;
-      font-weight: 600;
-      padding: 6px 10px;
-      border-radius: 8px;
-      border: 1.5px solid #ccc;
-      cursor: pointer;
-      outline-offset: 2px;
-      transition: border-color 0.2s ease;
-      margin-left: 8px;
-    }
-
-    select:focus {
-      border-color: #007aff;
-      box-shadow: 0 0 6px rgba(0, 122, 255, 0.5);
     }
 
     #capture-btn {
@@ -109,6 +78,7 @@
       cursor: pointer;
       transition: background 0.3s ease, transform 0.1s ease;
       user-select: none;
+      box-shadow: none;
     }
 
     #capture-btn:hover {
@@ -161,43 +131,21 @@
   </main>
 
   <footer>
-    <div id="controls">
-      <label for="fps-select">FPS:</label>
-      <select id="fps-select" aria-label="Select frame rate">
-        <option value="30" selected>30</option>
-        <option value="60">60</option>
-      </select>
-    </div>
     <button id="capture-btn" aria-label="Take photo"></button>
   </footer>
 
   <script>
     const video = document.getElementById('video');
     const errorMessage = document.getElementById('error-message');
-    const fpsSelect = document.getElementById('fps-select');
     const captureBtn = document.getElementById('capture-btn');
 
-    let currentStream = null;
-
-    async function startCamera(fps = 30) {
-      if (currentStream) {
-        currentStream.getTracks().forEach(track => track.stop());
-      }
-
+    async function startCamera() {
       try {
-        const constraints = {
-          video: {
-            facingMode: { exact: 'environment' },
-            width: { ideal: 1920 },
-            height: { ideal: 1080 },
-            frameRate: { ideal: fps },
-          },
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { exact: "environment" } },
           audio: false
-        };
-
-        currentStream = await navigator.mediaDevices.getUserMedia(constraints);
-        video.srcObject = currentStream;
-
+        });
+        video.srcObject = stream;
         errorMessage.style.display = 'none';
       } catch (err) {
         console.error('Error accessing camera:', err);
@@ -206,30 +154,21 @@
       }
     }
 
-    fpsSelect.addEventListener('change', () => {
-      startCamera(parseInt(fpsSelect.value));
-    });
-
     captureBtn.addEventListener('click', () => {
-      // Create a canvas the same size as the video element
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      // Convert the canvas to a data URL (base64 image)
       const imgDataUrl = canvas.toDataURL('image/png');
-
-      // For now, just open the captured photo in a new tab
       const newWindow = window.open();
       newWindow.document.write('<title>Captured Photo</title>');
       newWindow.document.write('<img src="' + imgDataUrl + '" style="width:100%;height:auto;">');
       newWindow.document.close();
     });
 
-    // Start camera initially at 30fps
-    startCamera(30);
+    startCamera();
   </script>
 </body>
 </html>
