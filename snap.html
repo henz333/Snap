@@ -59,7 +59,7 @@
     }
 
     footer {
-      height: 160px;
+      height: 120px;
       background: #fff;
       box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.12);
       display: flex;
@@ -73,28 +73,14 @@
 
     #controls {
       width: 100%;
-      max-width: 400px;
+      max-width: 200px;
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
       font-size: 0.9rem;
       color: #333;
       font-weight: 600;
       font-family: 'Poppins', sans-serif;
-    }
-
-    label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    input[type="checkbox"] {
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
     }
 
     select {
@@ -106,6 +92,7 @@
       cursor: pointer;
       outline-offset: 2px;
       transition: border-color 0.2s ease;
+      margin-left: 8px;
     }
 
     select:focus {
@@ -159,7 +146,7 @@
         height: 88px;
       }
       footer {
-        height: 180px;
+        height: 140px;
       }
     }
   </style>
@@ -175,17 +162,11 @@
 
   <footer>
     <div id="controls">
-      <label for="flash-toggle">
-        <input type="checkbox" id="flash-toggle" />
-        Flash (Torch)
-      </label>
-      <label for="fps-select">
-        FPS:
-        <select id="fps-select" aria-label="Select frame rate">
-          <option value="30" selected>30</option>
-          <option value="60">60</option>
-        </select>
-      </label>
+      <label for="fps-select">FPS:</label>
+      <select id="fps-select" aria-label="Select frame rate">
+        <option value="30" selected>30</option>
+        <option value="60">60</option>
+      </select>
     </div>
     <button id="capture-btn" aria-label="Take photo"></button>
   </footer>
@@ -193,16 +174,12 @@
   <script>
     const video = document.getElementById('video');
     const errorMessage = document.getElementById('error-message');
-    const flashToggle = document.getElementById('flash-toggle');
     const fpsSelect = document.getElementById('fps-select');
     const captureBtn = document.getElementById('capture-btn');
 
     let currentStream = null;
-    let videoTrack = null;
-    let torchAvailable = false;
 
-    async function startCamera(fps = 30, torchOn = false) {
-      // Stop old stream if exists
+    async function startCamera(fps = 30) {
       if (currentStream) {
         currentStream.getTracks().forEach(track => track.stop());
       }
@@ -221,68 +198,38 @@
         currentStream = await navigator.mediaDevices.getUserMedia(constraints);
         video.srcObject = currentStream;
 
-        videoTrack = currentStream.getVideoTracks()[0];
-
-        // Check if torch is supported
-        const imageCapture = new ImageCapture(videoTrack);
-        const capabilities = await imageCapture.getPhotoCapabilities();
-        torchAvailable = capabilities.torch || false;
-
-        if (!torchAvailable) {
-          flashToggle.disabled = true;
-          flashToggle.checked = false;
-        } else {
-          flashToggle.disabled = false;
-          // Apply torch if requested
-          await setTorch(torchOn);
-        }
-
         errorMessage.style.display = 'none';
       } catch (err) {
         console.error('Error accessing camera:', err);
         errorMessage.textContent = 'Camera access denied or unavailable.';
         errorMessage.style.display = 'block';
-        flashToggle.disabled = true;
-        flashToggle.checked = false;
       }
     }
-
-    async function setTorch(on) {
-      if (!videoTrack) return;
-      const capabilities = videoTrack.getCapabilities();
-      if (!capabilities.torch) {
-        // Torch not supported
-        flashToggle.disabled = true;
-        flashToggle.checked = false;
-        return;
-      }
-      try {
-        await videoTrack.applyConstraints({ advanced: [{ torch: on }] });
-      } catch (err) {
-        console.warn('Torch control failed:', err);
-        flashToggle.checked = false;
-      }
-    }
-
-    // Event listeners for controls
-
-    flashToggle.addEventListener('change', async () => {
-      if (!torchAvailable) return;
-      await setTorch(flashToggle.checked);
-    });
 
     fpsSelect.addEventListener('change', () => {
-      // Restart camera with new FPS, keep torch off because restarting stream disables torch
-      startCamera(parseInt(fpsSelect.value), false);
-      flashToggle.checked = false;
+      startCamera(parseInt(fpsSelect.value));
     });
 
     captureBtn.addEventListener('click', () => {
-      alert('Capture functionality coming soon!');
+      // Create a canvas the same size as the video element
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Convert the canvas to a data URL (base64 image)
+      const imgDataUrl = canvas.toDataURL('image/png');
+
+      // For now, just open the captured photo in a new tab
+      const newWindow = window.open();
+      newWindow.document.write('<title>Captured Photo</title>');
+      newWindow.document.write('<img src="' + imgDataUrl + '" style="width:100%;height:auto;">');
+      newWindow.document.close();
     });
 
-    // Start camera initially at 30fps, torch off
-    startCamera(30, false);
+    // Start camera initially at 30fps
+    startCamera(30);
   </script>
 </body>
 </html>
