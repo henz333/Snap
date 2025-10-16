@@ -16,7 +16,7 @@
       margin: 0;
       height: 100%;
       font-family: 'Open Sans', sans-serif;
-      background: #000;
+      background: #f0f2f5;
       overflow: hidden;
       user-select: none;
     }
@@ -40,7 +40,6 @@
       color: #007aff;
       flex-shrink: 0;
       z-index: 10;
-      position: relative;
     }
 
     .photo-count {
@@ -51,19 +50,21 @@
 
     main {
       flex-grow: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #fff;
       position: relative;
-      background: black;
-      overflow: hidden;
     }
 
     .video-container {
-      position: absolute;
-      top: 0;
-      bottom: 0;
+      position: relative;
       width: 100%;
-      max-width: 100%;
-      background: black;
-      z-index: 1;
+      max-width: 480px;
+      overflow: hidden;
+      background: #000;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
     }
 
     video {
@@ -71,6 +72,7 @@
       height: 100%;
       object-fit: cover;
       display: block;
+      border-radius: 16px;
     }
 
     .level-container {
@@ -157,7 +159,7 @@
 <body>
 
   <header>
-    <div>SNAP 01</div>
+    <div>SNAPPY</div>
     <div class="photo-count">Photos: <span id="photoCounter">0</span>/4</div>
   </header>
 
