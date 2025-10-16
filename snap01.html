@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>SNAP with Permissions</title>
+  <title>SNAP</title>
 
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins:wght@600&display=swap" rel="stylesheet" />
@@ -12,7 +12,6 @@
     * {
       box-sizing: border-box;
     }
-
     html, body {
       margin: 0;
       height: 100%;
@@ -153,106 +152,30 @@
       z-index: 20;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
-
-    /* Permissions Modal */
-    #permissionModal {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.9);
-      color: white;
-      font-family: 'Poppins', sans-serif;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      padding: 20px;
-      text-align: center;
-    }
-
-    #permissionModal h2 {
-      margin-bottom: 1rem;
-    }
-
-    #permissionList {
-      list-style: none;
-      padding: 0;
-      margin-bottom: 2rem;
-      width: 100%;
-      max-width: 400px;
-      text-align: left;
-    }
-
-    #permissionList li {
-      margin: 12px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-weight: 600;
-    }
-
-    .status {
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 0.8rem;
-    }
-
-    .pending { background: #666; }
-    .granted { background: #00ff99; color: #000; }
-    .denied { background: #ff3b30; }
-
-    #requestPermissionsBtn {
-      padding: 12px 24px;
-      background: #007aff;
-      border: none;
-      border-radius: 24px;
-      font-size: 1rem;
-      color: white;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      transition: background 0.3s ease;
-    }
-
-    #requestPermissionsBtn:disabled {
-      background: #555;
-      cursor: not-allowed;
-    }
   </style>
 </head>
 <body>
 
-  <!-- HEADER -->
   <header>
     <div>SNAP</div>
     <div class="photo-count">Photos: <span id="photoCounter">0</span>/4</div>
   </header>
 
-  <!-- MAIN CAMERA AREA -->
   <main>
     <div class="video-container" id="videoContainer">
       <video id="video" autoplay playsinline></video>
+
       <div class="level-container" id="levelContainer">
         <div class="level-indicator" id="levelIndicator"></div>
       </div>
     </div>
+
     <p id="error-message" role="alert" aria-live="assertive"></p>
   </main>
 
-  <!-- FOOTER -->
   <footer>
     <button id="capture-btn" aria-label="Take photo"></button>
   </footer>
-
-  <!-- PERMISSION MODAL -->
-  <div id="permissionModal" aria-modal="true" role="dialog" aria-labelledby="modalTitle">
-    <h2 id="modalTitle">Allow Permissions to Continue</h2>
-    <ul id="permissionList">
-      <li>Geolocation: <span id="geoStatus" class="status pending">Pending</span></li>
-      <li>Camera: <span id="cameraStatus" class="status pending">Pending</span></li>
-      <li>Torch (Flashlight): <span id="torchStatus" class="status pending">Pending</span></li>
-    </ul>
-    <button id="requestPermissionsBtn">Allow Permissions</button>
-  </div>
 
   <script>
     const video = document.getElementById('video');
@@ -263,22 +186,22 @@
     const videoContainer = document.getElementById('videoContainer');
     const photoCounterText = document.getElementById('photoCounter');
 
-    const permissionModal = document.getElementById('permissionModal');
-    const geoStatus = document.getElementById('geoStatus');
-    const cameraStatus = document.getElementById('cameraStatus');
-    const torchStatus = document.getElementById('torchStatus');
-    const requestPermissionsBtn = document.getElementById('requestPermissionsBtn');
-
-    let photoCount = 0;
     let isLandscape = false;
+    let photoCount = 0;
 
     function updateLevelContainer() {
       if (isLandscape) {
         levelContainer.style.width = '2px';
         levelContainer.style.height = '80%';
+        levelContainer.style.top = '50%';
+        levelContainer.style.left = '50%';
+        levelContainer.style.transform = 'translate(-50%, -50%)';
       } else {
         levelContainer.style.width = '80%';
         levelContainer.style.height = '2px';
+        levelContainer.style.top = '50%';
+        levelContainer.style.left = '50%';
+        levelContainer.style.transform = 'translate(-50%, -50%)';
       }
     }
 
@@ -295,49 +218,70 @@
       const indicatorSize = levelIndicator.offsetWidth;
 
       if (isLandscape) {
-        const offset = (Math.max(-30, Math.min(30, beta)) / 30) * ((containerRect.height / 2) - (indicatorSize / 2));
+        const containerHeight = containerRect.height;
+        const clampedBeta = Math.max(-30, Math.min(30, beta));
+        const maxOffset = (containerHeight / 2) - (indicatorSize / 2);
+        const offset = (clampedBeta / 30) * maxOffset;
         levelIndicator.style.top = `calc(50% + ${offset}px)`;
         levelIndicator.style.left = '50%';
-        levelIndicator.style.background = Math.abs(beta) < 2 ? '#00ff99' : 'white';
-      } else {
-        const offset = (Math.max(-30, Math.min(30, gamma)) / 30) * ((containerRect.width / 2) - (indicatorSize / 2));
-        levelIndicator.style.left = `calc(50% + ${offset}px)`;
-        levelIndicator.style.top = '50%';
-        levelIndicator.style.background = Math.abs(gamma) < 2 ? '#00ff99' : 'white';
-      }
-    }
 
-    async function requestPermissions() {
-      try {
-        // Geolocation
-        navigator.geolocation.getCurrentPosition(
-          () => geoStatus.textContent = "Granted",
-          () => geoStatus.textContent = "Denied"
-        );
-
-        // Camera
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
-          video.srcObject = stream;
-          cameraStatus.textContent = "Granted";
-          permissionModal.style.display = 'none';
-          startCameraListeners();
-        } catch (err) {
-          cameraStatus.textContent = "Denied";
+        if (Math.abs(beta) < 2) {
+          levelIndicator.style.background = '#00ff99';
+        } else {
+          levelIndicator.style.background = 'white';
         }
 
-        // Torch (fake for now)
-        const supported = 'ImageCapture' in window;
-        torchStatus.textContent = supported ? "Granted" : "Denied";
+      } else {
+        const containerWidth = containerRect.width;
+        const clampedGamma = Math.max(-30, Math.min(30, gamma));
+        const maxOffset = (containerWidth / 2) - (indicatorSize / 2);
+        const offset = (clampedGamma / 30) * maxOffset;
+        levelIndicator.style.left = `calc(50% + ${offset}px)`;
+        levelIndicator.style.top = '50%';
 
-      } catch (e) {
-        console.error('Permission error:', e);
+        if (Math.abs(gamma) < 2) {
+          levelIndicator.style.background = '#00ff99';
+        } else {
+          levelIndicator.style.background = 'white';
+        }
       }
     }
 
-    function startCameraListeners() {
-      if (window.DeviceOrientationEvent) {
-        window.addEventListener('deviceorientation', handleOrientation);
+    async function startCamera() {
+      try {
+        const constraints = {
+          video: {
+            facingMode: { exact: "environment" },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 }
+          },
+          audio: false
+        };
+
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = stream;
+
+        video.onloadedmetadata = () => {
+          const settings = stream.getVideoTracks()[0].getSettings();
+          const { width, height } = settings;
+
+          if (width && height) {
+            const aspectRatio = height / width;
+            videoContainer.style.height = `${videoContainer.clientWidth * aspectRatio}px`;
+          } else {
+            videoContainer.style.height = `${videoContainer.clientWidth * 3 / 4}px`;
+          }
+        };
+
+        errorMessage.style.display = 'none';
+
+        if (window.DeviceOrientationEvent) {
+          window.addEventListener('deviceorientation', handleOrientation);
+        }
+      } catch (err) {
+        console.error('Camera error:', err);
+        errorMessage.textContent = 'Camera access denied or unavailable.';
+        errorMessage.style.display = 'block';
       }
     }
 
@@ -345,7 +289,8 @@
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
-      canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
       const imageData = canvas.toDataURL('image/png');
       localStorage.setItem(`snap-photo-${photoCount + 1}`, imageData);
@@ -353,11 +298,29 @@
       photoCount++;
       photoCounterText.textContent = photoCount;
 
-      if (photoCount === 3) captureBtn.classList.add('red');
-      if (photoCount >= 4) window.location.href = "editor.html";
+      if (photoCount === 3) {
+        captureBtn.classList.add('red');
+      }
+
+      if (photoCount >= 4) {
+        window.location.href = "editor.html"; // replace with your editor page later
+      }
     });
 
-    requestPermissionsBtn.addEventListener('click', requestPermissions);
+    startCamera();
+
+    window.addEventListener('resize', () => {
+      if (video.srcObject) {
+        const track = video.srcObject.getVideoTracks()[0];
+        if (track) {
+          const settings = track.getSettings();
+          if (settings.width && settings.height) {
+            const aspectRatio = settings.height / settings.width;
+            videoContainer.style.height = `${videoContainer.clientWidth * aspectRatio}px`;
+          }
+        }
+      }
+    });
   </script>
 
 </body>
