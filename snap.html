@@ -193,19 +193,18 @@
       if (isLandscape) {
         levelContainer.style.width = '2px';
         levelContainer.style.height = '80%';
-        levelContainer.style.top = '50%';
-        levelContainer.style.left = '50%';
-        levelContainer.style.transform = 'translate(-50%, -50%)';
       } else {
         levelContainer.style.width = '80%';
         levelContainer.style.height = '2px';
-        levelContainer.style.top = '50%';
-        levelContainer.style.left = '50%';
-        levelContainer.style.transform = 'translate(-50%, -50%)';
       }
+      levelContainer.style.top = '50%';
+      levelContainer.style.left = '50%';
+      levelContainer.style.transform = 'translate(-50%, -50%)';
     }
 
     function handleOrientation(event) {
+      console.log('Orientation event:', event.gamma, event.beta); // DEBUG - Remove if you want
+
       const gamma = event.gamma;
       const beta = event.beta;
 
@@ -218,6 +217,7 @@
       const indicatorSize = levelIndicator.offsetWidth;
 
       if (isLandscape) {
+        // Vertical movement
         const containerHeight = containerRect.height;
         const clampedBeta = Math.max(-30, Math.min(30, beta));
         const maxOffset = (containerHeight / 2) - (indicatorSize / 2);
@@ -230,8 +230,8 @@
         } else {
           levelIndicator.style.background = 'white';
         }
-
       } else {
+        // Horizontal movement
         const containerWidth = containerRect.width;
         const clampedGamma = Math.max(-30, Math.min(30, gamma));
         const maxOffset = (containerWidth / 2) - (indicatorSize / 2);
@@ -275,13 +275,38 @@
 
         errorMessage.style.display = 'none';
 
-        if (window.DeviceOrientationEvent) {
-          window.addEventListener('deviceorientation', handleOrientation);
-        }
+        // Request orientation permission here
+        requestOrientationPermission();
+
       } catch (err) {
         console.error('Camera error:', err);
         errorMessage.textContent = 'Camera access denied or unavailable.';
         errorMessage.style.display = 'block';
+      }
+    }
+
+    function requestOrientationPermission() {
+      if (
+        typeof DeviceOrientationEvent !== 'undefined' &&
+        typeof DeviceOrientationEvent.requestPermission === 'function'
+      ) {
+        DeviceOrientationEvent.requestPermission()
+          .then(permissionState => {
+            if (permissionState === 'granted') {
+              window.addEventListener('deviceorientation', handleOrientation);
+            } else {
+              errorMessage.textContent = 'Permission to access device orientation was denied.';
+              errorMessage.style.display = 'block';
+            }
+          })
+          .catch(err => {
+            console.error(err);
+            errorMessage.textContent = 'Error requesting device orientation permission.';
+            errorMessage.style.display = 'block';
+          });
+      } else {
+        // Non iOS or permission not required
+        window.addEventListener('deviceorientation', handleOrientation);
       }
     }
 
