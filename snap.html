@@ -150,6 +150,18 @@
       z-index: 20;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
+
+    #countdown {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 5rem;
+      color: white;
+      font-weight: bold;
+      z-index: 30;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -166,6 +178,7 @@
         <div class="level-indicator" id="levelIndicator"></div>
       </div>
       <p id="error-message" role="alert" aria-live="assertive"></p>
+      <div id="countdown">3</div>
     </div>
   </main>
 
@@ -181,6 +194,7 @@
     const levelIndicator = document.getElementById('levelIndicator');
     const errorMessage = document.getElementById('error-message');
     const videoContainer = document.getElementById('videoContainer');
+    const countdownEl = document.getElementById('countdown');
 
     let photoCount = 0;
 
@@ -199,7 +213,6 @@
         video.srcObject = stream;
 
         video.onloadedmetadata = () => {
-          // Keep video container aspect ratio based on actual stream settings
           const track = stream.getVideoTracks()[0];
           const settings = track.getSettings();
           if (settings.width && settings.height) {
@@ -223,26 +236,7 @@
     }
 
     captureBtn.addEventListener('click', () => {
-      if (!video.srcObject) return;
-
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const imageData = canvas.toDataURL('image/png');
-      localStorage.setItem(`snap-photo-${photoCount + 1}`, imageData);
-
-      photoCount++;
-      photoCounterText.textContent = photoCount;
-
-      if (photoCount === 3) {
-        captureBtn.classList.add('red');
-      }
-
-      if (photoCount >= 4) {
-        window.location.href = "editor.html"; // Replace with your editor URL
-      }
+      // Button manually disabled for auto mode.
     });
 
     function handleOrientation(event) {
@@ -292,7 +286,54 @@
       }
     });
 
-    startCamera();
+    function takePhoto() {
+      if (!video.srcObject) return;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = canvas.toDataURL('image/png');
+      localStorage.setItem(`snap-photo-${photoCount + 1}`, imageData);
+
+      photoCount++;
+      photoCounterText.textContent = photoCount;
+
+      if (photoCount === 3) {
+        captureBtn.classList.add('red');
+      }
+
+      if (photoCount >= 4) {
+        window.location.href = "editor.html"; // Replace with your editor URL
+      }
+    }
+
+    function startCountdownAndCapture() {
+      let count = 3;
+      countdownEl.textContent = count;
+      countdownEl.style.display = 'block';
+
+      const countdownInterval = setInterval(() => {
+        count--;
+        if (count > 0) {
+          countdownEl.textContent = count;
+        } else {
+          clearInterval(countdownInterval);
+          countdownEl.style.display = 'none';
+          takePhoto();
+
+          if (photoCount < 4) {
+            setTimeout(startCountdownAndCapture, 500); // slight delay before next countdown
+          }
+        }
+      }, 1000);
+    }
+
+    window.addEventListener('load', () => {
+      setTimeout(startCamera, 300);
+      setTimeout(startCountdownAndCapture, 1000);
+    });
   </script>
 
 </body>
