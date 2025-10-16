@@ -62,7 +62,7 @@
       max-width: 480px;
       overflow: hidden;
       background: transparent;
-      border: none; /* no border to blend with header/footer */
+      border: none;
     }
 
     video {
@@ -71,7 +71,7 @@
       object-fit: cover;
       display: block;
       background: transparent;
-      border: none; /* no border */
+      border: none;
     }
 
     .level-container {
@@ -84,6 +84,7 @@
       transform: translate(-50%, -50%);
       z-index: 10;
       pointer-events: none;
+      transition: width 0.3s ease, height 0.3s ease;
     }
 
     .level-indicator {
@@ -331,6 +332,11 @@
     }
 
     captureBtn.addEventListener('click', () => {
+      if (!video.videoWidth || !video.videoHeight) {
+        alert('Camera not ready yet.');
+        return;
+      }
+
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
@@ -348,7 +354,7 @@
       }
 
       if (photoCount >= 4) {
-        window.location.href = "editor.html"; // replace with your editor page later
+        window.location.href = "editor.html"; // change this to your actual editor page
       }
     });
 
