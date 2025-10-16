@@ -14,6 +14,7 @@
     }
     html, body {
       margin: 0;
+      padding: 0;
       height: 100%;
       font-family: 'Open Sans', sans-serif;
       background: #000;
@@ -38,9 +39,8 @@
       font-weight: 700;
       font-size: 1.3rem;
       color: #007aff;
-      flex-shrink: 0;
       z-index: 10;
-      position: relative;
+      flex-shrink: 0;
     }
 
     .photo-count {
@@ -50,8 +50,8 @@
     }
 
     main {
-      flex-grow: 1;
       position: relative;
+      flex-grow: 1;
       background: black;
       overflow: hidden;
     }
@@ -59,10 +59,9 @@
     .video-container {
       position: absolute;
       top: 0;
+      left: 0;
+      right: 0;
       bottom: 0;
-      width: 100%;
-      max-width: 100%;
-      background: black;
       z-index: 1;
     }
 
@@ -83,6 +82,7 @@
       transform: translate(-50%, -50%);
       z-index: 10;
       pointer-events: none;
+      transition: all 0.3s ease;
     }
 
     .level-indicator {
@@ -98,17 +98,12 @@
     }
 
     footer {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 120px;
+      height: 100px;
       background: #ffffff;
-      box-shadow: 0 -2px 6px rgba(0,0,0,0.05);
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 50;
+      z-index: 20;
     }
 
     #capture-btn {
@@ -131,11 +126,6 @@
       box-shadow: 0 6px 16px rgba(0,0,0,0.2);
     }
 
-    #capture-btn:active {
-      transform: translateY(0);
-      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
-    }
-
     #error-message {
       position: absolute;
       top: 50%;
@@ -143,13 +133,13 @@
       transform: translate(-50%, -50%);
       color: #d32f2f;
       font-weight: 600;
-      background: rgba(255,255,255,0.9);
+      background: rgba(255,255,255,0.95);
       padding: 12px 24px;
       border-radius: 12px;
       text-align: center;
       max-width: 90%;
       display: none;
-      z-index: 20;
+      z-index: 100;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
   </style>
@@ -183,67 +173,45 @@
     const levelIndicator = document.getElementById('levelIndicator');
     const levelContainer = document.getElementById('levelContainer');
     const errorMessage = document.getElementById('error-message');
-    const videoContainer = document.getElementById('videoContainer');
     const photoCounterText = document.getElementById('photoCounter');
 
     let isLandscape = false;
     let photoCount = 0;
 
-    function updateLevelContainer() {
-      if (isLandscape) {
-        levelContainer.style.width = '2px';
-        levelContainer.style.height = '80%';
-        levelContainer.style.top = '50%';
-        levelContainer.style.left = '50%';
-        levelContainer.style.transform = 'translate(-50%, -50%)';
-      } else {
-        levelContainer.style.width = '80%';
-        levelContainer.style.height = '2px';
-        levelContainer.style.top = '50%';
-        levelContainer.style.left = '50%';
-        levelContainer.style.transform = 'translate(-50%, -50%)';
-      }
-    }
-
-    function handleOrientation(event) {
+    function updateLevelUI(event) {
       const gamma = event.gamma;
       const beta = event.beta;
 
       if (gamma === null || beta === null) return;
 
       isLandscape = Math.abs(gamma) > Math.abs(beta);
-      updateLevelContainer();
+
+      // Adjust level container orientation
+      if (isLandscape) {
+        levelContainer.style.width = '2px';
+        levelContainer.style.height = '80%';
+      } else {
+        levelContainer.style.width = '80%';
+        levelContainer.style.height = '2px';
+      }
 
       const containerRect = levelContainer.getBoundingClientRect();
       const indicatorSize = levelIndicator.offsetWidth;
 
       if (isLandscape) {
-        const containerHeight = containerRect.height;
+        const maxOffset = (containerRect.height / 2) - (indicatorSize / 2);
         const clampedBeta = Math.max(-30, Math.min(30, beta));
-        const maxOffset = (containerHeight / 2) - (indicatorSize / 2);
         const offset = (clampedBeta / 30) * maxOffset;
         levelIndicator.style.top = `calc(50% + ${offset}px)`;
         levelIndicator.style.left = '50%';
-
-        if (Math.abs(beta) < 2) {
-          levelIndicator.style.background = '#00ff99';
-        } else {
-          levelIndicator.style.background = 'white';
-        }
-
+        levelIndicator.style.background = Math.abs(beta) < 2 ? '#00ff99' : 'white';
       } else {
-        const containerWidth = containerRect.width;
+        const maxOffset = (containerRect.width / 2) - (indicatorSize / 2);
         const clampedGamma = Math.max(-30, Math.min(30, gamma));
-        const maxOffset = (containerWidth / 2) - (indicatorSize / 2);
         const offset = (clampedGamma / 30) * maxOffset;
         levelIndicator.style.left = `calc(50% + ${offset}px)`;
         levelIndicator.style.top = '50%';
-
-        if (Math.abs(gamma) < 2) {
-          levelIndicator.style.background = '#00ff99';
-        } else {
-          levelIndicator.style.background = 'white';
-        }
+        levelIndicator.style.background = Math.abs(gamma) < 2 ? '#00ff99' : 'white';
       }
     }
 
@@ -261,22 +229,10 @@
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
         video.srcObject = stream;
 
-        video.onloadedmetadata = () => {
-          const settings = stream.getVideoTracks()[0].getSettings();
-          const { width, height } = settings;
-
-          if (width && height) {
-            const aspectRatio = height / width;
-            videoContainer.style.height = `${videoContainer.clientWidth * aspectRatio}px`;
-          } else {
-            videoContainer.style.height = `${videoContainer.clientWidth * 3 / 4}px`;
-          }
-        };
-
         errorMessage.style.display = 'none';
 
         if (window.DeviceOrientationEvent) {
-          window.addEventListener('deviceorientation', handleOrientation);
+          window.addEventListener('deviceorientation', updateLevelUI, true);
         }
       } catch (err) {
         console.error('Camera error:', err);
@@ -286,9 +242,12 @@
     }
 
     captureBtn.addEventListener('click', () => {
+      if (!video.srcObject) return;
+
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
+
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
@@ -303,25 +262,11 @@
       }
 
       if (photoCount >= 4) {
-        window.location.href = "editor.html"; // replace with your editor page later
+        window.location.href = "editor.html";
       }
     });
 
     startCamera();
-
-    window.addEventListener('resize', () => {
-      if (video.srcObject) {
-        const track = video.srcObject.getVideoTracks()[0];
-        if (track) {
-          const settings = track.getSettings();
-          if (settings.width && settings.height) {
-            const aspectRatio = settings.height / settings.width;
-            videoContainer.style.height = `${videoContainer.clientWidth * aspectRatio}px`;
-          }
-        }
-      }
-    });
   </script>
-
 </body>
 </html>
