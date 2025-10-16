@@ -2,74 +2,55 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SNAP</title>
-
-  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins:wght@600&display=swap" rel="stylesheet" />
-
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
+      background: black;
       font-family: 'Open Sans', sans-serif;
-      background: #000;
       overflow: hidden;
       user-select: none;
     }
 
-    body {
-      display: flex;
-      flex-direction: column;
-    }
-
     header {
       height: 60px;
-      background: #ffffff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      background: white;
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
       padding: 0 20px;
       font-family: 'Poppins', sans-serif;
-      font-weight: 700;
-      font-size: 1.3rem;
+      font-size: 1.2rem;
       color: #007aff;
       z-index: 10;
-      flex-shrink: 0;
     }
 
     .photo-count {
       font-size: 0.9rem;
       color: #333;
-      font-family: 'Open Sans', sans-serif;
     }
 
     main {
       position: relative;
-      flex-grow: 1;
-      background: black;
+      flex: 1;
       overflow: hidden;
     }
 
     .video-container {
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 1;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: black;
     }
 
     video {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      display: block;
     }
 
     .level-container {
@@ -78,11 +59,9 @@
       left: 50%;
       width: 80%;
       height: 2px;
-      background: rgba(255, 255, 255, 0.4);
+      background: rgba(255,255,255,0.4);
       transform: translate(-50%, -50%);
-      z-index: 10;
-      pointer-events: none;
-      transition: all 0.3s ease;
+      z-index: 5;
     }
 
     .level-indicator {
@@ -92,38 +71,33 @@
       background: white;
       border: 2px solid #00ff99;
       border-radius: 50%;
-      pointer-events: none;
       transform: translate(-50%, -50%);
       box-shadow: 0 0 8px rgba(0,255,153,0.3);
+      left: 50%;
+      top: 50%;
     }
 
     footer {
       height: 100px;
-      background: #ffffff;
+      background: white;
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 20;
     }
 
     #capture-btn {
       width: 72px;
       height: 72px;
-      background: linear-gradient(145deg, #007aff, #0051a8);
-      border: none;
       border-radius: 50%;
-      cursor: pointer;
-      transition: background 0.3s ease, transform 0.1s ease;
+      border: none;
+      background: linear-gradient(145deg, #007aff, #0051a8);
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      cursor: pointer;
+      transition: 0.3s ease;
     }
 
     #capture-btn.red {
       background: linear-gradient(145deg, #ff3b30, #b3201c);
-    }
-
-    #capture-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
     }
 
     #error-message {
@@ -131,16 +105,12 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      color: #d32f2f;
-      font-weight: 600;
-      background: rgba(255,255,255,0.95);
+      color: red;
+      background: white;
       padding: 12px 24px;
-      border-radius: 12px;
-      text-align: center;
-      max-width: 90%;
+      border-radius: 8px;
       display: none;
       z-index: 100;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
   </style>
 </head>
@@ -152,15 +122,13 @@
   </header>
 
   <main>
-    <div class="video-container" id="videoContainer">
+    <div class="video-container">
       <video id="video" autoplay playsinline></video>
-
       <div class="level-container" id="levelContainer">
         <div class="level-indicator" id="levelIndicator"></div>
       </div>
+      <div id="error-message">Camera not available</div>
     </div>
-
-    <p id="error-message" role="alert" aria-live="assertive"></p>
   </main>
 
   <footer>
@@ -170,74 +138,25 @@
   <script>
     const video = document.getElementById('video');
     const captureBtn = document.getElementById('capture-btn');
-    const levelIndicator = document.getElementById('levelIndicator');
-    const levelContainer = document.getElementById('levelContainer');
-    const errorMessage = document.getElementById('error-message');
     const photoCounterText = document.getElementById('photoCounter');
+    const levelContainer = document.getElementById('levelContainer');
+    const levelIndicator = document.getElementById('levelIndicator');
+    const errorMessage = document.getElementById('error-message');
 
-    let isLandscape = false;
     let photoCount = 0;
-
-    function updateLevelUI(event) {
-      const gamma = event.gamma;
-      const beta = event.beta;
-
-      if (gamma === null || beta === null) return;
-
-      isLandscape = Math.abs(gamma) > Math.abs(beta);
-
-      // Adjust level container orientation
-      if (isLandscape) {
-        levelContainer.style.width = '2px';
-        levelContainer.style.height = '80%';
-      } else {
-        levelContainer.style.width = '80%';
-        levelContainer.style.height = '2px';
-      }
-
-      const containerRect = levelContainer.getBoundingClientRect();
-      const indicatorSize = levelIndicator.offsetWidth;
-
-      if (isLandscape) {
-        const maxOffset = (containerRect.height / 2) - (indicatorSize / 2);
-        const clampedBeta = Math.max(-30, Math.min(30, beta));
-        const offset = (clampedBeta / 30) * maxOffset;
-        levelIndicator.style.top = `calc(50% + ${offset}px)`;
-        levelIndicator.style.left = '50%';
-        levelIndicator.style.background = Math.abs(beta) < 2 ? '#00ff99' : 'white';
-      } else {
-        const maxOffset = (containerRect.width / 2) - (indicatorSize / 2);
-        const clampedGamma = Math.max(-30, Math.min(30, gamma));
-        const offset = (clampedGamma / 30) * maxOffset;
-        levelIndicator.style.left = `calc(50% + ${offset}px)`;
-        levelIndicator.style.top = '50%';
-        levelIndicator.style.background = Math.abs(gamma) < 2 ? '#00ff99' : 'white';
-      }
-    }
 
     async function startCamera() {
       try {
-        const constraints = {
-          video: {
-            facingMode: { exact: "environment" },
-            width: { ideal: 1920 },
-            height: { ideal: 1080 }
-          },
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" },
           audio: false
-        };
-
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        });
         video.srcObject = stream;
-
         errorMessage.style.display = 'none';
-
-        if (window.DeviceOrientationEvent) {
-          window.addEventListener('deviceorientation', updateLevelUI, true);
-        }
       } catch (err) {
-        console.error('Camera error:', err);
-        errorMessage.textContent = 'Camera access denied or unavailable.';
+        console.error(err);
         errorMessage.style.display = 'block';
+        errorMessage.textContent = "Unable to access camera.";
       }
     }
 
@@ -247,12 +166,10 @@
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
-
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      const imageData = canvas.toDataURL('image/png');
-      localStorage.setItem(`snap-photo-${photoCount + 1}`, imageData);
+      const imgData = canvas.toDataURL('image/png');
+      localStorage.setItem(`snap-photo-${photoCount + 1}`, imgData);
 
       photoCount++;
       photoCounterText.textContent = photoCount;
@@ -266,7 +183,42 @@
       }
     });
 
+    function handleOrientation(event) {
+      const gamma = event.gamma;
+      const beta = event.beta;
+
+      if (gamma == null || beta == null) return;
+
+      const isLandscape = Math.abs(gamma) > Math.abs(beta);
+      if (isLandscape) {
+        levelContainer.style.width = '2px';
+        levelContainer.style.height = '80%';
+
+        const offset = Math.max(-30, Math.min(30, beta));
+        const px = (offset / 30) * 40;
+        levelIndicator.style.top = `calc(50% + ${px}px)`;
+        levelIndicator.style.left = '50%';
+
+        levelIndicator.style.background = Math.abs(beta) < 2 ? '#00ff99' : 'white';
+      } else {
+        levelContainer.style.width = '80%';
+        levelContainer.style.height = '2px';
+
+        const offset = Math.max(-30, Math.min(30, gamma));
+        const px = (offset / 30) * 40;
+        levelIndicator.style.left = `calc(50% + ${px}px)`;
+        levelIndicator.style.top = '50%';
+
+        levelIndicator.style.background = Math.abs(gamma) < 2 ? '#00ff99' : 'white';
+      }
+    }
+
+    if (window.DeviceOrientationEvent) {
+      window.addEventListener('deviceorientation', handleOrientation);
+    }
+
     startCamera();
   </script>
+
 </body>
 </html>
