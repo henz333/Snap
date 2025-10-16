@@ -16,7 +16,7 @@
       margin: 0;
       height: 100%;
       font-family: 'Open Sans', sans-serif;
-      background: #000;
+      background: #f5f5f7;
       overflow: hidden;
       user-select: none;
     }
@@ -28,8 +28,7 @@
 
     header {
       height: 60px;
-      background: #ffffff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      background: #fff;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -40,7 +39,6 @@
       color: #007aff;
       flex-shrink: 0;
       z-index: 10;
-      position: relative;
     }
 
     .photo-count {
@@ -51,19 +49,20 @@
 
     main {
       flex-grow: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #fff;
       position: relative;
-      background: black;
-      overflow: hidden;
     }
 
     .video-container {
-      position: absolute;
-      top: 0;
-      bottom: 0;
+      position: relative;
       width: 100%;
-      max-width: 100%;
-      background: black;
-      z-index: 1;
+      max-width: 480px;
+      overflow: hidden;
+      background: transparent;
+      border: none; /* no border to blend with header/footer */
     }
 
     video {
@@ -71,6 +70,8 @@
       height: 100%;
       object-fit: cover;
       display: block;
+      background: transparent;
+      border: none; /* no border */
     }
 
     .level-container {
@@ -87,14 +88,13 @@
 
     .level-indicator {
       position: absolute;
-      width: 14px;
-      height: 14px;
-      background: white;
-      border: 2px solid #00ff99;
+      width: 12px;
+      height: 12px;
+      background: #00ff99;
       border-radius: 50%;
       pointer-events: none;
       transform: translate(-50%, -50%);
-      box-shadow: 0 0 8px rgba(0,255,153,0.3);
+      transition: background 0.3s ease;
     }
 
     footer {
@@ -103,12 +103,12 @@
       left: 0;
       right: 0;
       height: 120px;
-      background: #ffffff;
-      box-shadow: 0 -2px 6px rgba(0,0,0,0.05);
+      background: #fff;
       display: flex;
       justify-content: center;
       align-items: center;
       z-index: 50;
+      gap: 12px;
     }
 
     #capture-btn {
@@ -119,21 +119,42 @@
       border-radius: 50%;
       cursor: pointer;
       transition: background 0.3s ease, transform 0.1s ease;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      box-shadow: 0 4px 10px rgba(0, 122, 255, 0.5);
     }
 
     #capture-btn.red {
       background: linear-gradient(145deg, #ff3b30, #b3201c);
+      box-shadow: 0 4px 10px rgba(255, 59, 48, 0.5);
     }
 
     #capture-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+      transform: translateY(-2px);
     }
 
     #capture-btn:active {
       transform: translateY(0);
-      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    }
+
+    #flash-btn {
+      width: 48px;
+      height: 48px;
+      border: none;
+      border-radius: 50%;
+      background: #ccc;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s ease;
+    }
+
+    #flash-btn:hover {
+      background: #bbb;
+    }
+
+    #flash-btn:active {
+      background: #aaa;
     }
 
     #error-message {
@@ -150,7 +171,6 @@
       max-width: 90%;
       display: none;
       z-index: 20;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
   </style>
 </head>
@@ -175,6 +195,11 @@
 
   <footer>
     <button id="capture-btn" aria-label="Take photo"></button>
+    <button id="flash-btn" aria-label="Toggle flash" title="Toggle Flash" >
+      <svg id="flash-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="#666" viewBox="0 0 24 24">
+        <path d="M7 2v11h3v9l7-12h-4l4-8z"/>
+      </svg>
+    </button>
   </footer>
 
   <script>
@@ -185,6 +210,10 @@
     const errorMessage = document.getElementById('error-message');
     const videoContainer = document.getElementById('videoContainer');
     const photoCounterText = document.getElementById('photoCounter');
+
+    const flashBtn = document.getElementById('flash-btn');
+    const flashIcon = document.getElementById('flash-icon');
+    let torchOn = false;
 
     let isLandscape = false;
     let photoCount = 0;
@@ -224,13 +253,6 @@
         const offset = (clampedBeta / 30) * maxOffset;
         levelIndicator.style.top = `calc(50% + ${offset}px)`;
         levelIndicator.style.left = '50%';
-
-        if (Math.abs(beta) < 2) {
-          levelIndicator.style.background = '#00ff99';
-        } else {
-          levelIndicator.style.background = 'white';
-        }
-
       } else {
         const containerWidth = containerRect.width;
         const clampedGamma = Math.max(-30, Math.min(30, gamma));
@@ -238,14 +260,37 @@
         const offset = (clampedGamma / 30) * maxOffset;
         levelIndicator.style.left = `calc(50% + ${offset}px)`;
         levelIndicator.style.top = '50%';
+      }
 
-        if (Math.abs(gamma) < 2) {
-          levelIndicator.style.background = '#00ff99';
-        } else {
-          levelIndicator.style.background = 'white';
-        }
+      if (isLandscape ? Math.abs(beta) < 2 : Math.abs(gamma) < 2) {
+        levelIndicator.style.background = '#00ff99';
+      } else {
+        levelIndicator.style.background = 'white';
       }
     }
+
+    async function toggleTorch() {
+      if (!video.srcObject) return;
+
+      const track = video.srcObject.getVideoTracks()[0];
+      const capabilities = track.getCapabilities();
+
+      if (!capabilities.torch) {
+        alert('Torch/flashlight not supported on this device.');
+        return;
+      }
+
+      try {
+        torchOn = !torchOn;
+        await track.applyConstraints({ advanced: [{ torch: torchOn }] });
+        flashBtn.style.background = torchOn ? '#00ff99' : '#ccc';
+        flashIcon.style.fill = torchOn ? '#004d33' : '#666';
+      } catch (err) {
+        console.error('Torch toggle error:', err);
+      }
+    }
+
+    flashBtn.addEventListener('click', toggleTorch);
 
     async function startCamera() {
       try {
