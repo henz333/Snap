@@ -197,6 +197,7 @@
     const countdownEl = document.getElementById('countdown');
 
     let photoCount = 0;
+    let isCapturing = false;
 
     async function startCamera() {
       try {
@@ -234,10 +235,6 @@
         errorMessage.style.display = 'block';
       }
     }
-
-    captureBtn.addEventListener('click', () => {
-      // Button manually disabled for auto mode.
-    });
 
     function handleOrientation(event) {
       const gamma = event.gamma;
@@ -305,11 +302,11 @@
       }
 
       if (photoCount >= 4) {
-        window.location.href = "editor.html"; // Replace with your editor URL
+        window.location.href = "editor.html";
       }
     }
 
-    function startCountdownAndCapture() {
+    function startCountdownAndCapture(repeat = true) {
       let count = 3;
       countdownEl.textContent = count;
       countdownEl.style.display = 'block';
@@ -323,17 +320,20 @@
           countdownEl.style.display = 'none';
           takePhoto();
 
-          if (photoCount < 4) {
-            setTimeout(startCountdownAndCapture, 500); // slight delay before next countdown
+          if (photoCount < 4 && repeat) {
+            setTimeout(() => startCountdownAndCapture(true), 500);
           }
         }
       }, 1000);
     }
 
-    window.addEventListener('load', () => {
-      setTimeout(startCamera, 300);
-      setTimeout(startCountdownAndCapture, 1000);
+    captureBtn.addEventListener('click', () => {
+      if (isCapturing) return;
+      isCapturing = true;
+      startCountdownAndCapture(true);
     });
+
+    startCamera();
   </script>
 
 </body>
