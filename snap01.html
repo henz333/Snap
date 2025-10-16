@@ -3,155 +3,72 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>SNAP</title>
-
+  <title>SNAP with Permissions</title>
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins:wght@600&display=swap" rel="stylesheet" />
-
   <style>
-    * {
-      box-sizing: border-box;
-    }
-    html, body {
-      margin: 0;
-      height: 100%;
-      font-family: 'Open Sans', sans-serif;
-      background: #000;
-      overflow: hidden;
-      user-select: none;
-    }
+    /* Your existing styles ... */
+    /* + Modal styles below */
 
-    body {
+    /* Modal background */
+    #permissionModal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      color: white;
+      font-family: 'Poppins', sans-serif;
       display: flex;
       flex-direction: column;
-    }
-
-    header {
-      height: 60px;
-      background: #ffffff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 20px;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 700;
-      font-size: 1.3rem;
-      color: #007aff;
-      flex-shrink: 0;
-      z-index: 10;
-      position: relative;
-    }
-
-    .photo-count {
-      font-size: 0.9rem;
-      color: #333;
-      font-family: 'Open Sans', sans-serif;
-    }
-
-    main {
-      flex-grow: 1;
-      position: relative;
-      background: black;
-      overflow: hidden;
-    }
-
-    .video-container {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      width: 100%;
-      max-width: 100%;
-      background: black;
-      z-index: 1;
-    }
-
-    video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .level-container {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 80%;
-      height: 2px;
-      background: rgba(255, 255, 255, 0.4);
-      transform: translate(-50%, -50%);
-      z-index: 10;
-      pointer-events: none;
-    }
-
-    .level-indicator {
-      position: absolute;
-      width: 14px;
-      height: 14px;
-      background: white;
-      border: 2px solid #00ff99;
-      border-radius: 50%;
-      pointer-events: none;
-      transform: translate(-50%, -50%);
-      box-shadow: 0 0 8px rgba(0,255,153,0.3);
-    }
-
-    footer {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 120px;
-      background: #ffffff;
-      box-shadow: 0 -2px 6px rgba(0,0,0,0.05);
-      display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 50;
-    }
-
-    #capture-btn {
-      width: 72px;
-      height: 72px;
-      background: linear-gradient(145deg, #007aff, #0051a8);
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-      transition: background 0.3s ease, transform 0.1s ease;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-
-    #capture-btn.red {
-      background: linear-gradient(145deg, #ff3b30, #b3201c);
-    }
-
-    #capture-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
-    }
-
-    #capture-btn:active {
-      transform: translateY(0);
-      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
-    }
-
-    #error-message {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: #d32f2f;
-      font-weight: 600;
-      background: rgba(255,255,255,0.9);
-      padding: 12px 24px;
-      border-radius: 12px;
+      z-index: 1000;
+      padding: 20px;
       text-align: center;
-      max-width: 90%;
-      display: none;
-      z-index: 20;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
+    #permissionModal h2 {
+      margin-bottom: 1rem;
+    }
+    #permissionList {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 2rem;
+      width: 100%;
+      max-width: 400px;
+      text-align: left;
+    }
+    #permissionList li {
+      margin: 12px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+    }
+    .status {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+    }
+    .pending { background: #666; }
+    .granted { background: #00ff99; color: #000; }
+    .denied { background: #ff3b30; }
+
+    #requestPermissionsBtn {
+      padding: 12px 24px;
+      background: #007aff;
+      border: none;
+      border-radius: 24px;
+      font-size: 1rem;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      transition: background 0.3s ease;
+    }
+    #requestPermissionsBtn:disabled {
+      background: #555;
+      cursor: not-allowed;
+    }
+
+    /* rest of your styles... */
   </style>
 </head>
 <body>
@@ -164,18 +81,27 @@
   <main>
     <div class="video-container" id="videoContainer">
       <video id="video" autoplay playsinline></video>
-
       <div class="level-container" id="levelContainer">
         <div class="level-indicator" id="levelIndicator"></div>
       </div>
     </div>
-
     <p id="error-message" role="alert" aria-live="assertive"></p>
   </main>
 
   <footer>
     <button id="capture-btn" aria-label="Take photo"></button>
   </footer>
+
+  <!-- Permission Modal -->
+  <div id="permissionModal" aria-modal="true" role="dialog" aria-labelledby="modalTitle">
+    <h2 id="modalTitle">Allow Permissions to Continue</h2>
+    <ul id="permissionList">
+      <li>Geolocation: <span id="geoStatus" class="status pending">Pending</span></li>
+      <li>Camera: <span id="cameraStatus" class="status pending">Pending</span></li>
+      <li>Torch (Flashlight): <span id="torchStatus" class="status pending">Pending</span></li>
+    </ul>
+    <button id="requestPermissionsBtn">Allow Permissions</button>
+  </div>
 
   <script>
     const video = document.getElementById('video');
@@ -186,106 +112,159 @@
     const videoContainer = document.getElementById('videoContainer');
     const photoCounterText = document.getElementById('photoCounter');
 
-    let isLandscape = false;
+    // Permission modal elements
+    const permissionModal = document.getElementById('permissionModal');
+    const geoStatus = document.getElementById('geoStatus');
+    const cameraStatus = document.getElementById('cameraStatus');
+    const torchStatus = document.getElementById('torchStatus');
+    const requestPermissionsBtn = document.getElementById('requestPermissionsBtn');
+
     let photoCount = 0;
+    let stream = null;
 
-    function updateLevelContainer() {
-      if (isLandscape) {
-        levelContainer.style.width = '2px';
-        levelContainer.style.height = '80%';
-        levelContainer.style.top = '50%';
-        levelContainer.style.left = '50%';
-        levelContainer.style.transform = 'translate(-50%, -50%)';
-      } else {
-        levelContainer.style.width = '80%';
-        levelContainer.style.height = '2px';
-        levelContainer.style.top = '50%';
-        levelContainer.style.left = '50%';
-        levelContainer.style.transform = 'translate(-50%, -50%)';
-      }
+    // Utility function to update status badge
+    function updateStatus(el, status) {
+      el.classList.remove('pending', 'granted', 'denied');
+      el.classList.add(status);
+      el.textContent = status.charAt(0).toUpperCase() + status.slice(1);
     }
 
-    function handleOrientation(event) {
-      const gamma = event.gamma;
-      const beta = event.beta;
-
-      if (gamma === null || beta === null) return;
-
-      isLandscape = Math.abs(gamma) > Math.abs(beta);
-      updateLevelContainer();
-
-      const containerRect = levelContainer.getBoundingClientRect();
-      const indicatorSize = levelIndicator.offsetWidth;
-
-      if (isLandscape) {
-        const containerHeight = containerRect.height;
-        const clampedBeta = Math.max(-30, Math.min(30, beta));
-        const maxOffset = (containerHeight / 2) - (indicatorSize / 2);
-        const offset = (clampedBeta / 30) * maxOffset;
-        levelIndicator.style.top = `calc(50% + ${offset}px)`;
-        levelIndicator.style.left = '50%';
-
-        if (Math.abs(beta) < 2) {
-          levelIndicator.style.background = '#00ff99';
-        } else {
-          levelIndicator.style.background = 'white';
+    // Request Geolocation permission
+    function requestGeolocation() {
+      return new Promise((resolve) => {
+        if (!navigator.geolocation) {
+          updateStatus(geoStatus, 'denied');
+          resolve(false);
+          return;
         }
 
-      } else {
-        const containerWidth = containerRect.width;
-        const clampedGamma = Math.max(-30, Math.min(30, gamma));
-        const maxOffset = (containerWidth / 2) - (indicatorSize / 2);
-        const offset = (clampedGamma / 30) * maxOffset;
-        levelIndicator.style.left = `calc(50% + ${offset}px)`;
-        levelIndicator.style.top = '50%';
-
-        if (Math.abs(gamma) < 2) {
-          levelIndicator.style.background = '#00ff99';
-        } else {
-          levelIndicator.style.background = 'white';
-        }
-      }
-    }
-
-    async function startCamera() {
-      try {
-        const constraints = {
-          video: {
-            facingMode: { exact: "environment" },
-            width: { ideal: 1920 },
-            height: { ideal: 1080 }
+        navigator.geolocation.getCurrentPosition(
+          () => {
+            updateStatus(geoStatus, 'granted');
+            resolve(true);
           },
-          audio: false
-        };
-
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        video.srcObject = stream;
-
-        video.onloadedmetadata = () => {
-          const settings = stream.getVideoTracks()[0].getSettings();
-          const { width, height } = settings;
-
-          if (width && height) {
-            const aspectRatio = height / width;
-            videoContainer.style.height = `${videoContainer.clientWidth * aspectRatio}px`;
-          } else {
-            videoContainer.style.height = `${videoContainer.clientWidth * 3 / 4}px`;
+          () => {
+            updateStatus(geoStatus, 'denied');
+            resolve(false);
           }
-        };
+        );
+      });
+    }
 
-        errorMessage.style.display = 'none';
+    // Request Camera permission
+    async function requestCamera() {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }});
+        video.srcObject = stream;
+        updateStatus(cameraStatus, 'granted');
+        return true;
+      } catch (e) {
+        console.error('Camera error:', e);
+        updateStatus(cameraStatus, 'denied');
+        return false;
+      }
+    }
 
-        if (window.DeviceOrientationEvent) {
-          window.addEventListener('deviceorientation', handleOrientation);
+    // Torch permission (we check if torch can be toggled)
+    async function requestTorch() {
+      if (!stream) {
+        updateStatus(torchStatus, 'denied');
+        return false;
+      }
+      const track = stream.getVideoTracks()[0];
+      if (!track.getCapabilities) {
+        updateStatus(torchStatus, 'denied');
+        return false;
+      }
+      const capabilities = track.getCapabilities();
+      if (!capabilities.torch) {
+        updateStatus(torchStatus, 'denied');
+        return false;
+      }
+
+      // Try turning on the torch briefly to confirm permission
+      try {
+        await track.applyConstraints({ advanced: [{ torch: true }] });
+        await new Promise(r => setTimeout(r, 1000));
+        await track.applyConstraints({ advanced: [{ torch: false }] });
+        updateStatus(torchStatus, 'granted');
+        return true;
+      } catch (e) {
+        console.warn('Torch error:', e);
+        updateStatus(torchStatus, 'denied');
+        return false;
+      }
+    }
+
+    // Request all permissions sequentially
+    async function requestPermissions() {
+      requestPermissionsBtn.disabled = true;
+      await requestGeolocation();
+      const cameraAllowed = await requestCamera();
+      let torchAllowed = false;
+      if (cameraAllowed) {
+        torchAllowed = await requestTorch();
+      }
+      // If camera denied, stop stream to release camera
+      if (!cameraAllowed && stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+
+      // All done — hide modal only if camera allowed (since camera is core)
+      if (cameraAllowed) {
+        permissionModal.style.display = 'none';
+        startCamera();  // Continue your existing camera setup if needed
+      } else {
+        requestPermissionsBtn.disabled = false;
+        alert('Camera permission is required to use this app.');
+      }
+    }
+
+    // Your existing startCamera (adjusted to avoid re-requesting camera)
+    async function startCamera() {
+      if (!stream) {
+        try {
+          const constraints = {
+            video: {
+              facingMode: { exact: "environment" },
+              width: { ideal: 1920 },
+              height: { ideal: 1080 }
+            },
+            audio: false
+          };
+
+          stream = await navigator.mediaDevices.getUserMedia(constraints);
+          video.srcObject = stream;
+        } catch (err) {
+          console.error('Camera error:', err);
+          errorMessage.textContent = 'Camera access denied or unavailable.';
+          errorMessage.style.display = 'block';
+          return;
         }
-      } catch (err) {
-        console.error('Camera error:', err);
-        errorMessage.textContent = 'Camera access denied or unavailable.';
-        errorMessage.style.display = 'block';
+      }
+
+      video.onloadedmetadata = () => {
+        const settings = stream.getVideoTracks()[0].getSettings();
+        const { width, height } = settings;
+
+        if (width && height) {
+          const aspectRatio = height / width;
+          videoContainer.style.height = `${videoContainer.clientWidth * aspectRatio}px`;
+        } else {
+          videoContainer.style.height = `${videoContainer.clientWidth * 3 / 4}px`;
+        }
+      };
+
+      errorMessage.style.display = 'none';
+
+      if (window.DeviceOrientationEvent) {
+        window.addEventListener('deviceorientation', handleOrientation);
       }
     }
 
     captureBtn.addEventListener('click', () => {
+      if (!stream) return;
+
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
@@ -303,25 +282,81 @@
       }
 
       if (photoCount >= 4) {
-        window.location.href = "editor.html"; // replace with your editor page later
+        window.location.href = "editor.html";
       }
     });
 
-    startCamera();
+    // When user clicks to allow permissions
+    requestPermissionsBtn.addEventListener('click', () => {
+      requestPermissions();
+    });
 
-    window.addEventListener('resize', () => {
-      if (video.srcObject) {
-        const track = video.srcObject.getVideoTracks()[0];
-        if (track) {
-          const settings = track.getSettings();
-          if (settings.width && settings.height) {
-            const aspectRatio = settings.height / settings.width;
-            videoContainer.style.height = `${videoContainer.clientWidth * aspectRatio}px`;
-          }
+    // On page load, show modal and don't start camera yet
+    window.onload = () => {
+      permissionModal.style.display = 'flex';
+      captureBtn.disabled = true; // disable capture until permissions granted
+    };
+
+    // Enable capture button only after camera is ready
+    function enableCapture() {
+      captureBtn.disabled = false;
+    }
+
+    // Add event listener to enable capture once video starts
+    video.addEventListener('play', enableCapture);
+
+    // Existing handleOrientation function (unchanged)
+    function handleOrientation(event) {
+      const gamma = event.gamma;
+      const beta = event.beta;
+
+      if (gamma === null || beta === null) return;
+
+      let isLandscape = Math.abs(gamma) > Math.abs(beta);
+      if (isLandscape) {
+        levelContainer.style.width = '2px';
+        levelContainer.style.height = '80%';
+        levelContainer.style.top = '50%';
+        levelContainer.style.left = '50%';
+        levelContainer.style.transform = 'translate(-50%, -50%)';
+
+        const containerRect = levelContainer.getBoundingClientRect();
+        const indicatorSize = levelIndicator.offsetWidth;
+        const containerHeight = containerRect.height;
+        const clampedBeta = Math.max(-30, Math.min(30, beta));
+        const maxOffset = (containerHeight / 2) - (indicatorSize / 2);
+        const offset = (clampedBeta / 30) * maxOffset;
+        levelIndicator.style.top = `calc(50% + ${offset}px)`;
+        levelIndicator.style.left = '50%';
+
+        if (Math.abs(beta) < 2) {
+          levelIndicator.style.background = '#00ff99';
+        } else {
+          levelIndicator.style.background = 'white';
+        }
+      } else {
+        levelContainer.style.width = '80%';
+        levelContainer.style.height = '2px';
+        levelContainer.style.top = '50%';
+        levelContainer.style.left = '50%';
+        levelContainer.style.transform = 'translate(-50%, -50%)';
+
+        const containerRect = levelContainer.getBoundingClientRect();
+        const indicatorSize = levelIndicator.offsetWidth;
+        const containerWidth = containerRect.width;
+        const clampedGamma = Math.max(-30, Math.min(30, gamma));
+        const maxOffset = (containerWidth / 2) - (indicatorSize / 2);
+        const offset = (clampedGamma / 30) * maxOffset;
+        levelIndicator.style.left = `calc(50% + ${offset}px)`;
+        levelIndicator.style.top = '50%';
+
+        if (Math.abs(gamma) < 2) {
+          levelIndicator.style.background = '#00ff99';
+        } else {
+          levelIndicator.style.background = 'white';
         }
       }
-    });
+    }
   </script>
-
 </body>
 </html>
