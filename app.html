@@ -4,42 +4,59 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Photo Booth</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Poppins:wght@500&display=swap" rel="stylesheet">
+
   <style>
+    :root {
+      --primary-color: #0072ff;
+      --gradient: linear-gradient(to right, #00c6ff, #0072ff);
+      --background-color: #f9f9f9;
+      --card-bg: #ffffff;
+      --text-color: #333;
+      --border-radius: 16px;
+      --transition: 0.3s ease;
+    }
+
     * {
-      box-sizing: border-box;
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
     }
 
     body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f9f9f9;
-      color: #333;
+      font-family: 'Open Sans', sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
       line-height: 1.6;
     }
 
     header {
-      background: #fff;
+      background-color: var(--card-bg);
       padding: 30px 20px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
       text-align: center;
+      border-bottom: 1px solid #eaeaea;
     }
 
     header h1 {
       font-size: 2.5rem;
-      color: #2c3e50;
+      font-weight: 600;
+      color: var(--primary-color);
     }
 
     .hero {
       text-align: center;
       padding: 60px 20px;
-      background: linear-gradient(to right, #00c6ff, #0072ff);
+      background: var(--gradient);
       color: white;
+      border-radius: 0 0 var(--border-radius) var(--border-radius);
     }
 
     .hero h2 {
       font-size: 2rem;
+      font-weight: 600;
       margin-bottom: 10px;
     }
 
@@ -49,56 +66,66 @@
     }
 
     .btn {
-      background-color: #fff;
-      color: #0072ff;
-      padding: 12px 24px;
+      font-family: 'Poppins', sans-serif;
+      background-color: #ffffff;
+      color: var(--primary-color);
+      padding: 14px 28px;
       font-size: 1rem;
-      font-weight: 600;
+      font-weight: 500;
       border: none;
-      border-radius: 6px;
+      border-radius: var(--border-radius);
       cursor: pointer;
       text-decoration: none;
-      transition: background-color 0.3s ease;
+      display: inline-block;
+      transition: background-color var(--transition), transform var(--transition);
     }
 
     .btn:hover {
-      background-color: #e6e6e6;
+      background-color: #f0f0f0;
+      transform: translateY(-2px);
     }
 
     .features {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      padding: 50px 20px;
+      gap: 20px;
+      padding: 60px 20px;
       background-color: #f0f2f5;
     }
 
     .feature {
-      background: #fff;
-      border-radius: 8px;
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
       padding: 30px;
-      margin: 15px;
       max-width: 280px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-      transition: transform 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      transition: transform var(--transition), box-shadow var(--transition);
     }
 
     .feature:hover {
       transform: translateY(-5px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
     }
 
     .feature h3 {
-      color: #0072ff;
-      margin-bottom: 10px;
+      color: var(--primary-color);
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .feature p {
+      font-size: 0.95rem;
     }
 
     .footer {
       text-align: center;
       padding: 20px;
-      background: #ffffff;
+      background: var(--card-bg);
       border-top: 1px solid #e1e1e1;
       font-size: 0.95rem;
       color: #777;
+      border-radius: var(--border-radius) var(--border-radius) 0 0;
     }
 
     @media (max-width: 600px) {
@@ -106,9 +133,23 @@
         flex-direction: column;
         align-items: center;
       }
+
+      .hero h2 {
+        font-size: 1.6rem;
+      }
+
+      .hero p {
+        font-size: 1rem;
+      }
+
+      .btn {
+        width: 100%;
+        max-width: 220px;
+      }
     }
   </style>
 </head>
+
 <body>
 
   <header>
