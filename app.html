@@ -2,298 +2,147 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SNAP</title>
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins:wght@600&display=swap" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Photo Booth</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-    html, body {
-      margin: 0;
-      height: 100%;
-      font-family: 'Open Sans', sans-serif;
-      background: black;
-      overflow: hidden;
-      user-select: none;
-      display: flex;
-      flex-direction: column;
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f9f9f9;
+      color: #333;
+      line-height: 1.6;
     }
 
     header {
-      height: 60px;
-      background: white;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 20px;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-      font-size: 1.3rem;
-      color: #007aff;
-      flex-shrink: 0;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      z-index: 10;
-    }
-
-    .photo-count {
-      font-size: 0.9rem;
-      color: #333;
-    }
-
-    main {
-      flex-grow: 1;
-      position: relative;
-      background: black;
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .video-container {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      max-height: 100%;
-      background: black;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
-      z-index: 1;
-    }
-
-    video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .level-container {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 80%;
-      height: 2px;
-      background: rgba(255, 255, 255, 0.4);
-      transform: translate(-50%, -50%);
-      z-index: 10;
-      pointer-events: none;
-    }
-
-    .level-indicator {
-      position: absolute;
-      width: 14px;
-      height: 14px;
-      background: white;
-      border: 2px solid #00ff99;
-      border-radius: 50%;
-      pointer-events: none;
-      transform: translate(-50%, -50%);
-      box-shadow: 0 0 8px rgba(0,255,153,0.3);
-      left: 50%;
-      top: 50%;
-    }
-
-    footer {
-      height: 100px;
-      background: white;
-      box-shadow: 0 -2px 6px rgba(0,0,0,0.05);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-shrink: 0;
-      z-index: 50;
-    }
-
-    #capture-btn {
-      width: 72px;
-      height: 72px;
-      background: linear-gradient(145deg, #007aff, #0051a8);
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      transition: background 0.3s ease, transform 0.1s ease;
-    }
-
-    #capture-btn.red {
-      background: linear-gradient(145deg, #ff3b30, #b3201c);
-    }
-
-    #capture-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
-    }
-
-    #capture-btn:active {
-      transform: translateY(0);
-      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
-    }
-
-    #error-message {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: #d32f2f;
-      font-weight: 600;
-      background: rgba(255,255,255,0.9);
-      padding: 12px 24px;
-      border-radius: 12px;
+      background: #fff;
+      padding: 30px 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
       text-align: center;
-      max-width: 90%;
-      display: none;
-      z-index: 20;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      color: #2c3e50;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 60px 20px;
+      background: linear-gradient(to right, #00c6ff, #0072ff);
+      color: white;
+    }
+
+    .hero h2 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .hero p {
+      font-size: 1.1rem;
+      margin-bottom: 30px;
+    }
+
+    .btn {
+      background-color: #fff;
+      color: #0072ff;
+      padding: 12px 24px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #e6e6e6;
+    }
+
+    .features {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 50px 20px;
+      background-color: #f0f2f5;
+    }
+
+    .feature {
+      background: #fff;
+      border-radius: 8px;
+      padding: 30px;
+      margin: 15px;
+      max-width: 280px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      transition: transform 0.2s ease;
+    }
+
+    .feature:hover {
+      transform: translateY(-5px);
+    }
+
+    .feature h3 {
+      color: #0072ff;
+      margin-bottom: 10px;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 20px;
+      background: #ffffff;
+      border-top: 1px solid #e1e1e1;
+      font-size: 0.95rem;
+      color: #777;
+    }
+
+    @media (max-width: 600px) {
+      .features {
+        flex-direction: column;
+        align-items: center;
+      }
     }
   </style>
 </head>
 <body>
 
   <header>
-    <div>SNAP</div>
-    <div class="photo-count">Photos: <span id="photoCounter">0</span>/4</div>
+    <h1>📸 Photo Booth</h1>
   </header>
 
-  <main>
-    <div class="video-container" id="videoContainer">
-      <video id="video" autoplay playsinline></video>
-      <div class="level-container" id="levelContainer">
-        <div class="level-indicator" id="levelIndicator"></div>
-      </div>
-      <p id="error-message" role="alert" aria-live="assertive"></p>
+  <section class="hero">
+    <h2>Capture Your Best Moments</h2>
+    <p>Instant photos. No downloads. Just snap and share.</p>
+    <a href="snap.html" class="btn">Snap now</a>
+  </section>
+
+  <section class="features">
+    <div class="feature">
+      <h3>✨ Live Preview</h3>
+      <p>See yourself before you snap. Real-time camera preview included.</p>
     </div>
-  </main>
+    <div class="feature">
+      <h3>🎨 Filters & Effects</h3>
+      <p>Apply stylish filters to your photos instantly.</p>
+    </div>
+    <div class="feature">
+      <h3>📤 Easy Sharing</h3>
+      <p>Download or share your photos directly to social media.</p>
+    </div>
+    <div class="feature">
+      <h3>🔒 Private & Secure</h3>
+      <p>Your data stays with you. No storage or tracking.</p>
+    </div>
+  </section>
 
-  <footer>
-    <button id="capture-btn" aria-label="Take photo"></button>
+  <footer class="footer">
+    <p>Photo Booth App v1.0.0 • Built with ❤️ by You</p>
   </footer>
-
-  <script>
-    const video = document.getElementById('video');
-    const captureBtn = document.getElementById('capture-btn');
-    const photoCounterText = document.getElementById('photoCounter');
-    const levelContainer = document.getElementById('levelContainer');
-    const levelIndicator = document.getElementById('levelIndicator');
-    const errorMessage = document.getElementById('error-message');
-    const videoContainer = document.getElementById('videoContainer');
-
-    let photoCount = 0;
-
-    async function startCamera() {
-      try {
-        const constraints = {
-          video: {
-            facingMode: { exact: "environment" },
-            width: { ideal: 1920 },
-            height: { ideal: 1080 }
-          },
-          audio: false
-        };
-
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        video.srcObject = stream;
-
-        video.onloadedmetadata = () => {
-          // Keep video container aspect ratio based on actual stream settings
-          const track = stream.getVideoTracks()[0];
-          const settings = track.getSettings();
-          if (settings.width && settings.height) {
-            const aspectRatio = settings.height / settings.width;
-            videoContainer.style.height = `${videoContainer.clientWidth * aspectRatio}px`;
-          } else {
-            videoContainer.style.height = `${videoContainer.clientWidth * 3 / 4}px`;
-          }
-        };
-
-        errorMessage.style.display = 'none';
-
-        if (window.DeviceOrientationEvent) {
-          window.addEventListener('deviceorientation', handleOrientation);
-        }
-      } catch (err) {
-        console.error('Camera error:', err);
-        errorMessage.textContent = 'Camera access denied or unavailable.';
-        errorMessage.style.display = 'block';
-      }
-    }
-
-    captureBtn.addEventListener('click', () => {
-      if (!video.srcObject) return;
-
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const imageData = canvas.toDataURL('image/png');
-      localStorage.setItem(`snap-photo-${photoCount + 1}`, imageData);
-
-      photoCount++;
-      photoCounterText.textContent = photoCount;
-
-      if (photoCount === 3) {
-        captureBtn.classList.add('red');
-      }
-
-      if (photoCount >= 4) {
-        window.location.href = "editor.html"; // Replace with your editor URL
-      }
-    });
-
-    function handleOrientation(event) {
-      const gamma = event.gamma;
-      const beta = event.beta;
-
-      if (gamma == null || beta == null) return;
-
-      const isLandscape = Math.abs(gamma) > Math.abs(beta);
-      if (isLandscape) {
-        levelContainer.style.width = '2px';
-        levelContainer.style.height = '80%';
-
-        const clampedBeta = Math.max(-30, Math.min(30, beta));
-        const maxOffset = (levelContainer.clientHeight / 2) - (levelIndicator.offsetHeight / 2);
-        const offset = (clampedBeta / 30) * maxOffset;
-
-        levelIndicator.style.top = `calc(50% + ${offset}px)`;
-        levelIndicator.style.left = '50%';
-
-        levelIndicator.style.background = Math.abs(beta) < 2 ? '#00ff99' : 'white';
-      } else {
-        levelContainer.style.width = '80%';
-        levelContainer.style.height = '2px';
-
-        const clampedGamma = Math.max(-30, Math.min(30, gamma));
-        const maxOffset = (levelContainer.clientWidth / 2) - (levelIndicator.offsetWidth / 2);
-        const offset = (clampedGamma / 30) * maxOffset;
-
-        levelIndicator.style.left = `calc(50% + ${offset}px)`;
-        levelIndicator.style.top = '50%';
-
-        levelIndicator.style.background = Math.abs(gamma) < 2 ? '#00ff99' : 'white';
-      }
-    }
-
-    window.addEventListener('resize', () => {
-      if (video.srcObject) {
-        const track = video.srcObject.getVideoTracks()[0];
-        if (track) {
-          const settings = track.getSettings();
-          if (settings.width && settings.height) {
-            const aspectRatio = settings.height / settings.width;
-            videoContainer.style.height = `${videoContainer.clientWidth * aspectRatio}px`;
-          }
-        }
-      }
-    });
-
-    startCamera();
-  </script>
 
 </body>
 </html>
