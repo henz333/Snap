@@ -82,6 +82,7 @@
       transform: translate(-50%, -50%);
       z-index: 10;
       pointer-events: none;
+      transition: width 0.3s ease, height 0.3s ease;
     }
 
     .level-indicator {
@@ -96,6 +97,7 @@
       box-shadow: 0 0 8px rgba(0,255,153,0.3);
       left: 50%;
       top: 50%;
+      transition: background 0.3s ease, left 0.2s ease, top 0.2s ease;
     }
 
     footer {
@@ -161,7 +163,7 @@
 
   <main>
     <div class="video-container" id="videoContainer">
-      <video id="video" autoplay playsinline></video>
+      <video id="video" autoplay playsinline muted></video>
       <div class="level-container" id="levelContainer">
         <div class="level-indicator" id="levelIndicator"></div>
       </div>
@@ -186,9 +188,10 @@
 
     async function startCamera() {
       try {
+        // Use facingMode "environment" without exact for better compatibility
         const constraints = {
           video: {
-            facingMode: { exact: "environment" },
+            facingMode: "environment",
             width: { ideal: 1920 },
             height: { ideal: 1080 }
           },
@@ -199,7 +202,6 @@
         video.srcObject = stream;
 
         video.onloadedmetadata = () => {
-          // Keep video container aspect ratio based on actual stream settings
           const track = stream.getVideoTracks()[0];
           const settings = track.getSettings();
           if (settings.width && settings.height) {
@@ -212,7 +214,20 @@
 
         errorMessage.style.display = 'none';
 
-        if (window.DeviceOrientationEvent) {
+        // For iOS 13+ DeviceOrientationEvent requires permission request
+        if (typeof DeviceOrientationEvent !== 'undefined' &&
+            typeof DeviceOrientationEvent.requestPermission === 'function') {
+          DeviceOrientationEvent.requestPermission()
+            .then(permissionState => {
+              if (permissionState === 'granted') {
+                window.addEventListener('deviceorientation', handleOrientation);
+              } else {
+                console.warn('DeviceOrientation permission denied');
+              }
+            })
+            .catch(console.error);
+        } else if (window.DeviceOrientationEvent) {
+          // No permission needed
           window.addEventListener('deviceorientation', handleOrientation);
         }
       } catch (err) {
@@ -241,7 +256,8 @@
       }
 
       if (photoCount >= 4) {
-        window.location.href = "editor.html"; // Replace with your editor URL
+        // Navigate to editor only after the 4th photo is taken
+        window.location.href = "editor.html"; // Update this URL as needed
       }
     });
 
@@ -251,11 +267,15 @@
 
       if (gamma == null || beta == null) return;
 
+      // Detect landscape vs portrait based on orientation angles
       const isLandscape = Math.abs(gamma) > Math.abs(beta);
+
       if (isLandscape) {
+        // Vertical level line
         levelContainer.style.width = '2px';
         levelContainer.style.height = '80%';
 
+        // Clamp beta angle to [-30, 30]
         const clampedBeta = Math.max(-30, Math.min(30, beta));
         const maxOffset = (levelContainer.clientHeight / 2) - (levelIndicator.offsetHeight / 2);
         const offset = (clampedBeta / 30) * maxOffset;
@@ -265,9 +285,11 @@
 
         levelIndicator.style.background = Math.abs(beta) < 2 ? '#00ff99' : 'white';
       } else {
+        // Horizontal level line
         levelContainer.style.width = '80%';
         levelContainer.style.height = '2px';
 
+        // Clamp gamma angle to [-30, 30]
         const clampedGamma = Math.max(-30, Math.min(30, gamma));
         const maxOffset = (levelContainer.clientWidth / 2) - (levelIndicator.offsetWidth / 2);
         const offset = (clampedGamma / 30) * maxOffset;
@@ -279,6 +301,7 @@
       }
     }
 
+    // Adjust video container height on resize to maintain aspect ratio
     window.addEventListener('resize', () => {
       if (video.srcObject) {
         const track = video.srcObject.getVideoTracks()[0];
@@ -292,6 +315,7 @@
       }
     });
 
+    // Start camera on page load
     startCamera();
   </script>
 
