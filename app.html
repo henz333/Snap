@@ -3,308 +3,297 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SNAP App</title>
-
-  <!-- Google Fonts -->
+  <title>SNAP</title>
   <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins:wght@600&display=swap" rel="stylesheet" />
-
   <style>
-    :root {
-      --bg: #f5f5f7;
-      --fg: #1c1c1e;
-      --card-bg: #fff;
-      --accent: #007aff;
-      --note-bg: #fff4f4;
-      --note-border: #f3c0c0;
-      --note-color: #b00020;
-      --version-color: #888;
+    * {
+      box-sizing: border-box;
     }
 
-    [data-theme="dark"] {
-      --bg: #1c1c1e;
-      --fg: #f5f5f7;
-      --card-bg: #2c2c2e;
-      --accent: #0a84ff;
-      --note-bg: #4c2c2e;
-      --note-border: #6c4044;
-      --note-color: #ff7b7b;
-      --version-color: #aaa;
-    }
-
-    body, html {
-      height: 100%;
+    html, body {
       margin: 0;
+      height: 100%;
       font-family: 'Open Sans', sans-serif;
-      background-color: var(--bg);
-      color: var(--fg);
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
+      background: black;
+      overflow: hidden;
+      user-select: none;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 20px;
-      box-sizing: border-box;
-      user-select: none;
-      transition: background-color 0.3s, color 0.3s;
-      min-height: 100vh;
-    }
-
-    .container {
-      max-width: 400px;
-      width: 100%;
-      background: var(--card-bg);
-      padding: 30px 30px 40px 30px;
-      border-radius: 24px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-      transition: background-color 0.3s;
-      position: relative;
-      box-sizing: border-box;
-    }
-
-    [data-theme="dark"] .container {
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
     }
 
     header {
+      height: 60px;
+      background: white;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
-      padding-top: 10px;
-    }
-
-    header h1 {
-      font-family: 'Poppins', sans-serif;
-      font-weight: 700;
-      font-size: 2rem;
-      margin: 0;
-      letter-spacing: 0.04em;
-      color: var(--accent);
-      transition: color 0.3s;
-      user-select: none;
-    }
-
-    .theme-toggle {
-      background: none;
-      border: none;
-      cursor: pointer;
-      width: 36px;
-      height: 36px;
-      padding: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      transition: background 0.2s;
-      user-select: none;
-    }
-
-    .theme-toggle:hover {
-      background: rgba(0, 0, 0, 0.05);
-    }
-
-    .theme-toggle svg {
-      width: 24px;
-      height: 24px;
-      fill: var(--accent);
-      transition: fill 0.3s;
-    }
-
-    .start-button {
-      padding: 16px 60px;
+      padding: 0 20px;
       font-family: 'Poppins', sans-serif;
       font-weight: 600;
-      font-size: 1.4rem;
-      color: #fff;
-      background: linear-gradient(145deg, var(--accent), #0051a8);
-      border: none;
-      border-radius: 9999px;
-      cursor: pointer;
-      box-shadow:
-        0 4px 6px rgba(0, 122, 255, 0.3),
-        inset 0 -2px 0 rgba(0, 0, 0, 0.2);
-      transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.1s ease;
-      letter-spacing: 0.03em;
-      user-select: none;
-      margin: 30px 0;
-      width: 60px;
-      max-width: 300px;
-      box-sizing: border-box;
+      font-size: 1.3rem;
+      color: #007aff;
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      z-index: 10;
     }
 
-    .start-button:hover {
-      background: linear-gradient(145deg, #0051a8, var(--accent));
-      box-shadow:
-        0 6px 8px rgba(0, 122, 255, 0.45),
-        inset 0 -2px 0 rgba(0, 0, 0, 0.3);
-      transform: translateY(-2px);
+    .photo-count {
+      font-size: 0.9rem;
+      color: #333;
     }
 
-    .start-button:active {
-      transform: translateY(0);
-      box-shadow:
-        0 3px 4px rgba(0, 122, 255, 0.25),
-        inset 0 2px 4px rgba(0, 0, 0, 0.25);
-    }
-
-    .features {
-      text-align: left;
-      font-size: 1rem;
-      line-height: 1.6;
-      color: var(--fg);
-      margin-top: 10px;
-    }
-
-    .features ul {
-      padding-left: 20px;
-      margin: 0;
-    }
-
-    .features li {
-      margin-bottom: 10px;
+    main {
+      flex-grow: 1;
       position: relative;
-      padding-left: 15px;
+      background: black;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
-    .features li::before {
-      content: '✓';
-      position: absolute;
-      left: 0;
-      color: var(--accent);
-      font-weight: bold;
+    .video-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-height: 100%;
+      background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      z-index: 1;
     }
 
-    .platform-note {
-      background-color: var(--note-bg);
-      color: var(--note-color);
-      font-size: 0.95rem;
-      line-height: 1.5;
-      padding: 14px 18px;
-      border-radius: 14px;
-      margin-top: 24px;
-      text-align: left;
-      box-shadow: inset 0 0 0 1px var(--note-border);
-      transition: background-color 0.3s, color 0.3s;
-      user-select: none;
-    }
-
-    .platform-note strong {
-      font-weight: 600;
-    }
-
-    .platform-note-sub {
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
       display: block;
-      margin-top: 6px;
-      font-size: 0.88rem;
     }
 
-    .version {
-      font-size: 0.85rem;
-      color: var(--version-color);
-      margin-top: 30px;
-      letter-spacing: 0.05em;
-      transition: color 0.3s;
+    .level-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 80%;
+      height: 2px;
+      background: rgba(255, 255, 255, 0.4);
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .level-indicator {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background: white;
+      border: 2px solid #00ff99;
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 8px rgba(0,255,153,0.3);
+      left: 50%;
+      top: 50%;
+    }
+
+    footer {
+      height: 100px;
+      background: white;
+      box-shadow: 0 -2px 6px rgba(0,0,0,0.05);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-shrink: 0;
+      z-index: 50;
+    }
+
+    #capture-btn {
+      width: 72px;
+      height: 72px;
+      background: linear-gradient(145deg, #007aff, #0051a8);
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      transition: background 0.3s ease, transform 0.1s ease;
+    }
+
+    #capture-btn.red {
+      background: linear-gradient(145deg, #ff3b30, #b3201c);
+    }
+
+    #capture-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    }
+
+    #capture-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    }
+
+    #error-message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #d32f2f;
+      font-weight: 600;
+      background: rgba(255,255,255,0.9);
+      padding: 12px 24px;
+      border-radius: 12px;
       text-align: center;
-      user-select: none;
-    }
-
-    /* Responsive tweaks */
-    @media (max-width: 440px) {
-      body, html {
-        padding: 20px 15px;
-      }
-      .container {
-        padding: 20px 20px 30px 20px;
-        max-width: 100%;
-        border-radius: 16px;
-      }
-
-      header h1 {
-        font-size: 1.6rem;
-      }
-
-      .start-button {
-        padding: 14px 30px;
-        font-size: 1.2rem;
-        max-width: 100%;
-      }
-
-      .features {
-        font-size: 0.9rem;
-      }
-
-      .platform-note {
-        font-size: 0.9rem;
-        padding: 12px 14px;
-      }
+      max-width: 90%;
+      display: none;
+      z-index: 20;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
   </style>
 </head>
 <body>
-  <div class="container" role="main" aria-label="SNAP app homepage">
-    <header>
-      <h1>SNAP</h1>
-      <button class="theme-toggle" id="themeToggleBtn" aria-label="Toggle dark/light mode">
-        <svg id="themeIcon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path d="M21 12.79A9 9 0 1111.21 3c.49 0 .98.04 1.46.12a7 7 0 009.23 9.23c.08.48.12.97.12 1.46z"/>
-        </svg>
-      </button>
-    </header>
 
-    <button class="start-button" onclick="location.href='snap.html'">SNAP now</button>
+  <header>
+    <div>SNAP</div>
+    <div class="photo-count">Photos: <span id="photoCounter">0</span>/4</div>
+  </header>
 
-    <section class="features" aria-labelledby="features-heading">
-      <h2 id="features-heading" style="font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 1.25rem; margin-bottom: 12px; color: var(--accent);">Features</h2>
-      <ul>
-        <li>Take pictures using your device camera</li>
-        <li>Add frames</li>
-        <li>Drag, resize, and position decorations</li>
-        <li>Save, download, and print your customized photos</li>
-      </ul>
-    </section>
-
-    <div class="platform-note">
-      <strong>Note:</strong> Some features may not work on iOS <strong>FOR NOW</strong> due to system restrictions.
-      <span class="platform-note-sub">iOS 13+ has limited support for camera features in web apps. Android works well starting from version 5.1+.</span>
+  <main>
+    <div class="video-container" id="videoContainer">
+      <video id="video" autoplay playsinline></video>
+      <div class="level-container" id="levelContainer">
+        <div class="level-indicator" id="levelIndicator"></div>
+      </div>
+      <p id="error-message" role="alert" aria-live="assertive"></p>
     </div>
+  </main>
 
-    <p class="version">alpha a.1.3.16.3</p>
-  </div>
+  <footer>
+    <button id="capture-btn" aria-label="Take photo"></button>
+  </footer>
 
   <script>
-    const toggleBtn = document.getElementById('themeToggleBtn');
-    const themeIcon = document.getElementById('themeIcon');
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const video = document.getElementById('video');
+    const captureBtn = document.getElementById('capture-btn');
+    const photoCounterText = document.getElementById('photoCounter');
+    const levelContainer = document.getElementById('levelContainer');
+    const levelIndicator = document.getElementById('levelIndicator');
+    const errorMessage = document.getElementById('error-message');
+    const videoContainer = document.getElementById('videoContainer');
 
-    if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && prefersDark)) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      setMoonIcon(false);
-    } else {
-      document.documentElement.setAttribute('data-theme', 'light');
-      setMoonIcon(true);
+    let photoCount = 0;
+
+    async function startCamera() {
+      try {
+        const constraints = {
+          video: {
+            facingMode: { exact: "environment" },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 }
+          },
+          audio: false
+        };
+
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = stream;
+
+        video.onloadedmetadata = () => {
+          // Keep video container aspect ratio based on actual stream settings
+          const track = stream.getVideoTracks()[0];
+          const settings = track.getSettings();
+          if (settings.width && settings.height) {
+            const aspectRatio = settings.height / settings.width;
+            videoContainer.style.height = `${videoContainer.clientWidth * aspectRatio}px`;
+          } else {
+            videoContainer.style.height = `${videoContainer.clientWidth * 3 / 4}px`;
+          }
+        };
+
+        errorMessage.style.display = 'none';
+
+        if (window.DeviceOrientationEvent) {
+          window.addEventListener('deviceorientation', handleOrientation);
+        }
+      } catch (err) {
+        console.error('Camera error:', err);
+        errorMessage.textContent = 'Camera access denied or unavailable.';
+        errorMessage.style.display = 'block';
+      }
     }
 
-    toggleBtn.addEventListener('click', () => {
-      const current = document.documentElement.getAttribute('data-theme');
-      if (current === 'dark') {
-        document.documentElement.setAttribute('data-theme', 'light');
-        localStorage.setItem('theme', 'light');
-        setMoonIcon(true);
-      } else {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        localStorage.setItem('theme', 'dark');
-        setMoonIcon(false);
+    captureBtn.addEventListener('click', () => {
+      if (!video.srcObject) return;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const imageData = canvas.toDataURL('image/png');
+      localStorage.setItem(`snap-photo-${photoCount + 1}`, imageData);
+
+      photoCount++;
+      photoCounterText.textContent = photoCount;
+
+      if (photoCount === 3) {
+        captureBtn.classList.add('red');
+      }
+
+      if (photoCount >= 4) {
+        window.location.href = "editor.html"; // Replace with your editor URL
       }
     });
 
-    function setMoonIcon(showSun) {
-      if (showSun) {
-        themeIcon.innerHTML = `<path d="M12 4.354a1 1 0 011 1V7a1 1 0 11-2 0V5.354a1 1 0 011-1zm5.657 3.657a1 1 0 011.414 0l1.293 1.293a1 1 0 11-1.414 1.414L17.657 9.414a1 1 0 010-1.414zM20 11h1a1 1 0 110 2h-1a1 1 0 110-2zm-3.657 5.657a1 1 0 010 1.414l-1.293 1.293a1 1 0 11-1.414-1.414l1.293-1.293a1 1 0 011.414 0zM12 17a1 1 0 011 1v1.646a1 1 0 11-2 0V18a1 1 0 011-1zm-5.657-1.343a1 1 0 01-1.414 0L3.636 14.364a1 1 0 011.414-1.414l1.293 1.293a1 1 0 010 1.414zM4 11H3a1 1 0 100 2h1a1 1 0 100-2zm3.343-5.657a1 1 0 00-1.414 1.414l1.293 1.293a1 1 0 001.414-1.414L7.343 5.343zM12 8a4 4 0 100 8 4 4 0 000-8z"/>`;
+    function handleOrientation(event) {
+      const gamma = event.gamma;
+      const beta = event.beta;
+
+      if (gamma == null || beta == null) return;
+
+      const isLandscape = Math.abs(gamma) > Math.abs(beta);
+      if (isLandscape) {
+        levelContainer.style.width = '2px';
+        levelContainer.style.height = '80%';
+
+        const clampedBeta = Math.max(-30, Math.min(30, beta));
+        const maxOffset = (levelContainer.clientHeight / 2) - (levelIndicator.offsetHeight / 2);
+        const offset = (clampedBeta / 30) * maxOffset;
+
+        levelIndicator.style.top = `calc(50% + ${offset}px)`;
+        levelIndicator.style.left = '50%';
+
+        levelIndicator.style.background = Math.abs(beta) < 2 ? '#00ff99' : 'white';
       } else {
-        themeIcon.innerHTML = `<path d="M21 12.79A9 9 0 1111.21 3c.49 0 .98.04 1.46.12a7 7 0 009.23 9.23c.08.48.12.97.12 1.46z"/>`;
+        levelContainer.style.width = '80%';
+        levelContainer.style.height = '2px';
+
+        const clampedGamma = Math.max(-30, Math.min(30, gamma));
+        const maxOffset = (levelContainer.clientWidth / 2) - (levelIndicator.offsetWidth / 2);
+        const offset = (clampedGamma / 30) * maxOffset;
+
+        levelIndicator.style.left = `calc(50% + ${offset}px)`;
+        levelIndicator.style.top = '50%';
+
+        levelIndicator.style.background = Math.abs(gamma) < 2 ? '#00ff99' : 'white';
       }
     }
+
+    window.addEventListener('resize', () => {
+      if (video.srcObject) {
+        const track = video.srcObject.getVideoTracks()[0];
+        if (track) {
+          const settings = track.getSettings();
+          if (settings.width && settings.height) {
+            const aspectRatio = settings.height / settings.width;
+            videoContainer.style.height = `${videoContainer.clientWidth * aspectRatio}px`;
+          }
+        }
+      }
+    });
+
+    startCamera();
   </script>
+
 </body>
 </html>
