@@ -59,7 +59,6 @@
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
       display: inline-block;
-      cursor: pointer;
     }
     .start-button:hover {
       transform: scale(1.05);
@@ -80,42 +79,14 @@
   <main class="container">
     <header class="hero">
       <div class="logo-wrapper">
-        <img src="https://cdn-icons-png.flaticon.com/512/8795/8795821.png" alt="Fun Camera Logo" />
+        <img src="https://cdn-icons-png.flaticon.com/512/8795/8795821.png"
+             alt="Fun Camera Logo" />
         <h1>abcSnap</h1>
       </div>
 
       <p>Capture the fun at Business Week — take 4 photos, edit them, and share your smile!</p>
-
-      <!-- Start Booth Button -->
-      <button id="startBtn" class="start-button">Start Booth</button>
-
-      <!-- Hidden Layout Options -->
-      <div id="layoutOptions" style="display:none; margin-top: 2rem;">
-        <h2 style="color:#3D5AF1;">Choose Your Layout</h2>
-        <div style="display:flex; flex-direction:column; gap:1rem; align-items:center;">
-          <button class="start-button" style="background-color:#FFD93D;" onclick="selectLayout('portrait')">📸 Portrait</button>
-          <button class="start-button" style="background-color:#FFD93D;" onclick="selectLayout('landscape')">🖼️ Landscape</button>
-          <button class="start-button" style="background-color:#FFD93D;" onclick="selectLayout('strip')">🎞️ Photo Strip</button>
-        </div>
-      </div>
+      <a href="choose.html" class="start-button">Start Booth</a>
     </header>
   </main>
-
-  <script>
-    const startBtn = document.getElementById('startBtn');
-    const layoutOptions = document.getElementById('layoutOptions');
-
-    // When "Start Booth" is clicked, show layout options
-    startBtn.addEventListener('click', () => {
-      startBtn.style.display = 'none';
-      layoutOptions.style.display = 'block';
-    });
-
-    // When a layout is chosen, redirect to your booth page
-    function selectLayout(layout) {
-      // Redirect to your booth page (update 'choose.html' to your camera page if needed)
-      window.location.href = `choose.html?layout=${layout}`;
-    }
-  </script>
 </body>
 </html>
