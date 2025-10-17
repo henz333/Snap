@@ -207,6 +207,7 @@
 
   <div id="controls">
     <button id="startBtn">Start Taking Photos</button>
+    <button id="retakeBtn" disabled>Delete & Retake Selected Photo</button>
   </div>
 
   <script>
@@ -277,6 +278,55 @@
 
     startBtn.addEventListener('click', startTakingPhotos);
     startCamera();
+
+    // ===== NEW CODE BELOW FOR DELETE & RETAKE SINGLE PHOTO =====
+
+    const retakeBtn = document.getElementById('retakeBtn');
+    let selectedIndex = -1;
+
+    // Select thumbnail on click, highlight it and enable retake button
+    thumbnails.addEventListener('click', (e) => {
+      if (e.target.tagName === 'IMG') {
+        // Remove "selected" from all thumbnails
+        [...thumbnails.children].forEach((img, idx) => {
+          img.classList.remove('selected');
+          if (img === e.target) selectedIndex = idx;
+        });
+        // Add "selected" to clicked
+        e.target.classList.add('selected');
+        // Enable retake button if selection is valid
+        retakeBtn.disabled = selectedIndex === -1;
+      }
+    });
+
+    // Delete and retake photo at selected index
+    retakeBtn.addEventListener('click', async () => {
+      if (selectedIndex === -1) return;
+
+      retakeBtn.disabled = true;
+      startBtn.disabled = true;
+      timerEl.style.opacity = '1';
+
+      // Countdown before retake
+      for (let i = 5; i > 0; i--) {
+        timerEl.textContent = i;
+        await new Promise(r => setTimeout(r, 1000));
+      }
+      timerEl.style.opacity = '0';
+
+      // Take new photo
+      const newPhoto = takePhoto();
+
+      // Replace photo in photos array and update thumbnail src
+      photos[selectedIndex] = newPhoto;
+      thumbnails.children[selectedIndex].src = newPhoto;
+
+      // Clear selection and disable retake button
+      thumbnails.children[selectedIndex].classList.remove('selected');
+      selectedIndex = -1;
+      retakeBtn.disabled = true;
+      startBtn.disabled = false;
+    });
   </script>
 </body>
 </html>
