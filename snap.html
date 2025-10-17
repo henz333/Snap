@@ -3,338 +3,229 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SNAP</title>
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Poppins:wght@600&display=swap" rel="stylesheet" />
+  <title>abcSnap - Snap Photos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2&display=swap" rel="stylesheet" />
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    html, body {
-      margin: 0;
-      height: 100%;
-      font-family: 'Open Sans', sans-serif;
-      background: black;
-      overflow: hidden;
-      user-select: none;
+    body {
+      margin: 0; 
+      font-family: 'Baloo 2', cursive;
+      background: #ffffff;
+      color: #3D5AF1;
       display: flex;
       flex-direction: column;
+      min-height: 100vh;
     }
 
     header {
-      height: 60px;
-      background: white;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 20px;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-      font-size: 1.3rem;
-      color: #007aff;
-      flex-shrink: 0;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      z-index: 10;
-    }
-
-    .photo-count {
-      font-size: 0.9rem;
-      color: #333;
+      text-align: center;
+      padding: 1rem;
+      background: #FFD93D;
+      color: #3D5AF1;
+      font-size: 1.8rem;
+      font-weight: 700;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
 
     main {
-      flex-grow: 1;
-      position: relative;
-      background: black;
-      overflow: hidden;
+      flex: 1;
       display: flex;
-      justify-content: center;
-      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      max-width: 960px;
+      margin: 0 auto;
+      box-sizing: border-box;
     }
 
-    .video-container {
+    #video-container {
+      flex: 2;
       position: relative;
-      width: 100%;
-      height: 100%;
-      max-height: 100%;
-      background: black;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      border-radius: 16px;
       overflow: hidden;
-      z-index: 1;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
     }
 
     video {
       width: 100%;
-      height: 100%;
-      object-fit: cover;
+      height: auto;
       display: block;
+      background: black;
+      border-radius: 16px;
     }
 
-    .level-container {
+    #timer {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 80%;
-      height: 2px;
-      background: rgba(255, 255, 255, 0.4);
-      transform: translate(-50%, -50%);
-      z-index: 10;
-      pointer-events: none;
-    }
-
-    .level-indicator {
-      position: absolute;
-      width: 14px;
-      height: 14px;
-      background: white;
-      border: 2px solid #00ff99;
-      border-radius: 50%;
-      pointer-events: none;
-      transform: translate(-50%, -50%);
-      box-shadow: 0 0 8px rgba(0,255,153,0.3);
-      left: 50%;
-      top: 50%;
-    }
-
-    footer {
-      height: 100px;
-      background: white;
-      box-shadow: 0 -2px 6px rgba(0,0,0,0.05);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-shrink: 0;
-      z-index: 50;
-    }
-
-    #capture-btn {
-      width: 72px;
-      height: 72px;
-      background: linear-gradient(145deg, #007aff, #0051a8);
-      border: none;
-      border-radius: 50%;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      transition: background 0.3s ease, transform 0.1s ease;
-    }
-
-    #capture-btn.red {
-      background: linear-gradient(145deg, #ff3b30, #b3201c);
-    }
-
-    #capture-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
-    }
-
-    #capture-btn:active {
-      transform: translateY(0);
-      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
-    }
-
-    #error-message {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: #d32f2f;
-      font-weight: 600;
-      background: rgba(255,255,255,0.9);
-      padding: 12px 24px;
+      top: 12px;
+      right: 12px;
+      background: rgba(255 255 255 / 0.8);
+      color: #3D5AF1;
+      font-weight: 700;
+      font-size: 2rem;
+      padding: 0.2rem 0.6rem;
       border-radius: 12px;
-      text-align: center;
-      max-width: 90%;
-      display: none;
-      z-index: 20;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      user-select: none;
+      font-family: 'Baloo 2', cursive;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
     }
 
-    #countdown {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 5rem;
-      color: white;
-      font-weight: bold;
-      z-index: 30;
-      display: none;
+    #thumbnails {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-height: 100vh;
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+
+    #thumbnails img {
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      cursor: pointer;
+      border: 3px solid transparent;
+      transition: border-color 0.2s ease;
+    }
+
+    #thumbnails img.selected {
+      border-color: #FFD93D;
+    }
+
+    #controls {
+      margin: 1rem auto;
+      text-align: center;
+    }
+
+    button {
+      background-color: #FFD93D;
+      border: none;
+      color: #3D5AF1;
+      padding: 1rem 3rem;
+      font-size: 1.3rem;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.2);
+      transition: transform 0.2s ease;
+      font-family: 'Baloo 2', cursive;
+      font-weight: 700;
+    }
+
+    button:hover:not(:disabled) {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+
+    button:disabled {
+      background-color: #ddd;
+      cursor: not-allowed;
+      color: #999;
+      box-shadow: none;
+    }
+
+    @media (max-width: 768px) {
+      main {
+        flex-direction: column;
+      }
+      #thumbnails {
+        flex-direction: row;
+        max-height: none;
+        overflow-x: auto;
+        padding-right: 0;
+      }
+      #thumbnails img {
+        width: 100px;
+        aspect-ratio: 4 / 3;
+      }
     }
   </style>
 </head>
 <body>
-
-  <header>
-    <div>SNAP</div>
-    <div class="photo-count">Photos: <span id="photoCounter">0</span>/4</div>
-  </header>
+  <header>abcSnap - Snap Your 4 Photos</header>
 
   <main>
-    <div class="video-container" id="videoContainer">
+    <div id="video-container">
       <video id="video" autoplay playsinline></video>
-      <div class="level-container" id="levelContainer">
-        <div class="level-indicator" id="levelIndicator"></div>
-      </div>
-      <p id="error-message" role="alert" aria-live="assertive"></p>
-      <div id="countdown">3</div>
+      <div id="timer" style="opacity: 0;">3</div>
     </div>
+
+    <div id="thumbnails" aria-label="Photos taken"></div>
   </main>
 
-  <footer>
-    <button id="capture-btn" aria-label="Take photo"></button>
-  </footer>
+  <div id="controls">
+    <button id="startBtn">Start Taking Photos</button>
+  </div>
 
   <script>
     const video = document.getElementById('video');
-    const captureBtn = document.getElementById('capture-btn');
-    const photoCounterText = document.getElementById('photoCounter');
-    const levelContainer = document.getElementById('levelContainer');
-    const levelIndicator = document.getElementById('levelIndicator');
-    const errorMessage = document.getElementById('error-message');
-    const videoContainer = document.getElementById('videoContainer');
-    const countdownEl = document.getElementById('countdown');
+    const startBtn = document.getElementById('startBtn');
+    const thumbnails = document.getElementById('thumbnails');
+    const timerEl = document.getElementById('timer');
 
-    let photoCount = 0;
-    let isCapturing = false;
+    let photos = [];
+    let stream;
 
     async function startCamera() {
       try {
-        const constraints = {
-          video: {
-            facingMode: { exact: "environment" },
-            width: { ideal: 1920 },
-            height: { ideal: 1080 }
-          },
-          audio: false
-        };
-
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
         video.srcObject = stream;
-
-        video.onloadedmetadata = () => {
-          const track = stream.getVideoTracks()[0];
-          const settings = track.getSettings();
-          if (settings.width && settings.height) {
-            const aspectRatio = settings.height / settings.width;
-            videoContainer.style.height = `${videoContainer.clientWidth * aspectRatio}px`;
-          } else {
-            videoContainer.style.height = `${videoContainer.clientWidth * 3 / 4}px`;
-          }
-        };
-
-        errorMessage.style.display = 'none';
-
-        if (window.DeviceOrientationEvent) {
-          window.addEventListener('deviceorientation', handleOrientation);
-        }
       } catch (err) {
-        console.error('Camera error:', err);
-        errorMessage.textContent = 'Camera access denied or unavailable.';
-        errorMessage.style.display = 'block';
+        alert("Unable to access camera.");
+        console.error(err);
       }
     }
-
-    function handleOrientation(event) {
-      const gamma = event.gamma;
-      const beta = event.beta;
-
-      if (gamma == null || beta == null) return;
-
-      const isLandscape = Math.abs(gamma) > Math.abs(beta);
-      if (isLandscape) {
-        levelContainer.style.width = '2px';
-        levelContainer.style.height = '80%';
-
-        const clampedBeta = Math.max(-30, Math.min(30, beta));
-        const maxOffset = (levelContainer.clientHeight / 2) - (levelIndicator.offsetHeight / 2);
-        const offset = (clampedBeta / 30) * maxOffset;
-
-        levelIndicator.style.top = `calc(50% + ${offset}px)`;
-        levelIndicator.style.left = '50%';
-
-        levelIndicator.style.background = Math.abs(beta) < 2 ? '#00ff99' : 'white';
-      } else {
-        levelContainer.style.width = '80%';
-        levelContainer.style.height = '2px';
-
-        const clampedGamma = Math.max(-30, Math.min(30, gamma));
-        const maxOffset = (levelContainer.clientWidth / 2) - (levelIndicator.offsetWidth / 2);
-        const offset = (clampedGamma / 30) * maxOffset;
-
-        levelIndicator.style.left = `calc(50% + ${offset}px)`;
-        levelIndicator.style.top = '50%';
-
-        levelIndicator.style.background = Math.abs(gamma) < 2 ? '#00ff99' : 'white';
-      }
-    }
-
-    window.addEventListener('resize', () => {
-      if (video.srcObject) {
-        const track = video.srcObject.getVideoTracks()[0];
-        if (track) {
-          const settings = track.getSettings();
-          if (settings.width && settings.height) {
-            const aspectRatio = settings.height / settings.width;
-            videoContainer.style.height = `${videoContainer.clientWidth * aspectRatio}px`;
-          }
-        }
-      }
-    });
 
     function takePhoto() {
-      if (!video.srcObject) return;
-
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const imageData = canvas.toDataURL('image/png');
-      localStorage.setItem(`snap-photo-${photoCount + 1}`, imageData);
-
-      photoCount++;
-      photoCounterText.textContent = photoCount;
-
-      if (photoCount === 3) {
-        captureBtn.classList.add('red');
-      }
-
-      if (photoCount >= 4) {
-        window.location.href = "editor.html";
-      }
+      return canvas.toDataURL('image/png');
     }
 
-    function startCountdownAndCapture(repeat = true) {
-      let count = 3;
-      countdownEl.textContent = count;
-      countdownEl.style.display = 'block';
-
-      const countdownInterval = setInterval(() => {
-        count--;
-        if (count > 0) {
-          countdownEl.textContent = count;
-        } else {
-          clearInterval(countdownInterval);
-          countdownEl.style.display = 'none';
-          takePhoto();
-
-          if (photoCount < 4 && repeat) {
-            setTimeout(() => startCountdownAndCapture(true), 500);
-          }
-        }
-      }, 1000);
+    function addThumbnail(imgSrc) {
+      const img = document.createElement('img');
+      img.src = imgSrc;
+      thumbnails.appendChild(img);
+      // Optional: highlight newly added thumbnail briefly
+      img.classList.add('selected');
+      setTimeout(() => img.classList.remove('selected'), 1500);
     }
 
-    captureBtn.addEventListener('click', () => {
-      if (isCapturing) return;
-      isCapturing = true;
-      startCountdownAndCapture(true);
-    });
+    async function countdown(seconds) {
+      timerEl.style.opacity = '1';
+      for (let i = seconds; i > 0; i--) {
+        timerEl.textContent = i;
+        await new Promise(r => setTimeout(r, 1000));
+      }
+      timerEl.style.opacity = '0';
+    }
+
+    async function startTakingPhotos() {
+      startBtn.disabled = true;
+      photos = [];
+      thumbnails.innerHTML = '';
+
+      for(let i = 0; i < 4; i++) {
+        await countdown(3);
+        const photo = takePhoto();
+        photos.push(photo);
+        addThumbnail(photo);
+      }
+
+      timerEl.textContent = '';
+      timerEl.style.opacity = '0';
+      startBtn.disabled = false;
+      startBtn.textContent = "Retake Photos";
+      
+      // TODO: next step — add editing feature or proceed button
+    }
+
+    startBtn.addEventListener('click', startTakingPhotos);
 
     startCamera();
   </script>
-
 </body>
 </html>
