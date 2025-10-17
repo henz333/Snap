@@ -81,12 +81,24 @@
     #thumbnails {
       width: 200px;
       height: 480px;
-      overflow-y: auto;
+      overflow-y: scroll; /* Prevent size change by always showing scrollbar */
+      scrollbar-width: thin;
+      scrollbar-color: #FFD93D transparent;
       display: flex;
       flex-direction: column;
       gap: 1rem;
       padding-right: 0.5rem;
       flex-shrink: 0;
+    }
+
+    /* Webkit scrollbar styling */
+    #thumbnails::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    #thumbnails::-webkit-scrollbar-thumb {
+      background-color: #FFD93D;
+      border-radius: 10px;
     }
 
     #thumbnails img {
