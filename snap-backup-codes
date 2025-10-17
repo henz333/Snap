@@ -47,9 +47,9 @@
     #video-container {
       width: 640px;
       height: 480px;
-      background: black;
+      background: white;
       position: relative;
-      border-radius: 30px;
+      border-radius: 36px;
       overflow: hidden;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
       flex-shrink: 0;
@@ -80,8 +80,10 @@
 
     #thumbnails {
       width: 200px;
-      max-height: 480px;
-      overflow-y: auto;
+      height: 480px;
+      overflow-y: scroll; /* Prevent size change by always showing scrollbar */
+      scrollbar-width: thin;
+      scrollbar-color: #FFD93D transparent;
       display: flex;
       flex-direction: column;
       gap: 1rem;
@@ -89,9 +91,19 @@
       flex-shrink: 0;
     }
 
+    /* Webkit scrollbar styling */
+    #thumbnails::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    #thumbnails::-webkit-scrollbar-thumb {
+      background-color: #FFD93D;
+      border-radius: 10px;
+    }
+
     #thumbnails img {
       width: 100%;
-      aspect-ratio: 4 / 3;
+      height: 120px;
       border-radius: 20px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       object-fit: cover;
@@ -101,7 +113,7 @@
       transform: translateY(20px);
       animation: fadeInSlide 0.4s forwards;
       transition: border-color 0.2s ease, transform 0.2s ease;
-      flex-shrink: 0;
+      flex: 0 0 auto;
     }
 
     #thumbnails img:hover {
@@ -171,10 +183,12 @@
         overflow-y: hidden;
         justify-content: center;
         margin-top: 1rem;
+        height: auto;
       }
 
       #thumbnails img {
         width: 120px;
+        height: auto;
       }
     }
   </style>
@@ -250,7 +264,7 @@
       startBtn.textContent = "Taking Photos...";
 
       for (let i = 0; i < 4; i++) {
-        await countdown(3);
+        await countdown(5);
         const photo = takePhoto();
         photos.push(photo);
         addThumbnail(photo);
