@@ -80,7 +80,7 @@
 
     #thumbnails {
       width: 200px;
-      max-height: 480px;
+      height: 480px;
       overflow-y: auto;
       display: flex;
       flex-direction: column;
@@ -91,7 +91,7 @@
 
     #thumbnails img {
       width: 100%;
-      aspect-ratio: 4 / 3;
+      height: 120px;
       border-radius: 20px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       object-fit: cover;
@@ -101,7 +101,7 @@
       transform: translateY(20px);
       animation: fadeInSlide 0.4s forwards;
       transition: border-color 0.2s ease, transform 0.2s ease;
-      flex-shrink: 0;
+      flex: 0 0 auto;
     }
 
     #thumbnails img:hover {
@@ -171,10 +171,12 @@
         overflow-y: hidden;
         justify-content: center;
         margin-top: 1rem;
+        height: auto;
       }
 
       #thumbnails img {
         width: 120px;
+        height: auto;
       }
     }
   </style>
