@@ -12,57 +12,44 @@
       background-color: #ffffff;
       color: #3D5AF1;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      flex-direction: column;
       text-align: center;
     }
-
     h1 {
+      font-size: 2.5rem;
       margin-bottom: 2rem;
-      font-size: 2rem;
-      color: #3D5AF1;
     }
-
-    .layout-options {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      align-items: center;
-    }
-
-    .layout-btn {
+    .option-button {
       background-color: #FFD93D;
       color: #3D5AF1;
       padding: 1rem 2rem;
-      font-size: 1.2rem;
+      font-size: 1.5rem;
       border: none;
       border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      margin: 1rem;
       cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-
-    .layout-btn:hover {
+    .option-button:hover {
       transform: scale(1.05);
-      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.25);
     }
   </style>
 </head>
 <body>
-  <h1>Choose Your Layout</h1>
-
-  <div class="layout-options">
-    <button class="layout-btn" onclick="selectLayout('portrait')">📸 Portrait</button>
-    <button class="layout-btn" onclick="selectLayout('landscape')">🖼️ Landscape</button>
-  </div>
+  <h1>Choose Your Photo Layout</h1>
+  <button class="option-button" onclick="chooseLayout('portrait')">Portrait</button>
+  <button class="option-button" onclick="chooseLayout('landscape')">Landscape</button>
 
   <script>
-    function selectLayout(layout) {
-      // Go to your booth or camera page
-      // Replace 'booth.html' with your actual photo booth page filename
-      window.location.href = `booth.html?layout=${layout}`;
+    function chooseLayout(layout) {
+      // Save the user's choice
+      localStorage.setItem('photoLayout', layout);
+      // Redirect to the booth page
+      window.location.href = 'booth.html';
     }
   </script>
 </body>
