@@ -33,9 +33,10 @@
     main {
       flex: 1;
       display: flex;
-      gap: 1.5rem;
-      padding: 1.5rem;
-      max-width: 960px;
+      flex-direction: row; /* Ensure left to right layout */
+      gap: 2rem;
+      padding: 2rem;
+      max-width: 1000px;
       margin: 0 auto;
       justify-content: center;
       align-items: flex-start;
@@ -44,8 +45,8 @@
     #video-container {
       flex: 0 0 640px;
       height: 480px;
-      position: relative;
       background: black;
+      position: relative;
       border-radius: 32px;
       overflow: hidden;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
@@ -74,7 +75,7 @@
     }
 
     #thumbnails {
-      flex: 0 0 180px;
+      flex: 0 0 220px;
       max-height: 480px;
       overflow-y: auto;
       display: flex;
@@ -154,7 +155,7 @@
       }
 
       #thumbnails img {
-        width: 90px;
+        width: 120px;
       }
     }
   </style>
@@ -240,7 +241,7 @@
       startBtn.disabled = false;
       startBtn.textContent = "Retake Photos";
 
-      // Future: you can add a "Continue" button to edit or save
+      // Future: Add "Continue to Edit" button
     }
 
     startBtn.addEventListener('click', startTakingPhotos);
