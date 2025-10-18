@@ -225,7 +225,7 @@
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
             aspectRatio: layout === 'landscape' ? 16 / 9 : 3 / 4,
-            facingMode: "environment"
+            facingMode: "user"
           },
           audio: false
         });
