@@ -2,9 +2,97 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="refresh" content="0; url=home.html" />
-  <title>Load</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>abcSnap | Business Week</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2&family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1E3C72, #2A5298);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .hero {
+      text-align: center;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(12px);
+      padding: 3rem;
+      border-radius: 24px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+      max-width: 500px;
+      width: 90%;
+      animation: fadeIn 1s ease forwards;
+    }
+
+    .logo {
+      width: 70px;
+      height: 70px;
+      margin-bottom: 1rem;
+      filter: drop-shadow(0 0 8px rgba(255,255,255,0.5));
+    }
+
+    h1 {
+      font-family: 'Baloo 2', cursive;
+      font-size: 2.5rem;
+      margin: 0.5rem 0;
+      color: #FFD93D;
+    }
+
+    p {
+      font-size: 1.1rem;
+      color: #e0e0e0;
+      margin-bottom: 2rem;
+    }
+
+    .start-button {
+      display: inline-block;
+      padding: 1rem 2rem;
+      background: linear-gradient(90deg, #FFD93D, #FFB300);
+      color: #1E3C72;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 50px;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .start-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4);
+      background: linear-gradient(90deg, #FFDF5E, #FFD93D);
+    }
+
+    .footer {
+      margin-top: 1.5rem;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 600px) {
+      h1 { font-size: 2rem; }
+      p { font-size: 1rem; }
+    }
+  </style>
 </head>
 <body>
+  <main class="hero">
+    <img src="https://cdn-icons-png.flaticon.com/512/8795/8795821.png" alt="Camera Logo" class="logo" />
+    <h1>abcSnap</h1>
+    <p>Capture your professional side — powered by innovation and creativity this Business Week!</p>
+    <a href="choose.html" class="start-button">Start Booth</a>
+    <div class="footer">📸 Business Week 2025 | Entrepreneurship Booth</div>
+  </main>
 </body>
 </html>
