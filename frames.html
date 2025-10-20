@@ -142,10 +142,16 @@
       drawPreview();
     }
 
-    // Simulated photo (replace with your photo later)
+    // Load the real combined photo from snap.html
     const samplePhoto = new Image();
-    samplePhoto.src = "https://via.placeholder.com/600x800.png?text=Your+Photo";
-    samplePhoto.onload = drawPreview;
+    const savedPhoto = localStorage.getItem('finalPhoto');
+
+    if (savedPhoto) {
+      samplePhoto.src = savedPhoto;
+      samplePhoto.onload = drawPreview;
+    } else {
+      alert("No photo found! Please go back and take photos first.");
+}
 
     function drawPreview() {
       ctx.clearRect(0, 0, finalCanvas.width, finalCanvas.height);
