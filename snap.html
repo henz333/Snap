@@ -195,6 +195,7 @@
   <div id="controls">
     <button id="startBtn">Start Taking Photos</button>
     <button id="retakeBtn" disabled>Retake Selected Photo</button>
+    <button id="nextButton" disabled>Next ➜</button>
   </div>
 
   <footer>Empowering Smiles & Innovation — Business Week 2025</footer>
@@ -315,6 +316,56 @@
 
     startBtn.addEventListener('click', startTakingPhotos);
     startCamera();
+
+    <script>
+  const nextButton = document.getElementById('nextButton');
+
+  // Enable "Next" when 4 photos are taken
+  function checkNextButton() {
+    if (photos.length === 4) nextButton.disabled = false;
+    else nextButton.disabled = true;
+  }
+
+  // Combine 4 photos vertically into one
+  function combinePhotos() {
+    if (photos.length < 4) {
+      alert("Take all 4 photos first!");
+      return;
+    }
+
+    const imgElements = photos.map(src => {
+      const img = new Image();
+      img.src = src;
+      return img;
+    });
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 480; // adjust to your photo width
+    canvas.height = 640 * 4; // 4 stacked photos
+    const ctx = canvas.getContext('2d');
+
+    let y = 0;
+    imgElements.forEach(img => {
+      ctx.drawImage(img, 0, y, 480, 640);
+      y += 640;
+    });
+
+    return canvas;
+  }
+
+  nextButton.addEventListener('click', () => {
+    const finalCanvas = combinePhotos();
+    const photoData = finalCanvas.toDataURL('image/png');
+    localStorage.setItem('finalPhoto', photoData);
+    window.location.href = 'frames.html';
+  });
+
+  // Recheck after each photo
+  const originalStartTakingPhotos = startTakingPhotos;
+  startTakingPhotos = async function() {
+    await originalStartTakingPhotos();
+    checkNextButton();
+  };
   </script>
 </body>
 </html>
