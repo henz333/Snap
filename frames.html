@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>abcSnap - Choose Your Frame</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2&family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1E3C72, #2A5298);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      text-align: center;
+    }
+
+    header {
+      font-family: 'Baloo 2', cursive;
+      font-size: 2rem;
+      color: #FFD93D;
+      padding: 1.2rem;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      padding: 2rem;
+    }
+
+    #preview {
+      position: relative;
+      width: 400px;
+      height: 500px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    }
+
+    #user-photo, #frame-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .frames-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1rem;
+      width: 100%;
+      max-width: 800px;
+      margin-top: 1.5rem;
+    }
+
+    .frame-option {
+      border: 3px solid transparent;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s, border-color 0.3s;
+    }
+
+    .frame-option:hover {
+      transform: scale(1.05);
+    }
+
+    .frame-option.selected {
+      border-color: #FFD93D;
+    }
+
+    .frame-option img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background-color: #fff;
+    }
+
+    button {
+      background-color: #FFD93D;
+      color: #2A5298;
+      border: none;
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      border-radius: 30px;
+      cursor: pointer;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      margin: 1rem;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    #qr {
+      margin-top: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <header>✨ Choose Your Frame</header>
+
+  <main>
+    <div id="preview">
+      <img id="user-photo" src="" alt="User Photo">
+      <img id="frame-overlay" src="" alt="Frame Overlay">
+    </div>
+
+    <div class="frames-grid" id="frames-grid"></div>
+
+    <button id="generateQR">Generate QR Code</button>
+    <button id="printBtn">Print</button>
+
+    <canvas id="finalCanvas" style="display:none;"></canvas>
+    <div id="qr"></div>
+  </main>
+
+  <script>
+    // ✅ Replace with your actual frame filenames
+    const frameImages = [
+      "Untitled198_20251020124856.png",
+      "Untitled198_20251020125155.png",
+      "Untitled199_20251020125312.png",
+      "Untitled199_20251020125432.png",
+      "Untitled199_20251020130415.png",
+      "Untitled199_20251020130419.png"
+    ];
+
+    // 🖼 Create frame selection grid
+    const grid = document.getElementById('frames-grid');
+    const frameOverlay = document.getElementById('frame-overlay');
+    const userPhoto = document.getElementById('user-photo');
+
+    // 📸 Load the captured photo from snap.html
+    const photoData = localStorage.getItem('finalPhoto');
+    if (photoData) {
+      userPhoto.src = photoData;
+    }
+
+    frameImages.forEach(src => {
+      const div = document.createElement('div');
+      div.classList.add('frame-option');
+      const img = document.createElement('img');
+      img.src = src;
+      div.appendChild(img);
+      grid.appendChild(div);
+
+      div.addEventListener('click', () => {
+        document.querySelectorAll('.frame-option').forEach(d => d.classList.remove('selected'));
+        div.classList.add('selected');
+        frameOverlay.src = src;
+      });
+    });
+
+    // 🧾 Generate QR Code with embedded final image
+    document.getElementById('generateQR').addEventListener('click', () => {
+      const canvas = document.getElementById('finalCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = 400;
+      canvas.height = 500;
+
+      const img1 = new Image();
+      const img2 = new Image();
+      img1.src = userPhoto.src;
+      img2.src = frameOverlay.src;
+
+      img2.onload = () => {
+        ctx.drawImage(img1, 0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img2, 0, 0, canvas.width, canvas.height);
+        const finalData = canvas.toDataURL('image/png');
+
+        // Generate QR containing the photo data
+        const qrDiv = document.getElementById('qr');
+        qrDiv.innerHTML = "";
+        QRCode.toCanvas(finalData, { width: 200 }, (err, canvas) => {
+          if (err) console.error(err);
+          qrDiv.appendChild(canvas);
+        });
+      };
+    });
+
+    // 🖨 Print button
+    document.getElementById('printBtn').addEventListener('click', () => {
+      const win = window.open('');
+      win.document.write('<img src="' + document.getElementById('finalCanvas').toDataURL('image/png') + '" style="width:100%">');
+      win.print();
+    });
+  </script>
+</body>
+</html>
