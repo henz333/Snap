@@ -3,228 +3,225 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>abcSnap — Choose Frame</title>
-
+  <title>abcSnap - Frames</title>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2&family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+
   <style>
     body {
       margin: 0;
       font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg,#f5f7fb,#fff);
-      color: #123;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      padding: 24px;
-      min-height:100vh;
-      box-sizing:border-box;
+      background: linear-gradient(135deg, #1E3C72, #2A5298);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      overflow: hidden;
     }
+
     header {
-      font-family:'Baloo 2', cursive;
-      font-size: 28px;
-      color: #2a6;
-      margin-bottom: 18px;
-    }
-    .frames-grid {
-      display:flex;
-      flex-wrap:wrap;
-      gap:12px;
-      justify-content:center;
-      margin-bottom: 18px;
-      width:100%;
-      max-width:980px;
-    }
-    .frame-option {
-      width:160px;
-      height:120px;
-      border:3px solid transparent;
-      border-radius:8px;
-      overflow:hidden;
-      cursor:pointer;
-      background:#fff;
-      box-shadow:0 6px 14px rgba(0,0,0,0.12);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-    .frame-option.selected { border-color:#FFD93D; transform:scale(1.02); }
-    .frame-option img { width:100%; height:100%; object-fit:contain; display:block; }
-
-    #previewWrap {
-      display:flex;
-      gap:24px;
-      align-items:flex-start;
-      width:100%;
-      max-width:980px;
-      justify-content:center;
-      margin-bottom:18px;
-      flex-wrap:wrap;
+      font-family: 'Baloo 2', cursive;
+      font-size: 2rem;
+      color: #FFD93D;
+      text-align: center;
+      padding: 1.2rem;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
 
-    #finalCanvas {
-      width:360px;
-      height:auto;
-      border-radius:10px;
-      box-shadow:0 10px 30px rgba(0,0,0,0.12);
-      border:6px solid #fff;
-      background:#eee;
+    main {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      width: 90%;
+      max-width: 1300px;
+      margin-top: 2rem;
+      gap: 2rem;
     }
 
-    .controls {
-      display:flex;
-      gap:12px;
-      justify-content:center;
-      margin-bottom:12px;
-      flex-wrap:wrap;
+    #preview-container {
+      flex: 2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      height: 640px;
+      overflow: hidden;
+    }
+
+    #photoPreview {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 20px;
+      z-index: 1;
+    }
+
+    #frameOverlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    #frames-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      padding: 1rem;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+      max-height: 640px;
+      overflow-y: auto;
+    }
+
+    #frames-container img {
+      width: 150px;
+      height: auto;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.3s ease, border 0.3s ease;
+      border: 3px solid transparent;
+    }
+
+    #frames-container img:hover {
+      transform: scale(1.05);
+      border-color: #FFD93D;
+    }
+
+    #controls {
+      margin-top: 1.5rem;
+      text-align: center;
     }
 
     button {
-      background:#FFD93D;
-      border:none;
-      padding:10px 18px;
-      border-radius:10px;
-      font-weight:700;
-      cursor:pointer;
+      background-color: #FFD93D;
+      color: #2A5298;
+      border: none;
+      padding: 1rem 2.5rem;
+      font-size: 1.1rem;
+      border-radius: 30px;
+      margin: 0.5rem;
+      cursor: pointer;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
     }
 
-    #qrCanvas { margin-top:10px; }
+    button:hover:not(:disabled) {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
 
-    @media (max-width:900px) {
-      #finalCanvas { width:280px; }
+    footer {
+      margin-top: auto;
+      text-align: center;
+      padding: 1rem;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.9rem;
     }
   </style>
 </head>
+
 <body>
-  <header>Choose Your Frame</header>
+  <header>✨ Choose Your Frame — abcSnap Booth</header>
 
-  <div class="frames-grid" id="framesGrid"></div>
-
-  <div id="previewWrap">
-    <canvas id="finalCanvas" width="600" height="800"></canvas>
-    <div>
-      <div class="controls">
-        <button id="generateQR">Generate QR</button>
-        <button id="downloadImage">Download Image</button>
-        <button id="printPhoto">Print</button>
-        <button id="back">Back</button>
-      </div>
-      <div id="qrArea"></div>
+  <main>
+    <div id="preview-container">
+      <img id="photoPreview" />
+      <img id="frameOverlay" />
     </div>
+
+    <div id="frames-container">
+      <img src="frames/frame1.png" alt="Frame 1">
+      <img src="frames/frame2.png" alt="Frame 2">
+      <img src="frames/frame3.png" alt="Frame 3">
+      <img src="frames/frame4.png" alt="Frame 4">
+    </div>
+  </main>
+
+  <div id="controls">
+    <button id="downloadBtn">Download</button>
+    <button id="retakeBtn">Retake</button>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <footer>Empowering Smiles & Innovation — Business Week 2025</footer>
+
   <script>
-    // your uploaded frames filenames
-    const frames = [
-      "Untitled198_20251020124856.png",
-      "Untitled198_20251020125155.png",
-      "Untitled199_20251020125312.png",
-      "Untitled199_20251020125432.png",
-      "Untitled199_20251020130415.png",
-      "Untitled199_20251020130419.png"
-    ];
+    const photoPreview = document.getElementById('photoPreview');
+    const frameOverlay = document.getElementById('frameOverlay');
+    const frameOptions = document.querySelectorAll('#frames-container img');
 
-    const framesGrid = document.getElementById('framesGrid');
-    const finalCanvas = document.getElementById('finalCanvas');
-    const ctx = finalCanvas.getContext('2d');
-    const qrArea = document.getElementById('qrArea');
-
-    let selectedFrame = null;
-    let baseImage = new Image();
-
-    // populate frame options
-    frames.forEach((src, i) => {
-      const el = document.createElement('div');
-      el.className = 'frame-option';
-      el.innerHTML = `<img src="${src}" alt="frame ${i+1}">`;
-      el.addEventListener('click', () => selectFrame(src, el));
-      framesGrid.appendChild(el);
-    });
-
-    function selectFrame(src, el) {
-      document.querySelectorAll('.frame-option').forEach(x => x.classList.remove('selected'));
-      el.classList.add('selected');
-      selectedFrame = src;
-      drawPreview();
-    }
-
-    // load saved combined photo
-    const saved = localStorage.getItem('finalPhoto');
-    if (!saved) {
-      alert('No saved photo found. Please go back and take photos.');
-      // option: redirect back automatically
-      // window.location.href = 'snap.html';
+    // Load final photo from Snap.html
+    const savedPhoto = localStorage.getItem('finalPhoto');
+    if (!savedPhoto) {
+      alert('No photo found! Returning to capture page.');
+      window.location.href = 'snap.html';
     } else {
-      baseImage = new Image();
-      baseImage.crossOrigin = 'anonymous';
-      baseImage.onload = drawPreview;
-      baseImage.src = saved;
+      photoPreview.src = savedPhoto;
     }
 
-    // draw preview: baseImage then selected frame
-    function drawPreview() {
-      // clear
-      ctx.clearRect(0,0,finalCanvas.width, finalCanvas.height);
-      // draw base image to canvas; scale to canvas keeping aspect
-      if (baseImage && baseImage.complete) {
-        // fit base image into canvas
-        ctx.drawImage(baseImage, 0, 0, finalCanvas.width, finalCanvas.height);
-      }
-      if (selectedFrame) {
-        const fimg = new Image();
-        fimg.crossOrigin = 'anonymous';
-        fimg.onload = () => {
-          ctx.drawImage(fimg, 0, 0, finalCanvas.width, finalCanvas.height);
-        };
-        fimg.src = selectedFrame;
-      }
-    }
-
-    // generate QR with embedded image data
-    document.getElementById('generateQR').addEventListener('click', () => {
-      const dataURL = finalCanvas.toDataURL('image/png');
-      qrArea.innerHTML = '';
-      // QRious expects a string value — we'll embed the full data URL
-      const qr = new QRious({ value: dataURL, size: 220 });
-      const img = document.createElement('img');
-      img.src = qr.toDataURL();
-      img.alt = 'QR code';
-      qrArea.appendChild(img);
-
-      // also create download link for QR
-      const dl = document.createElement('a');
-      dl.href = qr.toDataURL();
-      dl.download = 'photo_qr.png';
-      dl.textContent = 'Download QR';
-      dl.style.display = 'block';
-      dl.style.marginTop = '8px';
-      qrArea.appendChild(dl);
+    // Frame selection
+    frameOptions.forEach(frame => {
+      frame.addEventListener('click', () => {
+        frameOptions.forEach(f => f.style.borderColor = 'transparent');
+        frame.style.borderColor = '#FFD93D';
+        frameOverlay.src = frame.src;
+      });
     });
 
-    // download combined image
-    document.getElementById('downloadImage').addEventListener('click', () => {
-      const a = document.createElement('a');
-      a.href = finalCanvas.toDataURL('image/png');
-      a.download = 'abcSnap_final.png';
-      a.click();
+    // Download final combined photo
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+      const canvas = document.createElement('canvas');
+      const previewWidth = photoPreview.naturalWidth;
+      const previewHeight = photoPreview.naturalHeight;
+      canvas.width = previewWidth;
+      canvas.height = previewHeight;
+      const ctx = canvas.getContext('2d');
+
+      const img = new Image();
+      img.src = photoPreview.src;
+      img.onload = () => {
+        ctx.drawImage(img, 0, 0, previewWidth, previewHeight);
+
+        if (frameOverlay.src) {
+          const overlay = new Image();
+          overlay.src = frameOverlay.src;
+          overlay.onload = () => {
+            ctx.drawImage(overlay, 0, 0, previewWidth, previewHeight);
+            const link = document.createElement('a');
+            link.download = 'abcSnap_Booth.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+          };
+        } else {
+          const link = document.createElement('a');
+          link.download = 'abcSnap_Booth.png';
+          link.href = canvas.toDataURL('image/png');
+          link.click();
+        }
+      };
     });
 
-    // print
-    document.getElementById('printPhoto').addEventListener('click', () => {
-      const w = window.open('', '_blank');
-      const img = finalCanvas.toDataURL('image/png');
-      w.document.write('<img src="'+img+'" style="width:100%;">');
-      w.document.close();
-      w.print();
-    });
-
-    // back button
-    document.getElementById('back').addEventListener('click', () => {
+    // Retake button
+    document.getElementById('retakeBtn').addEventListener('click', () => {
+      localStorage.removeItem('finalPhoto');
       window.location.href = 'snap.html';
     });
-
-    // initial draw if base loaded
-    if (baseImage && baseImage.complete) drawPreview();
   </script>
 </body>
 </html>
