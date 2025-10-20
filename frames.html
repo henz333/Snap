@@ -1,117 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Select Frame</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>abcSnap — Choose Frame</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2&family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     body {
-      font-family: 'Poppins', sans-serif;
-      background: #111;
-      color: #fff;
-      text-align: center;
       margin: 0;
-      padding: 20px;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg,#f5f7fb,#fff);
+      color: #123;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      padding: 24px;
+      min-height:100vh;
+      box-sizing:border-box;
     }
-
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 15px;
+    header {
+      font-family:'Baloo 2', cursive;
+      font-size: 28px;
+      color: #2a6;
+      margin-bottom: 18px;
     }
-
-    .frames-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 15px;
-      margin-bottom: 25px;
+    .frames-grid {
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      justify-content:center;
+      margin-bottom: 18px;
+      width:100%;
+      max-width:980px;
     }
-
     .frame-option {
-      border: 2px solid #444;
-      border-radius: 10px;
-      overflow: hidden;
-      cursor: pointer;
-      transition: 0.3s;
-      width: 140px;
-      height: 200px;
-      position: relative;
+      width:160px;
+      height:120px;
+      border:3px solid transparent;
+      border-radius:8px;
+      overflow:hidden;
+      cursor:pointer;
+      background:#fff;
+      box-shadow:0 6px 14px rgba(0,0,0,0.12);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .frame-option.selected { border-color:#FFD93D; transform:scale(1.02); }
+    .frame-option img { width:100%; height:100%; object-fit:contain; display:block; }
+
+    #previewWrap {
+      display:flex;
+      gap:24px;
+      align-items:flex-start;
+      width:100%;
+      max-width:980px;
+      justify-content:center;
+      margin-bottom:18px;
+      flex-wrap:wrap;
     }
 
-    .frame-option:hover {
-      transform: scale(1.05);
-      border-color: #0ff;
+    #finalCanvas {
+      width:360px;
+      height:auto;
+      border-radius:10px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.12);
+      border:6px solid #fff;
+      background:#eee;
     }
 
-    .frame-option.selected {
-      border-color: #0ff;
-      box-shadow: 0 0 10px #0ff;
-    }
-
-    .frame-option img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      background: #222;
-    }
-
-    #preview {
-      margin-top: 30px;
-    }
-
-    #preview canvas {
-      border: 2px solid #0ff;
-      border-radius: 10px;
-      max-width: 300px;
-    }
-
-    .buttons {
-      margin-top: 25px;
-      display: flex;
-      justify-content: center;
-      gap: 20px;
+    .controls {
+      display:flex;
+      gap:12px;
+      justify-content:center;
+      margin-bottom:12px;
+      flex-wrap:wrap;
     }
 
     button {
-      background: #0ff;
-      border: none;
-      color: #000;
-      padding: 10px 20px;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: 0.3s;
-      font-weight: bold;
+      background:#FFD93D;
+      border:none;
+      padding:10px 18px;
+      border-radius:10px;
+      font-weight:700;
+      cursor:pointer;
     }
 
-    button:hover {
-      background: #00cccc;
-    }
+    #qrCanvas { margin-top:10px; }
 
-    #qrCanvas {
-      margin-top: 20px;
+    @media (max-width:900px) {
+      #finalCanvas { width:280px; }
     }
   </style>
 </head>
 <body>
+  <header>Choose Your Frame</header>
 
-  <h1>Choose Your Frame</h1>
+  <div class="frames-grid" id="framesGrid"></div>
 
-  <div class="frames-container" id="frameList"></div>
-
-  <div id="preview">
-    <h2>Preview</h2>
+  <div id="previewWrap">
     <canvas id="finalCanvas" width="600" height="800"></canvas>
+    <div>
+      <div class="controls">
+        <button id="generateQR">Generate QR</button>
+        <button id="downloadImage">Download Image</button>
+        <button id="printPhoto">Print</button>
+        <button id="back">Back</button>
+      </div>
+      <div id="qrArea"></div>
+    </div>
   </div>
-
-  <div class="buttons">
-    <button id="generateQR">Generate QR</button>
-    <button id="printPhoto">Print Photo</button>
-  </div>
-
-  <canvas id="qrCanvas"></canvas>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
   <script>
+    // your uploaded frames filenames
     const frames = [
       "Untitled198_20251020124856.png",
       "Untitled198_20251020125155.png",
@@ -121,72 +124,107 @@
       "Untitled199_20251020130419.png"
     ];
 
-    const frameList = document.getElementById('frameList');
+    const framesGrid = document.getElementById('framesGrid');
     const finalCanvas = document.getElementById('finalCanvas');
     const ctx = finalCanvas.getContext('2d');
-    let selectedFrame = null;
+    const qrArea = document.getElementById('qrArea');
 
-    // Display frames
-    frames.forEach((src, index) => {
-      const div = document.createElement('div');
-      div.classList.add('frame-option');
-      div.innerHTML = `<img src="${src}" alt="Frame ${index + 1}">`;
-      div.onclick = () => selectFrame(src, div);
-      frameList.appendChild(div);
+    let selectedFrame = null;
+    let baseImage = new Image();
+
+    // populate frame options
+    frames.forEach((src, i) => {
+      const el = document.createElement('div');
+      el.className = 'frame-option';
+      el.innerHTML = `<img src="${src}" alt="frame ${i+1}">`;
+      el.addEventListener('click', () => selectFrame(src, el));
+      framesGrid.appendChild(el);
     });
 
-    function selectFrame(src, element) {
-      document.querySelectorAll('.frame-option').forEach(el => el.classList.remove('selected'));
-      element.classList.add('selected');
+    function selectFrame(src, el) {
+      document.querySelectorAll('.frame-option').forEach(x => x.classList.remove('selected'));
+      el.classList.add('selected');
       selectedFrame = src;
       drawPreview();
     }
 
-    // Load the real combined photo from snap.html
-    const samplePhoto = new Image();
-    const savedPhoto = localStorage.getItem('finalPhoto');
-
-    if (savedPhoto) {
-      samplePhoto.src = savedPhoto;
-      samplePhoto.onload = drawPreview;
+    // load saved combined photo
+    const saved = localStorage.getItem('finalPhoto');
+    if (!saved) {
+      alert('No saved photo found. Please go back and take photos.');
+      // option: redirect back automatically
+      // window.location.href = 'snap.html';
     } else {
-      alert("No photo found! Please go back and take photos first.");
-}
+      baseImage = new Image();
+      baseImage.crossOrigin = 'anonymous';
+      baseImage.onload = drawPreview;
+      baseImage.src = saved;
+    }
 
+    // draw preview: baseImage then selected frame
     function drawPreview() {
-      ctx.clearRect(0, 0, finalCanvas.width, finalCanvas.height);
-      ctx.drawImage(samplePhoto, 0, 0, finalCanvas.width, finalCanvas.height);
+      // clear
+      ctx.clearRect(0,0,finalCanvas.width, finalCanvas.height);
+      // draw base image to canvas; scale to canvas keeping aspect
+      if (baseImage && baseImage.complete) {
+        // fit base image into canvas
+        ctx.drawImage(baseImage, 0, 0, finalCanvas.width, finalCanvas.height);
+      }
       if (selectedFrame) {
-        const frameImg = new Image();
-        frameImg.src = selectedFrame;
-        frameImg.onload = () => {
-          ctx.drawImage(frameImg, 0, 0, finalCanvas.width, finalCanvas.height);
+        const fimg = new Image();
+        fimg.crossOrigin = 'anonymous';
+        fimg.onload = () => {
+          ctx.drawImage(fimg, 0, 0, finalCanvas.width, finalCanvas.height);
         };
+        fimg.src = selectedFrame;
       }
     }
 
-    document.getElementById('generateQR').onclick = () => {
-      const qrCanvas = document.getElementById('qrCanvas');
-      const qr = new QRious({
-        element: qrCanvas,
-        size: 200,
-        value: finalCanvas.toDataURL()
-      });
+    // generate QR with embedded image data
+    document.getElementById('generateQR').addEventListener('click', () => {
+      const dataURL = finalCanvas.toDataURL('image/png');
+      qrArea.innerHTML = '';
+      // QRious expects a string value — we'll embed the full data URL
+      const qr = new QRious({ value: dataURL, size: 220 });
+      const img = document.createElement('img');
+      img.src = qr.toDataURL();
+      img.alt = 'QR code';
+      qrArea.appendChild(img);
 
-      const link = document.createElement('a');
-      link.href = qrCanvas.toDataURL();
-      link.download = 'photo_qr.png';
-      link.click();
-    };
+      // also create download link for QR
+      const dl = document.createElement('a');
+      dl.href = qr.toDataURL();
+      dl.download = 'photo_qr.png';
+      dl.textContent = 'Download QR';
+      dl.style.display = 'block';
+      dl.style.marginTop = '8px';
+      qrArea.appendChild(dl);
+    });
 
-    document.getElementById('printPhoto').onclick = () => {
-      const imgData = finalCanvas.toDataURL('image/png');
-      const win = window.open('');
-      win.document.write(`<img src="${imgData}" style="width:100%">`);
-      win.print();
-      win.close();
-    };
+    // download combined image
+    document.getElementById('downloadImage').addEventListener('click', () => {
+      const a = document.createElement('a');
+      a.href = finalCanvas.toDataURL('image/png');
+      a.download = 'abcSnap_final.png';
+      a.click();
+    });
+
+    // print
+    document.getElementById('printPhoto').addEventListener('click', () => {
+      const w = window.open('', '_blank');
+      const img = finalCanvas.toDataURL('image/png');
+      w.document.write('<img src="'+img+'" style="width:100%;">');
+      w.document.close();
+      w.print();
+    });
+
+    // back button
+    document.getElementById('back').addEventListener('click', () => {
+      window.location.href = 'snap.html';
+    });
+
+    // initial draw if base loaded
+    if (baseImage && baseImage.complete) drawPreview();
   </script>
-
 </body>
 </html>
