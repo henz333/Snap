@@ -52,6 +52,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      width: 480px;
+      height: 640px;
     }
 
     video {
@@ -86,15 +88,6 @@
       scrollbar-color: #FFD93D transparent;
     }
 
-    #thumbnails::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    #thumbnails::-webkit-scrollbar-thumb {
-      background-color: #FFD93D;
-      border-radius: 10px;
-    }
-
     #thumbnails img {
       width: 180px;
       height: 120px;
@@ -104,24 +97,10 @@
       border: 3px solid transparent;
       cursor: pointer;
       transition: all 0.2s ease;
-      opacity: 0;
-      transform: translateY(20px);
-      animation: fadeIn 0.5s forwards;
-    }
-
-    #thumbnails img:hover {
-      transform: scale(1.05);
     }
 
     #thumbnails img.selected {
       border-color: #FFD93D;
-    }
-
-    @keyframes fadeIn {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
     }
 
     #controls {
@@ -154,29 +133,6 @@
       opacity: 0.6;
       cursor: not-allowed;
     }
-
-    footer {
-      margin-top: auto;
-      text-align: center;
-      padding: 1rem;
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 0.9rem;
-    }
-
-    @media (max-width: 768px) {
-      #thumbnails {
-        flex-direction: row;
-        overflow-x: auto;
-        overflow-y: hidden;
-        max-height: none;
-        width: 100%;
-      }
-
-      #thumbnails img {
-        width: 120px;
-        height: 80px;
-      }
-    }
   </style>
 </head>
 
@@ -201,20 +157,10 @@
   <footer>Empowering Smiles & Innovation — Business Week 2025</footer>
 
   <script>
-    const layout = localStorage.getItem('layout') || 'portrait';
-    const videoContainer = document.getElementById('video-container');
-
-    if (layout === 'landscape') {
-      videoContainer.style.width = '720px';
-      videoContainer.style.height = '480px';
-    } else {
-      videoContainer.style.width = '480px';
-      videoContainer.style.height = '640px';
-    }
-
     const video = document.getElementById('video');
     const startBtn = document.getElementById('startBtn');
     const retakeBtn = document.getElementById('retakeBtn');
+    const nextButton = document.getElementById('nextButton');
     const thumbnails = document.getElementById('thumbnails');
     const timerEl = document.getElementById('timer');
 
@@ -224,13 +170,7 @@
 
     async function startCamera() {
       try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            aspectRatio: layout === 'landscape' ? 16 / 9 : 3 / 4,
-            facingMode: "user"
-          },
-          audio: false
-        });
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
         video.srcObject = stream;
       } catch (err) {
         alert("Unable to access camera.");
@@ -244,24 +184,13 @@
       canvas.height = video.videoHeight;
       const ctx = canvas.getContext('2d');
 
-      // Flip horizontally to correct the mirrored preview
+      // Flip horizontally
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
-
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      // Reset transform for next draw calls
       ctx.setTransform(1, 0, 0, 1, 0, 0);
 
       return canvas.toDataURL('image/png');
-    }
-
-    function addThumbnail(imgSrc) {
-      const img = document.createElement('img');
-      img.src = imgSrc;
-      thumbnails.appendChild(img);
-      img.classList.add('selected');
-      setTimeout(() => img.classList.remove('selected'), 1500);
     }
 
     async function countdown(seconds) {
@@ -284,88 +213,51 @@
         await countdown(5);
         const photo = takePhoto();
         photos.push(photo);
-        addThumbnail(photo);
+        const img = document.createElement('img');
+        img.src = photo;
+        thumbnails.appendChild(img);
       }
 
       startBtn.textContent = "Retake Photos";
       startBtn.disabled = false;
+      checkNextButton();
     }
 
-    thumbnails.addEventListener('click', e => {
-      if (e.target.tagName === 'IMG') {
-        [...thumbnails.children].forEach((img, idx) => img.classList.remove('selected'));
-        selectedIndex = [...thumbnails.children].indexOf(e.target);
-        e.target.classList.add('selected');
-        retakeBtn.disabled = false;
-      }
-    });
+    function checkNextButton() {
+      nextButton.disabled = (photos.length !== 4);
+    }
 
-    retakeBtn.addEventListener('click', async () => {
-      if (selectedIndex === -1) return;
-      retakeBtn.disabled = true;
-      startBtn.disabled = true;
-      await countdown(5);
-      const newPhoto = takePhoto();
-      photos[selectedIndex] = newPhoto;
-      thumbnails.children[selectedIndex].src = newPhoto;
-      thumbnails.children[selectedIndex].classList.remove('selected');
-      selectedIndex = -1;
-      retakeBtn.disabled = true;
-      startBtn.disabled = false;
+    function combinePhotos() {
+      if (photos.length < 4) {
+        alert("Take all 4 photos first!");
+        return;
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 480;
+      canvas.height = 640 * 4;
+      const ctx = canvas.getContext('2d');
+
+      let y = 0;
+      photos.forEach(src => {
+        const img = new Image();
+        img.src = src;
+        ctx.drawImage(img, 0, y, 480, 640);
+        y += 640;
+      });
+
+      return canvas;
+    }
+
+    nextButton.addEventListener('click', () => {
+      const finalCanvas = combinePhotos();
+      const photoData = finalCanvas.toDataURL('image/png');
+      localStorage.setItem('finalPhoto', photoData);
+      window.location.href = 'frames.html';
     });
 
     startBtn.addEventListener('click', startTakingPhotos);
     startCamera();
-
-    <script>
-  const nextButton = document.getElementById('nextButton');
-
-  // Enable "Next" when 4 photos are taken
-  function checkNextButton() {
-    if (photos.length === 4) nextButton.disabled = false;
-    else nextButton.disabled = true;
-  }
-
-  // Combine 4 photos vertically into one
-  function combinePhotos() {
-    if (photos.length < 4) {
-      alert("Take all 4 photos first!");
-      return;
-    }
-
-    const imgElements = photos.map(src => {
-      const img = new Image();
-      img.src = src;
-      return img;
-    });
-
-    const canvas = document.createElement('canvas');
-    canvas.width = 480; // adjust to your photo width
-    canvas.height = 640 * 4; // 4 stacked photos
-    const ctx = canvas.getContext('2d');
-
-    let y = 0;
-    imgElements.forEach(img => {
-      ctx.drawImage(img, 0, y, 480, 640);
-      y += 640;
-    });
-
-    return canvas;
-  }
-
-  nextButton.addEventListener('click', () => {
-    const finalCanvas = combinePhotos();
-    const photoData = finalCanvas.toDataURL('image/png');
-    localStorage.setItem('finalPhoto', photoData);
-    window.location.href = 'frames.html';
-  });
-
-  // Recheck after each photo
-  const originalStartTakingPhotos = startTakingPhotos;
-  startTakingPhotos = async function() {
-    await originalStartTakingPhotos();
-    checkNextButton();
-  };
   </script>
 </body>
 </html>
