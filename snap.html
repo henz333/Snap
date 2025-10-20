@@ -3,223 +3,159 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>abcSnap - Snap Photos</title>
+  <title>abcSnap - Photo Booth</title>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2&display=swap" rel="stylesheet" />
   <style>
     body {
       margin: 0;
       font-family: 'Baloo 2', cursive;
-      background: #ffffff;
+      background-color: #ffffff;
       color: #3D5AF1;
       display: flex;
       flex-direction: column;
+      align-items: center;
+      justify-content: center;
       min-height: 100vh;
+      overflow: hidden;
+      text-align: center;
     }
 
     header {
-      text-align: center;
-      padding: 1rem;
-      background: #FFD93D;
-      color: #3D5AF1;
-      font-size: 1.8rem;
-      font-weight: 700;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    main {
-      flex: 1;
-      display: flex;
-      flex-direction: row;
-      gap: 1.5rem;
-      padding: 1.5rem;
+      background-color: #3D5AF1;
+      color: #FFD93D;
+      font-size: 2rem;
+      font-weight: bold;
       width: 100%;
-      max-width: 1100px;
-      margin: 0 auto;
-      justify-content: flex-start;
-      align-items: flex-start;
-      flex-wrap: wrap;
+      text-align: center;
+      padding: 1rem 0;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
 
     #video-container {
-      background: white;
       position: relative;
-      border-radius: 36px;
+      border-radius: 20px;
       overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-      flex-shrink: 0;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      background: #000;
+      width: 85vw;
+      max-width: 720px;
+      aspect-ratio: 4 / 3;
+      margin: 2rem 0;
     }
 
     video {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: 30px;
-      transform: scaleX(-1); /* Fix: not mirrored preview */
+      border-radius: 20px;
+      transform: scaleX(-1); /* Mirror preview for natural look */
     }
 
     #timer {
       position: absolute;
       top: 16px;
       right: 16px;
-      background: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.9);
       color: #3D5AF1;
       font-weight: 700;
       font-size: 2rem;
       padding: 0.3rem 0.8rem;
-      border-radius: 16px;
-      user-select: none;
-      pointer-events: none;
+      border-radius: 12px;
       opacity: 0;
-      transition: opacity 0.4s ease;
+      transition: opacity 0.3s ease;
+      user-select: none;
     }
 
     #thumbnails {
-      width: 200px;
-      height: 480px;
-      overflow-y: scroll;
-      scrollbar-width: thin;
-      scrollbar-color: #FFD93D transparent;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
       gap: 1rem;
-      padding-right: 0.5rem;
-      flex-shrink: 0;
-    }
-
-    #thumbnails::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    #thumbnails::-webkit-scrollbar-thumb {
-      background-color: #FFD93D;
-      border-radius: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
     }
 
     #thumbnails img {
-      width: 100%;
-      height: 120px;
-      border-radius: 20px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      width: 120px;
+      height: 90px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
       object-fit: cover;
       cursor: pointer;
       border: 3px solid transparent;
-      opacity: 0;
-      transform: translateY(20px);
-      animation: fadeInSlide 0.4s forwards;
-      transition: border-color 0.2s ease, transform 0.2s ease;
-      flex: 0 0 auto;
-    }
-
-    #thumbnails img:hover {
-      transform: scale(1.02);
+      transition: border-color 0.2s ease;
     }
 
     #thumbnails img.selected {
       border-color: #FFD93D;
     }
 
-    #controls {
-      margin: 1rem auto 2rem;
-      text-align: center;
-    }
-
     button {
       background-color: #FFD93D;
-      border: none;
       color: #3D5AF1;
-      padding: 1rem 3rem;
+      border: none;
+      padding: 1rem 2rem;
       font-size: 1.2rem;
-      border-radius: 24px;
+      border-radius: 12px;
+      margin: 0.5rem;
       cursor: pointer;
-      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+      font-weight: bold;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
-      font-family: 'Baloo 2', cursive;
-      font-weight: 700;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
 
     button:hover:not(:disabled) {
       transform: scale(1.05);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
     }
 
     button:disabled {
-      background-color: #ddd;
+      background-color: #ccc;
+      color: #666;
       cursor: not-allowed;
-      color: #999;
-      box-shadow: none;
     }
 
-    @keyframes fadeInSlide {
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    footer {
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      color: #666;
     }
 
     @media (max-width: 768px) {
-      main {
-        flex-direction: column;
-        align-items: center;
-      }
-
       #video-container {
-        width: 100%;
-        max-width: 90vw;
-        height: auto;
-        aspect-ratio: 4/3;
+        width: 90vw;
+        aspect-ratio: 3 / 4;
       }
-
-      #thumbnails {
-        flex-direction: row;
-        width: 100%;
-        max-height: none;
-        overflow-x: auto;
-        overflow-y: hidden;
-        justify-content: center;
-        margin-top: 1rem;
-        height: auto;
-      }
-
       #thumbnails img {
-        width: 120px;
-        height: auto;
+        width: 100px;
+        height: 80px;
       }
     }
   </style>
 </head>
+
 <body>
-  <header>abcSnap - Snap Your 4 Photos</header>
+  <header>abcSnap Booth</header>
 
-  <main>
-    <div id="video-container">
-      <video id="video" autoplay playsinline></video>
-      <div id="timer">3</div>
-    </div>
-    <div id="thumbnails" aria-label="Photos taken"></div>
-  </main>
-
-  <div id="controls">
-    <button id="startBtn">Start Taking Photos</button>
-    <button id="retakeBtn" disabled>Delete & Retake Selected Photo</button>
+  <div id="video-container">
+    <video id="video" autoplay playsinline></video>
+    <div id="timer">3</div>
   </div>
 
+  <div id="thumbnails"></div>
+
+  <div>
+    <button id="startBtn">Start Taking Photos</button>
+    <button id="retakeBtn" disabled>Retake Selected Photo</button>
+  </div>
+
+  <footer>© 2025 abcSnap | Business Week</footer>
+
   <script>
-    const layout = localStorage.getItem('photoLayout') || 'landscape';
-    const videoContainer = document.getElementById('video-container');
-
-    if (layout === 'landscape') {
-      videoContainer.style.width = '720px';
-      videoContainer.style.height = '480px';
-    } else {
-      videoContainer.style.width = '480px';
-      videoContainer.style.height = '640px';
-    }
-
     const video = document.getElementById('video');
     const startBtn = document.getElementById('startBtn');
-    const thumbnails = document.getElementById('thumbnails');
-    const timerEl = document.getElementById('timer');
     const retakeBtn = document.getElementById('retakeBtn');
+    const timerEl = document.getElementById('timer');
+    const thumbnails = document.getElementById('thumbnails');
 
     let photos = [];
     let stream;
@@ -228,10 +164,7 @@
     async function startCamera() {
       try {
         stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            aspectRatio: layout === 'landscape' ? 16 / 9 : 3 / 4,
-            facingMode: "user" // front-facing camera
-          },
+          video: { facingMode: "user", aspectRatio: 4 / 3 },
           audio: false
         });
         video.srcObject = stream;
@@ -247,7 +180,7 @@
       canvas.height = video.videoHeight;
       const ctx = canvas.getContext('2d');
 
-      // Fix mirroring issue for saved photo
+      // Flip horizontally to match preview
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -256,12 +189,10 @@
       return canvas.toDataURL('image/png');
     }
 
-    function addThumbnail(imgSrc) {
+    function addThumbnail(src) {
       const img = document.createElement('img');
-      img.src = imgSrc;
+      img.src = src;
       thumbnails.appendChild(img);
-      img.classList.add('selected');
-      setTimeout(() => img.classList.remove('selected'), 1500);
     }
 
     async function countdown(seconds) {
@@ -286,18 +217,16 @@
         addThumbnail(photo);
       }
 
-      timerEl.textContent = '';
-      startBtn.disabled = false;
       startBtn.textContent = "Retake Photos";
+      startBtn.disabled = false;
     }
 
-    startBtn.addEventListener('click', startTakingPhotos);
     thumbnails.addEventListener('click', (e) => {
       if (e.target.tagName === 'IMG') {
-        [...thumbnails.children].forEach((img, idx) => img.classList.remove('selected'));
-        selectedIndex = [...thumbnails.children].indexOf(e.target);
+        [...thumbnails.children].forEach(img => img.classList.remove('selected'));
         e.target.classList.add('selected');
-        retakeBtn.disabled = selectedIndex === -1;
+        selectedIndex = [...thumbnails.children].indexOf(e.target);
+        retakeBtn.disabled = false;
       }
     });
 
@@ -305,14 +234,15 @@
       if (selectedIndex === -1) return;
       retakeBtn.disabled = true;
       startBtn.disabled = true;
+
       await countdown(5);
       const newPhoto = takePhoto();
       photos[selectedIndex] = newPhoto;
       thumbnails.children[selectedIndex].src = newPhoto;
-      thumbnails.children[selectedIndex].classList.remove('selected');
-      selectedIndex = -1;
+
       retakeBtn.disabled = true;
       startBtn.disabled = false;
+      selectedIndex = -1;
     });
 
     startCamera();
