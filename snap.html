@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>abcSnap - Capture</title>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2&family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
-
   <style>
     body {
       margin: 0;
@@ -34,13 +33,14 @@
 
     main {
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: row;
       justify-content: center;
       align-items: flex-start;
       padding: 2rem;
       gap: 2rem;
       width: 100%;
       max-width: 1200px;
+      flex-wrap: wrap;
     }
 
     #video-container {
@@ -54,6 +54,7 @@
       justify-content: center;
       width: 480px;
       height: 640px;
+      flex-shrink: 0;
     }
 
     video {
@@ -86,6 +87,7 @@
       max-height: 550px;
       scrollbar-width: thin;
       scrollbar-color: #FFD93D transparent;
+      flex-shrink: 0;
     }
 
     #thumbnails img {
@@ -107,6 +109,10 @@
       text-align: center;
       margin-top: 1rem;
       padding-bottom: 2rem;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
     }
 
     button {
@@ -116,7 +122,6 @@
       padding: 1rem 2.5rem;
       font-size: 1.1rem;
       border-radius: 30px;
-      margin: 0.5rem;
       cursor: pointer;
       font-family: 'Poppins', sans-serif;
       font-weight: 600;
@@ -132,6 +137,12 @@
     button:disabled {
       opacity: 0.6;
       cursor: not-allowed;
+    }
+
+    footer {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-bottom: 15px;
     }
   </style>
 </head>
@@ -183,13 +194,9 @@
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       const ctx = canvas.getContext('2d');
-
-      // Flip horizontally
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-
       return canvas.toDataURL('image/png');
     }
 
@@ -210,7 +217,7 @@
       startBtn.textContent = "Taking Photos...";
 
       for (let i = 0; i < 4; i++) {
-        await countdown(5);
+        await countdown(3);
         const photo = takePhoto();
         photos.push(photo);
         const img = document.createElement('img');
@@ -228,29 +235,29 @@
     }
 
     function combinePhotos() {
-      if (photos.length < 4) {
-        alert("Take all 4 photos first!");
-        return;
-      }
+      return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 480;
+        canvas.height = 640 * 4;
+        const ctx = canvas.getContext('2d');
+        let y = 0;
+        let loaded = 0;
 
-      const canvas = document.createElement('canvas');
-      canvas.width = 480;
-      canvas.height = 640 * 4;
-      const ctx = canvas.getContext('2d');
-
-      let y = 0;
-      photos.forEach(src => {
-        const img = new Image();
-        img.src = src;
-        ctx.drawImage(img, 0, y, 480, 640);
-        y += 640;
+        photos.forEach((src, i) => {
+          const img = new Image();
+          img.onload = () => {
+            ctx.drawImage(img, 0, y, 480, 640);
+            y += 640;
+            loaded++;
+            if (loaded === photos.length) resolve(canvas);
+          };
+          img.src = src;
+        });
       });
-
-      return canvas;
     }
 
-    nextButton.addEventListener('click', () => {
-      const finalCanvas = combinePhotos();
+    nextButton.addEventListener('click', async () => {
+      const finalCanvas = await combinePhotos();
       const photoData = finalCanvas.toDataURL('image/png');
       localStorage.setItem('finalPhoto', photoData);
       window.location.href = 'frames.html';
