@@ -59,7 +59,8 @@
       height: 100%;
       object-fit: cover;
       border-radius: 24px;
-      transform: scaleX(-1);
+      /* make preview not mirrored */
+      transform: none;
     }
 
     #timer {
@@ -200,16 +201,22 @@
   <footer>Empowering Smiles & Innovation — Business Week 2025</footer>
 
   <script>
+    const layout = localStorage.getItem('layout') || 'landscape';
+    const videoContainer = document.getElementById('video-container');
+
+    if (layout === 'landscape') {
+      videoContainer.style.width = '720px';
+      videoContainer.style.height = '480px';
+    } else {
+      videoContainer.style.width = '480px';
+      videoContainer.style.height = '640px';
+    }
+
     const video = document.getElementById('video');
     const startBtn = document.getElementById('startBtn');
     const retakeBtn = document.getElementById('retakeBtn');
     const thumbnails = document.getElementById('thumbnails');
     const timerEl = document.getElementById('timer');
-    const videoContainer = document.getElementById('video-container');
-
-    // Always landscape for now
-    videoContainer.style.width = '720px';
-    videoContainer.style.height = '480px';
 
     let stream;
     let photos = [];
@@ -217,11 +224,10 @@
 
     async function startCamera() {
       try {
-        // Use FRONT camera
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
-            facingMode: "user",
-            aspectRatio: 4 / 3
+            facingMode: "user", // Selfie camera
+            aspectRatio: layout === 'landscape' ? 16 / 9 : 3 / 4
           },
           audio: false
         });
@@ -238,14 +244,13 @@
       canvas.height = video.videoHeight;
       const ctx = canvas.getContext('2d');
 
-      // Flip the image horizontally so it's not mirrored
+      // Flip horizontally to correct mirror for selfie
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform for future drawings
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
 
       return canvas.toDataURL('image/png');
-}
     }
 
     function addThumbnail(imgSrc) {
