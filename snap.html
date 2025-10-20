@@ -3,130 +3,176 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>abcSnap - Photo Booth</title>
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2&display=swap" rel="stylesheet" />
+  <title>abcSnap - Capture</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2&family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+
   <style>
     body {
       margin: 0;
-      font-family: 'Baloo 2', cursive;
-      background-color: #ffffff;
-      color: #3D5AF1;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1E3C72, #2A5298);
+      color: #fff;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       min-height: 100vh;
-      overflow: hidden;
-      text-align: center;
+      overflow-x: hidden;
     }
 
     header {
-      background-color: #3D5AF1;
-      color: #FFD93D;
+      font-family: 'Baloo 2', cursive;
       font-size: 2rem;
-      font-weight: bold;
-      width: 100%;
+      color: #FFD93D;
       text-align: center;
-      padding: 1rem 0;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      padding: 1.2rem;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    main {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 2rem;
+      gap: 2rem;
+      width: 100%;
+      max-width: 1200px;
     }
 
     #video-container {
       position: relative;
-      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
       overflow: hidden;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-      background: #000;
-      width: 85vw;
-      max-width: 720px;
-      aspect-ratio: 4 / 3;
-      margin: 2rem 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     video {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: 20px;
-      transform: scaleX(-1); /* Mirror preview for natural look */
+      border-radius: 24px;
     }
 
     #timer {
       position: absolute;
-      top: 16px;
-      right: 16px;
-      background: rgba(255, 255, 255, 0.9);
-      color: #3D5AF1;
-      font-weight: 700;
+      top: 10px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.85);
+      color: #2A5298;
       font-size: 2rem;
-      padding: 0.3rem 0.8rem;
+      font-weight: 700;
       border-radius: 12px;
+      padding: 0.3rem 0.8rem;
       opacity: 0;
       transition: opacity 0.3s ease;
-      user-select: none;
     }
 
     #thumbnails {
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       gap: 1rem;
-      flex-wrap: wrap;
-      margin-bottom: 1.5rem;
+      overflow-y: auto;
+      max-height: 550px;
+      scrollbar-width: thin;
+      scrollbar-color: #FFD93D transparent;
+    }
+
+    #thumbnails::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    #thumbnails::-webkit-scrollbar-thumb {
+      background-color: #FFD93D;
+      border-radius: 10px;
     }
 
     #thumbnails img {
-      width: 120px;
-      height: 90px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      width: 180px;
+      height: 120px;
       object-fit: cover;
-      cursor: pointer;
+      border-radius: 16px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
       border: 3px solid transparent;
-      transition: border-color 0.2s ease;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeIn 0.5s forwards;
+    }
+
+    #thumbnails img:hover {
+      transform: scale(1.05);
     }
 
     #thumbnails img.selected {
       border-color: #FFD93D;
     }
 
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    #controls {
+      text-align: center;
+      margin-top: 1rem;
+      padding-bottom: 2rem;
+    }
+
     button {
       background-color: #FFD93D;
-      color: #3D5AF1;
+      color: #2A5298;
       border: none;
-      padding: 1rem 2rem;
-      font-size: 1.2rem;
-      border-radius: 12px;
+      padding: 1rem 2.5rem;
+      font-size: 1.1rem;
+      border-radius: 30px;
       margin: 0.5rem;
       cursor: pointer;
-      font-weight: bold;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
     }
 
     button:hover:not(:disabled) {
       transform: scale(1.05);
-      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
     }
 
     button:disabled {
-      background-color: #ccc;
-      color: #666;
+      opacity: 0.6;
       cursor: not-allowed;
     }
 
     footer {
-      margin-top: 2rem;
+      margin-top: auto;
+      text-align: center;
+      padding: 1rem;
+      color: rgba(255, 255, 255, 0.7);
       font-size: 0.9rem;
-      color: #666;
     }
 
     @media (max-width: 768px) {
-      #video-container {
-        width: 90vw;
-        aspect-ratio: 3 / 4;
+      #thumbnails {
+        flex-direction: row;
+        overflow-x: auto;
+        overflow-y: hidden;
+        max-height: none;
+        width: 100%;
       }
+
       #thumbnails img {
-        width: 100px;
+        width: 120px;
         height: 80px;
       }
     }
@@ -134,37 +180,48 @@
 </head>
 
 <body>
-  <header>abcSnap Booth</header>
+  <header>📸 abcSnap Booth — Business Week 2025</header>
 
-  <div id="video-container">
-    <video id="video" autoplay playsinline></video>
-    <div id="timer">3</div>
-  </div>
+  <main>
+    <div id="video-container">
+      <video id="video" autoplay playsinline></video>
+      <div id="timer">3</div>
+    </div>
 
-  <div id="thumbnails"></div>
+    <div id="thumbnails"></div>
+  </main>
 
-  <div>
+  <div id="controls">
     <button id="startBtn">Start Taking Photos</button>
     <button id="retakeBtn" disabled>Retake Selected Photo</button>
   </div>
 
-  <footer>© 2025 abcSnap | Business Week</footer>
+  <footer>Empowering Smiles & Innovation — Business Week 2025</footer>
 
   <script>
     const video = document.getElementById('video');
     const startBtn = document.getElementById('startBtn');
     const retakeBtn = document.getElementById('retakeBtn');
-    const timerEl = document.getElementById('timer');
     const thumbnails = document.getElementById('thumbnails');
+    const timerEl = document.getElementById('timer');
+    const videoContainer = document.getElementById('video-container');
 
-    let photos = [];
+    // Always landscape for now
+    videoContainer.style.width = '720px';
+    videoContainer.style.height = '480px';
+
     let stream;
+    let photos = [];
     let selectedIndex = -1;
 
     async function startCamera() {
       try {
+        // Use FRONT camera
         stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "user", aspectRatio: 4 / 3 },
+          video: {
+            facingMode: "user",
+            aspectRatio: 4 / 3
+          },
           audio: false
         });
         video.srcObject = stream;
@@ -180,19 +237,18 @@
       canvas.height = video.videoHeight;
       const ctx = canvas.getContext('2d');
 
-      // Flip horizontally to match preview
-      ctx.translate(canvas.width, 0);
-      ctx.scale(-1, 1);
+      // DO NOT mirror — capture exactly as it looks
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
 
       return canvas.toDataURL('image/png');
     }
 
-    function addThumbnail(src) {
+    function addThumbnail(imgSrc) {
       const img = document.createElement('img');
-      img.src = src;
+      img.src = imgSrc;
       thumbnails.appendChild(img);
+      img.classList.add('selected');
+      setTimeout(() => img.classList.remove('selected'), 1500);
     }
 
     async function countdown(seconds) {
@@ -206,6 +262,7 @@
 
     async function startTakingPhotos() {
       startBtn.disabled = true;
+      retakeBtn.disabled = true;
       photos = [];
       thumbnails.innerHTML = '';
       startBtn.textContent = "Taking Photos...";
@@ -221,11 +278,11 @@
       startBtn.disabled = false;
     }
 
-    thumbnails.addEventListener('click', (e) => {
+    thumbnails.addEventListener('click', e => {
       if (e.target.tagName === 'IMG') {
-        [...thumbnails.children].forEach(img => img.classList.remove('selected'));
-        e.target.classList.add('selected');
+        [...thumbnails.children].forEach((img, idx) => img.classList.remove('selected'));
         selectedIndex = [...thumbnails.children].indexOf(e.target);
+        e.target.classList.add('selected');
         retakeBtn.disabled = false;
       }
     });
@@ -234,17 +291,17 @@
       if (selectedIndex === -1) return;
       retakeBtn.disabled = true;
       startBtn.disabled = true;
-
       await countdown(5);
       const newPhoto = takePhoto();
       photos[selectedIndex] = newPhoto;
       thumbnails.children[selectedIndex].src = newPhoto;
-
+      thumbnails.children[selectedIndex].classList.remove('selected');
+      selectedIndex = -1;
       retakeBtn.disabled = true;
       startBtn.disabled = false;
-      selectedIndex = -1;
     });
 
+    startBtn.addEventListener('click', startTakingPhotos);
     startCamera();
   </script>
 </body>
