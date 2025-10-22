@@ -74,7 +74,7 @@
       border-radius: 20px;
       padding: 1rem;
       width: 480px;
-      height: auto;
+      min-height: 600px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -85,7 +85,6 @@
     #preview {
       position: relative;
       width: 100%;
-      height: auto;
       border-radius: 16px;
       overflow: hidden;
       display: inline-block;
@@ -142,7 +141,6 @@
       }
       #preview-container {
         width: 90%;
-        height: auto;
       }
     }
   </style>
@@ -172,14 +170,12 @@
     const confirmButton = document.getElementById('confirmButton');
     const frameCount = 6;
 
-    // Load captured photos
     const photos = JSON.parse(localStorage.getItem('photos')) || [];
     if (photos.length < 4) {
       alert("No photos found. Please take your photos first!");
       window.location.href = "snap.html";
     }
 
-    // Load frame thumbnails
     for (let i = 1; i <= frameCount; i++) {
       const div = document.createElement('div');
       div.classList.add('frame');
@@ -197,28 +193,31 @@
     function generatePreview(index, frameSrc) {
       preview.innerHTML = '';
 
-      // Set preview container ratio depending on frame
-      if (index <= 2) {
-        preview.style.aspectRatio = "2/3"; // portrait strips
-      } else {
-        preview.style.aspectRatio = "3/2"; // landscape frames
-      }
+      const frameImg = document.createElement('img');
+      frameImg.src = frameSrc;
+      frameImg.className = 'frame';
 
-      // Add photos first (behind frame)
-      if (index <= 2) {
-        // portrait strip layout (4 stacked)
+      // Detect orientation by index
+      const isLandscape = (index >= 3);
+
+      // Portrait strips (frame1, frame2)
+      if (!isLandscape) {
+        preview.style.aspectRatio = "2/3";
+
         for (let i = 0; i < 4; i++) {
           const img = document.createElement('img');
           img.src = photos[i];
           img.className = 'photo';
           img.style.width = '70%';
-          img.style.height = '23%';
+          img.style.height = '20%';
           img.style.left = '15%';
-          img.style.top = `${8 + i * 24}%`;
+          img.style.top = `${10 + i * 23}%`;
           preview.appendChild(img);
         }
-      } else {
-        // 2x2 layout
+      } 
+      // Landscape (frame3-6)
+      else {
+        preview.style.aspectRatio = "3/2";
         const positions = [
           { top: '8%', left: '6%' },
           { top: '8%', left: '52%' },
@@ -237,10 +236,6 @@
         }
       }
 
-      // Add frame image last (on top)
-      const frameImg = document.createElement('img');
-      frameImg.src = frameSrc;
-      frameImg.className = 'frame';
       preview.appendChild(frameImg);
     }
 
@@ -251,7 +246,6 @@
         return;
       }
       alert("Frame selected! Ready for print.");
-      // window.location.href = "print.html";
     });
   </script>
 </body>
