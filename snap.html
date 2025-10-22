@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Take Snap</title>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2&family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
-
   <style>
     body {
       margin: 0;
@@ -34,37 +33,33 @@
 
     main {
       display: flex;
-      flex-wrap: nowrap;
       justify-content: center;
       align-items: flex-start;
-      padding: 2rem;
-      gap: 2rem;
+      padding: 1rem;
       width: 100%;
-      max-width: 1200px;
-      box-sizing: border-box;
+      flex-direction: column;
+      max-width: 1000px;
     }
 
     #video-container {
       position: relative;
       background: rgba(255, 255, 255, 0.06);
-      border-radius: 24px;
+      border-radius: 16px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
       overflow: hidden;
+      width: 100%;
+      aspect-ratio: 16 / 9;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 960px;
-      height: 540px;
-      flex-shrink: 0;
     }
 
     video {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: 24px;
+      border-radius: 16px;
       transform: scaleX(-1);
-      display: block;
     }
 
     #timer {
@@ -82,47 +77,44 @@
       z-index: 5;
     }
 
-    #thumbnails img {
-      width: 160px;
-      height: 120px;
-      object-fit: contain;
-      background-color: rgba(0, 0, 0, 0.2);
-      border-radius: 14px;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.25);
-      border: 3px solid transparent;
-      cursor: pointer;
-      transition: transform 0.18s ease, border-color 0.18s ease;
-      display: block;
-      background: rgba(255,255,255,0.03);
+    #thumbnails {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 1rem;
     }
 
-    #thumbnails::-webkit-scrollbar { width: 8px; }
-    #thumbnails::-webkit-scrollbar-thumb { background: #FFD93D; border-radius: 10px; }
+    #thumbnails img {
+      width: 150px;
+      height: 84px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 3px solid transparent;
+      background: rgba(255,255,255,0.05);
+      transition: border-color 0.2s ease;
+    }
 
     #thumbnails img.selected {
       border-color: #FFD93D;
-      transform: scale(1.03);
     }
 
     #controls {
       text-align: center;
-      margin-top: 18px;
-      padding-bottom: 2rem;
-      width: 100%;
+      margin-top: 1rem;
       display: flex;
-      justify-content: center;
-      gap: 18px;
       flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
     }
 
     button {
       background-color: #FFD93D;
       color: #2A5298;
       border: none;
-      padding: 14px 26px;
-      font-size: 1.05rem;
-      border-radius: 30px;
-      margin: 0.5rem;
+      padding: 12px 22px;
+      font-size: 1rem;
+      border-radius: 24px;
       cursor: pointer;
       font-family: 'Poppins', sans-serif;
       font-weight: 600;
@@ -131,7 +123,7 @@
     }
 
     button:hover:not(:disabled) { transform: translateY(-3px); }
-    button:disabled { opacity: 0.55; cursor: not-allowed; }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
 
     footer {
       margin-top: auto;
@@ -140,102 +132,69 @@
       color: rgba(255, 255, 255, 0.7);
       font-size: 0.9rem;
     }
-
-    @media (max-width: 980px) {
-      main {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      #video-container {
-        width: 480px;
-        height: 270px;
-      }
-
-      #thumbnails {
-        flex-direction: row;
-        width: auto;
-        max-width: none;
-        overflow-x: hidden;
-        flex-wrap: nowrap;
-        justify-content: center;
-        gap: 12px;
-      }
-
-      #thumbnails img {
-        width: 120px;
-        height: 90px;
-        flex-shrink: 0;
-      }
-    }
   </style>
 </head>
-
 <body>
   <header>📸 abcSnap Booth — Business Week 2025</header>
 
   <main>
     <div id="video-container">
-      <video id="video" autoplay playsinline></video>
+      <video id="video" autoplay playsinline muted></video>
       <div id="timer">3</div>
     </div>
-
-    <div id="thumbnails" aria-hidden="false"></div>
+    <div id="thumbnails"></div>
   </main>
 
   <div id="controls">
     <button id="startBtn">Start Taking Photos</button>
-    <button id="retakeBtn" disabled>Retake Selected Photo</button>
+    <button id="retakeBtn" disabled>Retake Selected</button>
     <button id="retakeAllBtn" disabled>Retake All</button>
     <button id="nextButton" disabled>Next ➜</button>
   </div>
 
   <footer>Empowering Smiles & Innovation — Business Week 2025</footer>
-  <footer>Bringing smiles all around the world!</footer>
 
   <script>
     const video = document.getElementById('video');
+    const timerEl = document.getElementById('timer');
+    const thumbnails = document.getElementById('thumbnails');
     const startBtn = document.getElementById('startBtn');
     const retakeBtn = document.getElementById('retakeBtn');
     const retakeAllBtn = document.getElementById('retakeAllBtn');
     const nextButton = document.getElementById('nextButton');
-    const thumbnails = document.getElementById('thumbnails');
-    const timerEl = document.getElementById('timer');
 
     let stream;
     let photos = [];
     let selectedIndex = -1;
 
-    // ✅ Force landscape, front camera
     async function startCamera() {
       try {
+        // ✅ Force 1280x720 landscape
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: "user",
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-            aspectRatio: 16/9
+            width: { exact: 1280 },
+            height: { exact: 720 }
           },
           audio: false
         });
         video.srcObject = stream;
       } catch (err) {
-        alert("Unable to access camera.");
+        alert("Camera access failed. Please allow camera permissions.");
         console.error(err);
       }
     }
 
-    function takeSinglePhoto() {
+    function takePhoto() {
       const canvas = document.createElement('canvas');
-      const vw = video.videoWidth || 1280;
-      const vh = video.videoHeight || 720;
+      const vw = video.videoWidth;
+      const vh = video.videoHeight;
       canvas.width = vw;
       canvas.height = vh;
       const ctx = canvas.getContext('2d');
       ctx.translate(canvas.width, 0);
-      ctx.scale(-1, 1);
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(-1, 1); // mirror for selfie
+      ctx.drawImage(video, 0, 0, vw, vh);
       return canvas.toDataURL('image/png');
     }
 
@@ -248,10 +207,9 @@
       timerEl.style.opacity = '0';
     }
 
-    function addThumbnail(dataURL) {
+    function addThumbnail(src) {
       const img = document.createElement('img');
-      img.src = dataURL;
-      img.alt = "Shot";
+      img.src = src;
       thumbnails.appendChild(img);
       img.addEventListener('click', () => {
         [...thumbnails.children].forEach(i => i.classList.remove('selected'));
@@ -272,7 +230,7 @@
 
       for (let i = 0; i < 4; i++) {
         await countdown(5);
-        const photo = takeSinglePhoto();
+        const photo = takePhoto();
         photos.push(photo);
         addThumbnail(photo);
       }
@@ -285,44 +243,30 @@
     }
 
     async function retakeSelectedPhoto() {
-      if (selectedIndex === -1) {
-        alert("Select a thumbnail to retake.");
-        return;
-      }
-      retakeBtn.disabled = true;
-      startBtn.disabled = true;
+      if (selectedIndex === -1) return alert("Select a photo to retake");
       await countdown(3);
-      const newPhoto = takeSinglePhoto();
+      const newPhoto = takePhoto();
       photos[selectedIndex] = newPhoto;
       thumbnails.children[selectedIndex].src = newPhoto;
-      thumbnails.children[selectedIndex].classList.remove('selected');
+      localStorage.setItem('photos', JSON.stringify(photos));
       selectedIndex = -1;
       retakeBtn.disabled = true;
-      startBtn.disabled = false;
-      localStorage.setItem('photos', JSON.stringify(photos));
     }
 
     async function retakeAll() {
       photos = [];
       thumbnails.innerHTML = '';
-      selectedIndex = -1;
-      retakeBtn.disabled = true;
-      nextButton.disabled = true;
       startBtn.disabled = true;
       await startTakingPhotos();
     }
 
-    nextButton.addEventListener('click', () => {
-      if (photos.length < 4) {
-        alert("Please take 4 photos first.");
-        return;
-      }
-      window.location.href = 'frames.html';
-    });
-
     startBtn.addEventListener('click', startTakingPhotos);
     retakeBtn.addEventListener('click', retakeSelectedPhoto);
     retakeAllBtn.addEventListener('click', retakeAll);
+    nextButton.addEventListener('click', () => {
+      if (photos.length < 4) return alert("Take 4 photos first!");
+      window.location.href = "frames.html";
+    });
 
     startCamera();
   </script>
