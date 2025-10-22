@@ -175,7 +175,6 @@
     const backBtn = document.getElementById('backBtn');
 
     const photos = JSON.parse(sessionStorage.getItem('photos') || '[]');
-    sessionStorage.setItem('finalPhoto', finalDataURL);
     console.log("Loaded photos:", photos);
     
     if (!photos || photos.length < 4) {
@@ -283,8 +282,8 @@
 
       fctx.drawImage(frameImg, 0, 0, finalCanvas.width, finalCanvas.height);
       const finalDataURL = finalCanvas.toDataURL('image/png');
-      localStorage.setItem('finalPhoto', finalDataURL);
-      localStorage.setItem('selectedFrame', frameSrc);
+      sessionStorage.setItem('finalPhoto', finalDataURL);
+      sessionStorage.setItem('selectedFrame', frameSrc);
       window.location.href = 'print.html';
     });
 
