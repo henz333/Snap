@@ -68,18 +68,23 @@
       box-shadow: 0 0 20px rgba(0,0,0,0.3);
       padding: 1rem;
       display: none;
+      max-width: 800px;
     }
 
     #preview {
       position: relative;
       display: inline-block;
+      width: 100%;
       max-width: 100%;
+      overflow: hidden;
+      border-radius: 16px;
     }
 
     #preview img.photo {
       position: absolute;
       object-fit: cover;
       border-radius: 8px;
+      transition: all 0.3s ease;
     }
 
     #preview img.frame {
@@ -138,14 +143,12 @@
     const confirmButton = document.getElementById('confirmButton');
     const frameCount = 6;
 
-    // Load photos from snap.html
     const photos = JSON.parse(localStorage.getItem('photos')) || [];
-    if (photos.length === 0) {
+    if (photos.length < 4) {
       alert("No photos found. Please take your photos first!");
       window.location.href = "snap.html";
     }
 
-    // Create frame thumbnails
     for (let i = 1; i <= frameCount; i++) {
       const div = document.createElement('div');
       div.classList.add('frame');
@@ -154,7 +157,6 @@
       frameGrid.appendChild(div);
     }
 
-    // Handle frame selection and preview generation
     function selectFrame(index) {
       const frameSrc = `frames/frame${index}.png`;
       localStorage.setItem('selectedFrame', frameSrc);
@@ -168,12 +170,10 @@
       const frameImg = document.createElement('img');
       frameImg.src = frameSrc;
       frameImg.className = 'frame';
-
       preview.appendChild(frameImg);
 
-      // Layout logic
       if (index <= 2) {
-        // Portrait frames (stacked vertically)
+        // Portrait strip layout (4 stacked photos)
         for (let i = 0; i < 4; i++) {
           const img = document.createElement('img');
           img.src = photos[i];
@@ -185,7 +185,7 @@
           preview.appendChild(img);
         }
       } else {
-        // Landscape 2x2 grid frames
+        // Landscape 2x2 grid layout
         const positions = [
           { top: '5%', left: '5%' },
           { top: '5%', left: '52%' },
@@ -211,9 +211,8 @@
         alert("Please select a frame first!");
         return;
       }
-      // Save preview info for print.html
       localStorage.setItem('finalLayout', preview.innerHTML);
-      alert("Frame applied! (Next step: print or save.)");
+      alert("Frame applied! Ready for print next.");
       // window.location.href = 'print.html';
     });
   </script>
