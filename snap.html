@@ -67,7 +67,6 @@
       border-radius: 24px;
       transform: scaleX(-1);
       display:block;
-      pointer-events: none; /* ✅ Prevents blocking taps on mobile */
     }
 
     #timer {
@@ -87,18 +86,18 @@
 
     /* thumbnails column on the right */
     #thumbnails img {
-      width: 160px;
-      height: 120px;
-      object-fit: contain;
-      background-color: rgba(0, 0, 0, 0.2);
-      border-radius: 14px;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.25);
-      border: 3px solid transparent;
-      cursor: pointer;
-      transition: transform 0.18s ease, border-color 0.18s ease;
-      display:block;
-      background: rgba(255,255,255,0.03);
-    }
+  width: 160px;
+  height: 120px;
+  object-fit: contain;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 14px;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease;
+  display:block;
+  background: rgba(255,255,255,0.03);
+}
 
     #thumbnails::-webkit-scrollbar { width: 8px; }
     #thumbnails::-webkit-scrollbar-thumb { background: #FFD93D; border-radius: 10px; }
@@ -130,8 +129,6 @@
       justify-content:center;
       gap: 18px;
       flex-wrap:wrap;
-      position: relative;
-      z-index: 10; /* ✅ Keeps buttons above video */
     }
 
     button {
@@ -147,8 +144,6 @@
       font-weight: 600;
       box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
       transition: transform 0.15s ease;
-      position: relative;
-      z-index: 20;
     }
 
     button:hover:not(:disabled) { transform: translateY(-3px); }
@@ -189,6 +184,7 @@
         flex-shrink: 0;
       }
     }
+    
   </style>
 </head>
 
@@ -206,6 +202,7 @@
 
   <div id="controls">
     <button id="startBtn">Start Taking Photos</button>
+    <!-- Removed Retake Photos button as requested -->
     <button id="retakeBtn" disabled>Retake Selected Photo</button>
     <button id="retakeAllBtn" disabled>Retake All</button>
     <button id="nextButton" disabled>Next ➜</button>
@@ -226,18 +223,16 @@
     const timerEl = document.getElementById('timer');
 
     let stream;
-    let photos = [];
-    let selectedIndex = -1;
+    let photos = [];           // array of dataURLs
+    let selectedIndex = -1;    // index for retake selected
 
-    // ✅ FORCE REAL LANDSCAPE (1280x720) ON ALL DEVICES
+    // camera start
     async function startCamera() {
       try {
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
-            facingMode: "user",
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-            aspectRatio: 16 / 9
+            aspectRatio: layout === 'landscape' ? 16/9 : 3/4,
+            facingMode: "user"
           },
           audio: false
         });
@@ -295,6 +290,7 @@
       nextButton.disabled = true;
       photos = [];
       thumbnails.innerHTML = '';
+      // Change text but no longer switch to "Retake Photos"
       startBtn.textContent = "Taking Photos...";
 
       for (let i = 0; i < 4; i++) {
@@ -304,6 +300,7 @@
         addThumbnail(photo);
       }
 
+      // After photos taken, revert to original button text
       startBtn.textContent = "Start Taking Photos";
       startBtn.disabled = false;
       retakeAllBtn.disabled = false;
