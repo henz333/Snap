@@ -174,8 +174,8 @@
     const confirmBtn = document.getElementById('confirmBtn');
     const backBtn = document.getElementById('backBtn');
 
-    const photos = JSON.parse(localStorage.getItem('photos') || '[]');
-    localStorage.removeItem('finalPhoto');
+    const photos = JSON.parse(sessionStorage.getItem('photos') || '[]');
+    sessionStorage.setItem('finalPhoto', finalDataURL);
     console.log("Loaded photos:", photos);
     
     if (!photos || photos.length < 4) {
