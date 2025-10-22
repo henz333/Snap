@@ -163,6 +163,9 @@
     let photos = [];
     let selectedIndex = -1;
 
+    // ✅ clear any old session data
+    sessionStorage.clear();
+
     async function startCamera() {
       try {
         stream = await navigator.mediaDevices.getUserMedia({
@@ -181,6 +184,7 @@
       }
     }
 
+    // ✅ Fixed version: compress + JPEG format (prevents QuotaExceeded)
     function takeSinglePhoto() {
       const canvas = document.createElement('canvas');
       let vw = video.videoWidth || 1280;
@@ -193,7 +197,9 @@
       ctx.scale(-1, 1);
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       ctx.setTransform(1, 0, 0, 1, 0, 0);
-      return canvas.toDataURL('image/png');
+
+      // ✅ Compress image to JPEG at 80% quality
+      return canvas.toDataURL('image/jpeg', 0.8);
     }
 
     async function countdown(seconds) {
@@ -238,7 +244,9 @@
       startBtn.disabled = false;
       retakeAllBtn.disabled = false;
       checkNextButton();
-      sessionStorage.setItem('photos', JSON.stringify(photos)); // ✅ save immediately
+
+      // ✅ Save after capture
+      sessionStorage.setItem('photos', JSON.stringify(photos));
     }
 
     function checkNextButton() {
@@ -259,6 +267,7 @@
       retakeBtn.disabled = true;
       startBtn.disabled = false;
       checkNextButton();
+
       sessionStorage.setItem('photos', JSON.stringify(photos));
     }
 
@@ -296,7 +305,7 @@
     nextButton.addEventListener('click', async () => {
       try {
         const finalCanvas = await combinePhotos();
-        const photoData = finalCanvas.toDataURL('image/png');
+        const photoData = finalCanvas.toDataURL('image/jpeg', 0.8);
         sessionStorage.setItem('finalPhoto', photoData);
         sessionStorage.setItem('photos', JSON.stringify(photos));
         window.location.href = 'frames.html';
