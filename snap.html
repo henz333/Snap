@@ -231,8 +231,10 @@
       try {
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
-            aspectRatio: layout === 'landscape' ? 16/9 : 3/4,
             facingMode: "user"
+            width: { ideal: 1280 },
+            height: { ideal : 720 },
+            aspectRatio: 16 / 9
           },
           audio: false
         });
@@ -246,8 +248,9 @@
     // take a single photo (returns dataURL)
     function takeSinglePhoto() {
       const canvas = document.createElement('canvas');
-      const vw = video.videoWidth || 1280;
-      const vh = video.videoHeight || 720;
+      let vw = video.videoWidth || 1280;
+      let vh = video.videoHeight || 720;
+      if (vh> vw) [vw,vh] = [vh, vw]; 
       canvas.width = vw;
       canvas.height = vh;
       const ctx = canvas.getContext('2d');
