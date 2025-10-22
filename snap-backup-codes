@@ -202,6 +202,7 @@
 
   <div id="controls">
     <button id="startBtn">Start Taking Photos</button>
+    <!-- Removed Retake Photos button as requested -->
     <button id="retakeBtn" disabled>Retake Selected Photo</button>
     <button id="retakeAllBtn" disabled>Retake All</button>
     <button id="nextButton" disabled>Next ➜</button>
@@ -289,6 +290,7 @@
       nextButton.disabled = true;
       photos = [];
       thumbnails.innerHTML = '';
+      // Change text but no longer switch to "Retake Photos"
       startBtn.textContent = "Taking Photos...";
 
       for (let i = 0; i < 4; i++) {
@@ -298,7 +300,8 @@
         addThumbnail(photo);
       }
 
-      startBtn.textContent = "Retake Photos";
+      // After photos taken, revert to original button text
+      startBtn.textContent = "Start Taking Photos";
       startBtn.disabled = false;
       retakeAllBtn.disabled = false;
       checkNextButton();
