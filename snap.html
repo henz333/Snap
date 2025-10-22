@@ -14,9 +14,9 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
       min-height: 100vh;
       overflow-x: hidden;
+      touch-action: manipulation;
     }
 
     header {
@@ -29,16 +29,18 @@
       background: rgba(255, 255, 255, 0.08);
       backdrop-filter: blur(10px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      z-index: 2;
     }
 
     main {
       display: flex;
-      justify-content: center;
-      align-items: flex-start;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
       padding: 1rem;
       width: 100%;
-      flex-direction: column;
-      max-width: 1000px;
+      flex: 1;
+      z-index: 1;
     }
 
     #video-container {
@@ -52,6 +54,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      z-index: 1;
     }
 
     video {
@@ -60,6 +63,7 @@
       object-fit: cover;
       border-radius: 16px;
       transform: scaleX(-1);
+      pointer-events: none; /* ✅ fixes unclickable buttons */
     }
 
     #timer {
@@ -74,7 +78,8 @@
       padding: 0.2rem 0.8rem;
       opacity: 0;
       transition: opacity 0.2s ease;
-      z-index: 5;
+      z-index: 2;
+      pointer-events: none;
     }
 
     #thumbnails {
@@ -83,6 +88,7 @@
       justify-content: center;
       gap: 10px;
       margin-top: 1rem;
+      z-index: 2;
     }
 
     #thumbnails img {
@@ -101,11 +107,13 @@
 
     #controls {
       text-align: center;
-      margin-top: 1rem;
+      margin-top: 1.2rem;
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 10px;
+      z-index: 3;
+      position: relative;
     }
 
     button {
@@ -120,17 +128,19 @@
       font-weight: 600;
       box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
       transition: transform 0.15s ease;
+      z-index: 3;
+      position: relative;
     }
 
     button:hover:not(:disabled) { transform: translateY(-3px); }
     button:disabled { opacity: 0.6; cursor: not-allowed; }
 
     footer {
-      margin-top: auto;
       text-align: center;
       padding: 1rem;
       color: rgba(255, 255, 255, 0.7);
       font-size: 0.9rem;
+      z-index: 3;
     }
   </style>
 </head>
@@ -169,31 +179,31 @@
 
     async function startCamera() {
       try {
-        // ✅ Force 1280x720 landscape
         stream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: "user",
-            width: { exact: 1280 },
-            height: { exact: 720 }
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            aspectRatio: 16 / 9
           },
           audio: false
         });
         video.srcObject = stream;
       } catch (err) {
-        alert("Camera access failed. Please allow camera permissions.");
+        alert("Please allow camera access to continue.");
         console.error(err);
       }
     }
 
     function takePhoto() {
       const canvas = document.createElement('canvas');
-      const vw = video.videoWidth;
-      const vh = video.videoHeight;
+      const vw = video.videoWidth || 1280;
+      const vh = video.videoHeight || 720;
       canvas.width = vw;
       canvas.height = vh;
       const ctx = canvas.getContext('2d');
       ctx.translate(canvas.width, 0);
-      ctx.scale(-1, 1); // mirror for selfie
+      ctx.scale(-1, 1);
       ctx.drawImage(video, 0, 0, vw, vh);
       return canvas.toDataURL('image/png');
     }
@@ -229,7 +239,7 @@
       startBtn.textContent = "Taking Photos...";
 
       for (let i = 0; i < 4; i++) {
-        await countdown(5);
+        await countdown(3);
         const photo = takePhoto();
         photos.push(photo);
         addThumbnail(photo);
@@ -260,13 +270,14 @@
       await startTakingPhotos();
     }
 
+    nextButton.addEventListener('click', () => {
+      if (photos.length < 4) return alert("Please take 4 photos first.");
+      window.location.href = "frames.html";
+    });
+
     startBtn.addEventListener('click', startTakingPhotos);
     retakeBtn.addEventListener('click', retakeSelectedPhoto);
     retakeAllBtn.addEventListener('click', retakeAll);
-    nextButton.addEventListener('click', () => {
-      if (photos.length < 4) return alert("Take 4 photos first!");
-      window.location.href = "frames.html";
-    });
 
     startCamera();
   </script>
