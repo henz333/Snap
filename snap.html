@@ -378,8 +378,8 @@
       try {
         const finalCanvas = await combinePhotos();
         const photoData = finalCanvas.toDataURL('image/png');
-        sessionstorage.setItem('finalPhoto', photoData);
-        sessionstorage.setItem('photos', JSON.stringify(photos));
+        sessionStorage.setItem('finalPhoto', photoData);
+        sessionStorage.setItem('photos', JSON.stringify(photos));
         window.location.href = 'frames.html';
       } catch (err) {
         alert("Error creating final image: " + err);
