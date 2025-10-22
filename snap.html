@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Take Snap</title>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2&family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
-
   <style>
     body {
       margin: 0;
@@ -63,9 +62,8 @@
       height: 100%;
       object-fit: cover;
       border-radius: 24px;
+      transform: scaleX(-1);
       display: block;
-      /* no mirroring! */
-      transform: none;
     }
 
     #timer {
@@ -83,27 +81,22 @@
       z-index: 5;
     }
 
-    #thumbnails {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      overflow-y: auto;
-      max-height: 540px;
-    }
-
     #thumbnails img {
       width: 160px;
       height: 120px;
       object-fit: contain;
       background-color: rgba(0, 0, 0, 0.2);
       border-radius: 14px;
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.25);
       border: 3px solid transparent;
       cursor: pointer;
       transition: transform 0.18s ease, border-color 0.18s ease;
       display: block;
       background: rgba(255,255,255,0.03);
     }
+
+    #thumbnails::-webkit-scrollbar { width: 8px; }
+    #thumbnails::-webkit-scrollbar-thumb { background: #FFD93D; border-radius: 10px; }
 
     #thumbnails img.selected {
       border-color: #FFD93D;
@@ -148,10 +141,31 @@
     }
 
     @media (max-width: 980px) {
-      main { flex-direction: column; align-items: center; }
-      #video-container { width: 480px; height: 270px; }
-      #thumbnails { flex-direction: row; max-height: none; }
-      #thumbnails img { width: 120px; height: 90px; }
+      main {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      #video-container {
+        width: 480px;
+        height: 270px;
+      }
+
+      #thumbnails {
+        flex-direction: row;
+        width: auto;
+        max-width: none;
+        overflow-x: hidden;
+        flex-wrap: nowrap;
+        justify-content: center;
+        gap: 12px;
+      }
+
+      #thumbnails img {
+        width: 120px;
+        height: 90px;
+        flex-shrink: 0;
+      }
     }
   </style>
 </head>
@@ -179,7 +193,6 @@
   <footer>Bringing smiles all around the world!</footer>
 
   <script>
-    const layout = 'landscape';
     const video = document.getElementById('video');
     const startBtn = document.getElementById('startBtn');
     const retakeBtn = document.getElementById('retakeBtn');
@@ -198,7 +211,8 @@
           video: {
             width: { ideal: 1280 },
             height: { ideal: 720 },
-            facingMode: "user"
+            aspectRatio: 16/9,
+            facingMode: "user" // still selfie camera
           },
           audio: false
         });
@@ -216,8 +230,10 @@
       canvas.width = vw;
       canvas.height = vh;
       const ctx = canvas.getContext('2d');
-      // No mirroring — draw exactly as seen
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1); // mirror for selfie
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       return canvas.toDataURL('image/png');
     }
 
@@ -233,6 +249,7 @@
     function addThumbnail(dataURL) {
       const img = document.createElement('img');
       img.src = dataURL;
+      img.alt = "Shot";
       thumbnails.appendChild(img);
       img.addEventListener('click', () => {
         [...thumbnails.children].forEach(i => i.classList.remove('selected'));
@@ -259,7 +276,6 @@
       }
 
       localStorage.setItem('photos', JSON.stringify(photos));
-
       startBtn.textContent = "Start Taking Photos";
       startBtn.disabled = false;
       retakeAllBtn.disabled = false;
