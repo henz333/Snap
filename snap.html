@@ -379,6 +379,7 @@
         const finalCanvas = await combinePhotos();
         const photoData = finalCanvas.toDataURL('image/png');
         localStorage.setItem('finalPhoto', photoData);
+        localStorage.setItem('photos', JSON.stringify(photos));
         window.location.href = 'frames.html';
       } catch (err) {
         alert("Error creating final image: " + err);
