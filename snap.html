@@ -7,7 +7,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2&family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
 
   <style>
-    /* Kept your original visual style with a few layout fixes */
     body {
       margin: 0;
       font-family: 'Poppins', sans-serif;
@@ -45,7 +44,6 @@
       box-sizing: border-box;
     }
 
-    /* FIXED container size so video never shrinks */
     #video-container {
       position: relative;
       background: rgba(255, 255, 255, 0.06);
@@ -66,7 +64,7 @@
       object-fit: cover;
       border-radius: 24px;
       transform: scaleX(-1);
-      display:block;
+      display: block;
     }
 
     #timer {
@@ -84,36 +82,22 @@
       z-index: 5;
     }
 
-    /* thumbnails column on the right */
-    #thumbnails img {
-  width: 160px;
-  height: 120px;
-  object-fit: contain;
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 14px;
-  box-shadow: 0 6px 12px rgba(0,0,0,0.25);
-  border: 3px solid transparent;
-  cursor: pointer;
-  transition: transform 0.18s ease, border-color 0.18s ease;
-  display:block;
-  background: rgba(255,255,255,0.03);
-}
-
-    #thumbnails::-webkit-scrollbar { width: 8px; }
-    #thumbnails::-webkit-scrollbar-thumb { background: #FFD93D; border-radius: 10px; }
-
     #thumbnails img {
       width: 160px;
       height: 120px;
-      object-fit: cover;
+      object-fit: contain;
+      background-color: rgba(0, 0, 0, 0.2);
       border-radius: 14px;
       box-shadow: 0 6px 12px rgba(0,0,0,0.25);
       border: 3px solid transparent;
       cursor: pointer;
       transition: transform 0.18s ease, border-color 0.18s ease;
-      display:block;
+      display: block;
       background: rgba(255,255,255,0.03);
     }
+
+    #thumbnails::-webkit-scrollbar { width: 8px; }
+    #thumbnails::-webkit-scrollbar-thumb { background: #FFD93D; border-radius: 10px; }
 
     #thumbnails img.selected {
       border-color: #FFD93D;
@@ -125,10 +109,10 @@
       margin-top: 18px;
       padding-bottom: 2rem;
       width: 100%;
-      display:flex;
-      justify-content:center;
+      display: flex;
+      justify-content: center;
       gap: 18px;
-      flex-wrap:wrap;
+      flex-wrap: wrap;
     }
 
     button {
@@ -184,7 +168,6 @@
         flex-shrink: 0;
       }
     }
-    
   </style>
 </head>
 
@@ -202,7 +185,6 @@
 
   <div id="controls">
     <button id="startBtn">Start Taking Photos</button>
-    <!-- Removed Retake Photos button as requested -->
     <button id="retakeBtn" disabled>Retake Selected Photo</button>
     <button id="retakeAllBtn" disabled>Retake All</button>
     <button id="nextButton" disabled>Next ➜</button>
@@ -212,7 +194,6 @@
   <footer>Bringing smiles all around the world!</footer>
 
   <script>
-    // keep variables in top scope
     const layout = localStorage.getItem('layout') || 'landscape';
     const video = document.getElementById('video');
     const startBtn = document.getElementById('startBtn');
@@ -223,10 +204,9 @@
     const timerEl = document.getElementById('timer');
 
     let stream;
-    let photos = [];           // array of dataURLs
-    let selectedIndex = -1;    // index for retake selected
+    let photos = [];
+    let selectedIndex = -1;
 
-    // camera start
     async function startCamera() {
       try {
         stream = await navigator.mediaDevices.getUserMedia({
@@ -243,7 +223,6 @@
       }
     }
 
-    // take a single photo (returns dataURL)
     function takeSinglePhoto() {
       const canvas = document.createElement('canvas');
       const vw = video.videoWidth || 1280;
@@ -254,11 +233,10 @@
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      ctx.setTransform(1,0,0,1,0,0);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       return canvas.toDataURL('image/png');
     }
 
-    // animated countdown
     async function countdown(seconds) {
       timerEl.style.opacity = '1';
       for (let i = seconds; i > 0; i--) {
@@ -268,17 +246,15 @@
       timerEl.style.opacity = '0';
     }
 
-    // add thumbnail element
     function addThumbnail(dataURL) {
       const img = document.createElement('img');
       img.src = dataURL;
       img.alt = "Shot";
       thumbnails.appendChild(img);
-      img.addEventListener('click', (e) => {
-        const imgs = Array.from(thumbnails.querySelectorAll('img'));
-        imgs.forEach(i => i.classList.remove('selected'));
+      img.addEventListener('click', () => {
+        [...thumbnails.children].forEach(i => i.classList.remove('selected'));
         img.classList.add('selected');
-        selectedIndex = imgs.indexOf(img);
+        selectedIndex = [...thumbnails.children].indexOf(img);
         retakeBtn.disabled = false;
       });
     }
@@ -290,7 +266,6 @@
       nextButton.disabled = true;
       photos = [];
       thumbnails.innerHTML = '';
-      // Change text but no longer switch to "Retake Photos"
       startBtn.textContent = "Taking Photos...";
 
       for (let i = 0; i < 4; i++) {
@@ -300,15 +275,13 @@
         addThumbnail(photo);
       }
 
-      // After photos taken, revert to original button text
+      // ✅ Save photos to localStorage for frames.html
+      localStorage.setItem('photos', JSON.stringify(photos));
+
       startBtn.textContent = "Start Taking Photos";
       startBtn.disabled = false;
       retakeAllBtn.disabled = false;
-      checkNextButton();
-    }
-
-    function checkNextButton() {
-      nextButton.disabled = photos.length !== 4;
+      nextButton.disabled = false;
     }
 
     async function retakeSelectedPhoto() {
@@ -321,13 +294,14 @@
       await countdown(3);
       const newPhoto = takeSinglePhoto();
       photos[selectedIndex] = newPhoto;
-      const imgs = thumbnails.querySelectorAll('img');
-      imgs[selectedIndex].src = newPhoto;
-      imgs[selectedIndex].classList.remove('selected');
+      thumbnails.children[selectedIndex].src = newPhoto;
+      thumbnails.children[selectedIndex].classList.remove('selected');
       selectedIndex = -1;
       retakeBtn.disabled = true;
       startBtn.disabled = false;
-      checkNextButton();
+
+      // ✅ Update saved photos
+      localStorage.setItem('photos', JSON.stringify(photos));
     }
 
     async function retakeAll() {
@@ -340,46 +314,12 @@
       await startTakingPhotos();
     }
 
-    function combinePhotos() {
-      return new Promise((resolve, reject) => {
-        if (photos.length < 4) return reject("Need 4 photos");
-        const canvas = document.createElement('canvas');
-        const singleW = 640;
-        const singleH = 480;
-        canvas.width = singleW * 4;
-        canvas.height = singleH;
-        const ctx = canvas.getContext('2d');
-
-        let loaded = 0;
-        let x = 0;
-        photos.forEach((src, i) => {
-          const img = new Image();
-          img.crossOrigin = "anonymous";
-          img.onload = () => {
-            ctx.drawImage(img, x, 0, singleW, singleH);
-            x += singleW;
-            loaded++;
-            if (loaded === photos.length) resolve(canvas);
-          };
-          img.onerror = () => {
-            loaded++;
-            x += singleW;
-            if (loaded === photos.length) resolve(canvas);
-          };
-          img.src = src;
-        });
-      });
-    }
-
-    nextButton.addEventListener('click', async () => {
-      try {
-        const finalCanvas = await combinePhotos();
-        const photoData = finalCanvas.toDataURL('image/png');
-        localStorage.setItem('finalPhoto', photoData);
-        window.location.href = 'frames.html';
-      } catch (err) {
-        alert("Error creating final image: " + err);
+    nextButton.addEventListener('click', () => {
+      if (photos.length < 4) {
+        alert("Please take 4 photos first.");
+        return;
       }
+      window.location.href = 'frames.html';
     });
 
     startBtn.addEventListener('click', startTakingPhotos);
