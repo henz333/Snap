@@ -175,6 +175,9 @@
     const backBtn = document.getElementById('backBtn');
 
     const photos = JSON.parse(localStorage.getItem('photos') || '[]');
+    localStorage.removeItem('finalPhoto');
+    console.log("Loaded photos:", photos);
+    
     if (!photos || photos.length < 4) {
       alert('No photos found — please take your 4 photos first.');
       window.location.href = 'snap.html';
