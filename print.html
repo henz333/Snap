@@ -1,1 +1,42 @@
+const printBtn = document.getElementById('printBtn');
 
+// Enable Print button when a frame is selected and preview rendered
+function updatePrintButtonState(enabled) {
+  printBtn.disabled = !enabled;
+}
+
+// Modify onFrameClick to enable Print button
+async function onFrameClick(index, div) {
+  // existing code...
+
+  printBtn.disabled = false; // enable print button when frame selected and preview loaded
+}
+
+// Print canvas function
+printBtn.addEventListener('click', () => {
+  if (!selectedFrameImg) return alert('Please select a frame first.');
+
+  const dataUrl = previewCanvas.toDataURL('image/png');
+  const printWindow = window.open('', '_blank');
+
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Print Preview</title>
+        <style>
+          body { margin: 0; padding: 0; text-align: center; }
+          img { max-width: 100%; height: auto; }
+          @media print {
+            body { margin: 0; }
+            img { max-width: 100%; }
+          }
+        </style>
+      </head>
+      <body>
+        <img src="${dataUrl}" onload="window.print(); window.close();" />
+      </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+});
