@@ -55,8 +55,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 560px;   /* wider to match your screenshot proportions */
-      height: 720px;
+      width: 960px;
+      height: 540px;
       flex-shrink: 0;
     }
 
@@ -156,7 +156,7 @@
 
     @media (max-width: 980px) {
       main { flex-direction: column; align-items:center; }
-      #video-container { width: 360px; height: 480px; }
+      #video-container { width: 480px; height: 270px; }
       #thumbnails { flex-direction: row; width: 100%; max-width: 360px; overflow-x:auto; gap:12px; }
       #thumbnails img { width: 120px; height: 90px; }
     }
@@ -186,7 +186,7 @@
 
   <script>
     // keep variables in top scope
-    const layout = localStorage.getItem('layout') || 'portrait';
+    const layout = localStorage.getItem('layout') || 'landscape';
     const video = document.getElementById('video');
     const startBtn = document.getElementById('startBtn');
     const retakeBtn = document.getElementById('retakeBtn');
@@ -224,7 +224,6 @@
       canvas.width = vw;
       canvas.height = vh;
       const ctx = canvas.getContext('2d');
-      // mirror to match preview visually
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -248,7 +247,6 @@
       img.src = dataURL;
       img.alt = "Shot";
       thumbnails.appendChild(img);
-      // ensure click selects
       img.addEventListener('click', (e) => {
         const imgs = Array.from(thumbnails.querySelectorAll('img'));
         imgs.forEach(i => i.classList.remove('selected'));
@@ -258,7 +256,6 @@
       });
     }
 
-    // take 4 photos sequence
     async function startTakingPhotos() {
       startBtn.disabled = true;
       retakeBtn.disabled = true;
@@ -269,7 +266,7 @@
       startBtn.textContent = "Taking Photos...";
 
       for (let i = 0; i < 4; i++) {
-        await countdown(5);           // original 5s countdown
+        await countdown(5);
         const photo = takeSinglePhoto();
         photos.push(photo);
         addThumbnail(photo);
@@ -281,12 +278,10 @@
       checkNextButton();
     }
 
-    // enable Next when exactly 4 photos present
     function checkNextButton() {
       nextButton.disabled = photos.length !== 4;
     }
 
-    // retake selected photo: replace index with new capture
     async function retakeSelectedPhoto() {
       if (selectedIndex === -1) {
         alert("Select a thumbnail to retake.");
@@ -306,7 +301,6 @@
       checkNextButton();
     }
 
-    // retake all: clears and runs sequence again
     async function retakeAll() {
       photos = [];
       thumbnails.innerHTML = '';
@@ -317,34 +311,30 @@
       await startTakingPhotos();
     }
 
-    // combine photos — wait for loaded Image objects before drawing
     function combinePhotos() {
       return new Promise((resolve, reject) => {
         if (photos.length < 4) return reject("Need 4 photos");
         const canvas = document.createElement('canvas');
-        // We will standardize output to 480x640 per single photo (portrait)
-        const singleW = 480;
-        const singleH = 640;
-        canvas.width = singleW;
-        canvas.height = singleH * 4;
+        const singleW = 640;
+        const singleH = 480;
+        canvas.width = singleW * 4;
+        canvas.height = singleH;
         const ctx = canvas.getContext('2d');
 
         let loaded = 0;
-        let y = 0;
+        let x = 0;
         photos.forEach((src, i) => {
           const img = new Image();
           img.crossOrigin = "anonymous";
           img.onload = () => {
-            // draw image covering the singleW x singleH area
-            ctx.drawImage(img, 0, y, singleW, singleH);
-            y += singleH;
+            ctx.drawImage(img, x, 0, singleW, singleH);
+            x += singleW;
             loaded++;
             if (loaded === photos.length) resolve(canvas);
           };
           img.onerror = () => {
-            // still increment so it doesn't hang
             loaded++;
-            y += singleH;
+            x += singleW;
             if (loaded === photos.length) resolve(canvas);
           };
           img.src = src;
@@ -352,7 +342,6 @@
       });
     }
 
-    // Next: combine & save, then redirect
     nextButton.addEventListener('click', async () => {
       try {
         const finalCanvas = await combinePhotos();
@@ -364,12 +353,10 @@
       }
     });
 
-    // wire UI
     startBtn.addEventListener('click', startTakingPhotos);
     retakeBtn.addEventListener('click', retakeSelectedPhoto);
     retakeAllBtn.addEventListener('click', retakeAll);
 
-    // start camera
     startCamera();
   </script>
 </body>
