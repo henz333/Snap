@@ -308,6 +308,7 @@
       startBtn.disabled = false;
       retakeAllBtn.disabled = false;
       checkNextButton();
+      sessionStorage.setItem('photos', JSON.stringify(photos));
     }
 
     function checkNextButton() {
