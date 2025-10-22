@@ -176,6 +176,7 @@
       window.location.href = "snap.html";
     }
 
+    // Load frame thumbnails
     for (let i = 1; i <= frameCount; i++) {
       const div = document.createElement('div');
       div.classList.add('frame');
@@ -197,32 +198,32 @@
       frameImg.src = frameSrc;
       frameImg.className = 'frame';
 
-      // Detect orientation by index
-      const isLandscape = (index >= 3);
+      // 👇 Corrected logic:
+      // frame1–2 = landscape (grid)
+      // frame3–6 = portrait (strip)
+      const isPortrait = (index >= 3);
 
-      // Portrait strips (frame1, frame2)
-      if (!isLandscape) {
+      if (isPortrait) {
+        // Portrait strip (tall)
         preview.style.aspectRatio = "2/3";
-
         for (let i = 0; i < 4; i++) {
           const img = document.createElement('img');
           img.src = photos[i];
           img.className = 'photo';
-          img.style.width = '70%';
-          img.style.height = '20%';
-          img.style.left = '15%';
-          img.style.top = `${10 + i * 23}%`;
+          img.style.width = '72%';
+          img.style.height = '21%';
+          img.style.left = '14%';
+          img.style.top = `${9 + i * 23.2}%`;
           preview.appendChild(img);
         }
-      } 
-      // Landscape (frame3-6)
-      else {
+      } else {
+        // Landscape grid (2x2)
         preview.style.aspectRatio = "3/2";
         const positions = [
-          { top: '8%', left: '6%' },
-          { top: '8%', left: '52%' },
-          { top: '54%', left: '6%' },
-          { top: '54%', left: '52%' }
+          { top: '8%', left: '5%' },
+          { top: '8%', left: '53%' },
+          { top: '54%', left: '5%' },
+          { top: '54%', left: '53%' }
         ];
         for (let i = 0; i < 4; i++) {
           const img = document.createElement('img');
