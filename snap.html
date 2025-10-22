@@ -275,7 +275,6 @@
         addThumbnail(photo);
       }
 
-      // ✅ Save photos to localStorage for frames.html
       localStorage.setItem('photos', JSON.stringify(photos));
 
       startBtn.textContent = "Start Taking Photos";
@@ -300,7 +299,6 @@
       retakeBtn.disabled = true;
       startBtn.disabled = false;
 
-      // ✅ Update saved photos
       localStorage.setItem('photos', JSON.stringify(photos));
     }
 
