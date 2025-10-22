@@ -1,267 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Select Frame — abcSnap</title>
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    :root{--blue1:#1E3C72; --blue2:#2A5298; --yellow:#FFD93D; --accent:#2A5298}
-    body{margin:0;font-family:'Poppins',sans-serif;background:linear-gradient(135deg,var(--blue1),var(--blue2));color:#fff;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:24px;box-sizing:border-box}
-    h1{font-family:'Baloo 2',cursive;color:var(--yellow);margin:0 0 8px;font-size:2rem}
-    p.lead{margin:0 0 18px;color:rgba(255,255,255,0.9)}
-    .layout{display:flex;gap:24px;width:100%;max-width:1400px;align-items:flex-start;justify-content:center;flex-wrap:wrap}
-    .frame-grid{width:480px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-    .frame{background:rgba(255,255,255,0.06);border-radius:12px;padding:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s,box-shadow .15s}
-    .frame:hover{transform:translateY(-6px);box-shadow:0 10px 30px rgba(0,0,0,0.35)}
-    .frame img{width:100%;height:auto;border-radius:8px;object-fit:contain;display:block}
-    #preview-container{width:540px;min-height:640px;background:rgba(255,255,255,0.06);border-radius:14px;padding:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,0.35)}
-    #preview-title{color:rgba(255,255,255,0.9);margin-bottom:8px;font-weight:600}
-    #preview-canvas{background:#111;border-radius:8px;max-width:100%;height:auto;display:block}
-    .help{font-size:0.9rem;color:rgba(255,255,255,0.7);margin-top:10px}
-    .controls{margin-top:16px;display:flex;gap:12px;flex-wrap:wrap}
-    button.primary{background:var(--yellow);color:var(--accent);border:none;padding:12px 18px;border-radius:10px;font-weight:700;cursor:pointer;box-shadow:0 10px 20px rgba(0,0,0,0.2)}
-    button.ghost{background:transparent;color:rgba(255,255,255,0.9);border:1px solid rgba(255,255,255,0.08);padding:10px 14px;border-radius:10px;cursor:pointer}
-    footer{margin-top:28px;color:rgba(255,255,255,0.7);font-size:0.9rem}
-    @media (max-width:1000px){ .layout{flex-direction:column;align-items:center} .frame-grid{width:90%;grid-template-columns:repeat(3,1fr)} #preview-container{width:90%} }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Select Frame – abcSnap</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  body {
+    margin:0;
+    font-family:'Poppins',sans-serif;
+    background:linear-gradient(135deg,#1E3C72,#2A5298);
+    color:#fff;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  header{
+    font-family:'Baloo 2',cursive;
+    font-size:2rem;
+    color:#FFD93D;
+    text-align:center;
+    padding:1.2rem;
+    width:100%;
+    background:rgba(255,255,255,0.08);
+    backdrop-filter:blur(10px);
+    box-shadow:0 4px 12px rgba(0,0,0,0.3);
+  }
+  main{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    align-items:flex-start;
+    gap:2rem;
+    padding:2rem;
+    width:100%;
+    max-width:1300px;
+    box-sizing:border-box;
+  }
+  .frame-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:1rem;
+    max-width:400px;
+    flex-shrink:0;
+  }
+  .frame{
+    background:rgba(255,255,255,0.1);
+    border-radius:18px;
+    overflow:hidden;
+    cursor:pointer;
+    transition:transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .frame:hover{transform:scale(1.05);box-shadow:0 0 20px rgba(255,217,61,0.5);}
+  .frame img{width:100%;display:block;border-radius:18px;}
+  #preview-area{
+    flex:1;
+    max-width:800px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+  }
+  #preview-canvas{
+    background:rgba(255,255,255,0.1);
+    border-radius:20px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.3);
+    max-width:100%;
+  }
+  #nextBtn{
+    background-color:#FFD93D;
+    color:#2A5298;
+    border:none;
+    border-radius:30px;
+    font-family:'Poppins',sans-serif;
+    font-weight:600;
+    padding:1rem 2.5rem;
+    margin-top:1.5rem;
+    font-size:1.1rem;
+    cursor:pointer;
+    box-shadow:0 6px 14px rgba(0,0,0,0.2);
+    transition:transform 0.2s ease;
+  }
+  #nextBtn:hover{transform:scale(1.05);}
+  footer{
+    margin-top:auto;
+    text-align:center;
+    padding:1rem;
+    color:rgba(255,255,255,0.7);
+  }
+  @media(max-width:900px){
+    main{flex-direction:column;align-items:center;}
+    .frame-grid{grid-template-columns:repeat(3,1fr);}
+  }
+</style>
 </head>
 <body>
-  <h1>🎨 Choose Your Frame</h1>
-  <p class="lead">Click a frame on the left — preview will show on the right. When it looks good, press <strong>Confirm Frame</strong>.</p>
-
-  <div class="layout">
-    <div class="frame-grid" id="frameGrid"></div>
-
-    <div id="preview-container" aria-live="polite">
-      <div id="preview-title">Preview</div>
-      <!-- previewCanvas will show the composite preview (photos behind frame) -->
-      <canvas id="preview-canvas"></canvas>
-      <div class="help">Preview updates immediately when you click a frame. Confirm to continue.</div>
-
-      <div class="controls">
-        <button id="confirmBtn" class="primary" disabled>Confirm Frame</button>
-        <button id="backBtn" class="ghost">Back to Capture</button>
-      </div>
-    </div>
+<header>🎨 Choose Your Frame – abcSnap</header>
+<main>
+  <div class="frame-grid" id="frameGrid"></div>
+  <div id="preview-area">
+    <canvas id="preview-canvas" width="800" height="600"></canvas>
+    <button id="nextBtn">Next / Print</button>
   </div>
+</main>
+<footer>abcSnap Booth — Business Week 2025</footer>
 
-  <footer>abcSnap Booth — Business Week 2025</footer>
+<script>
+const frameGrid=document.getElementById("frameGrid");
+const frameCount=6;
+const canvas=document.getElementById("preview-canvas");
+const ctx=canvas.getContext("2d");
+const nextBtn=document.getElementById("nextBtn");
+let selectedFrame=null;
 
-  <script>
-  (function(){
-    // ----------------------------
-    // Measurements provided by you
-    // ----------------------------
-    // GRID frames (frames 1-4)
-    const GRID = {
-      x: 55,           // top-left X of top-left hole
-      y: 515,          // top-left Y of top-left hole
-      w: 798,          // width of one hole
-      h: 461,          // height of one hole
-      gapX: 837,       // horizontal distance from left-hole X to right-hole X
-      gapY: 489        // vertical distance from top-hole Y to bottom-hole Y
-    };
+// Load thumbnails
+for(let i=1;i<=frameCount;i++){
+  const div=document.createElement("div");
+  div.classList.add("frame");
+  div.innerHTML=`<img src="frames/frame${i}.png" alt="Frame ${i}">`;
+  div.addEventListener("click",()=>selectFrame(i));
+  frameGrid.appendChild(div);
+}
 
-    // STRIP frames (frames 5-6)
-    const STRIP = {
-      x: 43,
-      y: 418,
-      w: 621,
-      h: 375,
-      gapY: 427
-    };
+// Get photos from snap.html
+const combinedPhoto=localStorage.getItem("finalPhoto");
+let photos=[];
+if(!combinedPhoto){
+  const stored=localStorage.getItem("photoArray");
+  if(stored) photos=JSON.parse(stored);
+}else{
+  const img=new Image();
+  img.src=combinedPhoto;
+  photos.push(img.src);
+}
 
-    // Frames count and mapping:
-    // frames 1-4 => GRID, frames 5-6 => STRIP
-    const GRID_INDICES = [1,2,3,4];
-    const STRIP_INDICES = [5,6];
-    const FRAME_COUNT = 6;
-
-    // DOM
-    const frameGrid = document.getElementById('frameGrid');
-    const previewCanvas = document.getElementById('preview-canvas');
-    const confirmBtn = document.getElementById('confirmBtn');
-    const backBtn = document.getElementById('backBtn');
-
-    // Load captured photos (dataURLs) from localStorage
-    const photos = JSON.parse(localStorage.getItem('photos') || '[]');
-    if (!photos || photos.length < 4) {
-      alert('No photos found — please take your 4 photos first.');
-      window.location.href = 'snap.html';
-      return;
+// draw scaled
+function drawImageFit(src,x,y,w,h){
+  const img=new Image();
+  img.onload=function(){
+    const aspectSrc=img.width/img.height;
+    const aspectDst=w/h;
+    let drawW=w, drawH=h, dx=x, dy=y;
+    if(aspectSrc>aspectDst){
+      drawW=h*aspectSrc;
+      dx=x+(w-drawW)/2;
+    }else{
+      drawH=w/aspectSrc;
+      dy=y+(h-drawH)/2;
     }
+    ctx.drawImage(img,dx,dy,drawW,drawH);
+  }
+  img.src=src;
+}
 
-    // Build thumbnail grid
-    for (let i = 1; i <= FRAME_COUNT; i++) {
-      const div = document.createElement('div');
-      div.className = 'frame';
-      div.innerHTML = `<img src="frames/frame${i}.png" alt="Frame ${i}" data-index="${i}">`;
-      div.addEventListener('click', () => onFrameClick(i));
-      frameGrid.appendChild(div);
+// coordinates
+function getCoords(frameNum){
+  if(frameNum<=4){ // grid
+    return [
+      {x:55,y:515,w:798,h:461},
+      {x:55+837,y:515,w:798,h:461},
+      {x:55,y:515+489,w:798,h:461},
+      {x:55+837,y:515+489,w:798,h:461}
+    ];
+  }else{ // strip
+    return [
+      {x:43,y:418,w:621,h:375},
+      {x:43,y:418+427,w:621,h:375},
+      {x:43,y:418+427*2,w:621,h:375},
+      {x:43,y:418+427*3,w:621,h:375}
+    ];
+  }
+}
+
+// select frame
+function selectFrame(i){
+  selectedFrame=i;
+  const frameImg=new Image();
+  frameImg.onload=function(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    // scale frame to canvas
+    canvas.width=frameImg.width;
+    canvas.height=frameImg.height;
+    // draw photos first
+    const coords=getCoords(i);
+    const storedPhotos=JSON.parse(localStorage.getItem("photos")||"[]");
+    for(let p=0;p<Math.min(4,storedPhotos.length);p++){
+      drawImageFit(storedPhotos[p],coords[p].x,coords[p].y,coords[p].w,coords[p].h);
     }
+    // draw frame on top
+    ctx.drawImage(frameImg,0,0,canvas.width,canvas.height);
+  };
+  frameImg.src=`frames/frame${i}.png`;
+}
 
-    // Preview state
-    let selectedFrameIndex = null;
-    let selectedFrameImg = null; // HTMLImageElement
-
-    // Helper: create Image from src returning promise
-    function loadImage(src) {
-      return new Promise((res, rej) => {
-        const img = new Image();
-        img.onload = () => res(img);
-        img.onerror = (e) => rej(e);
-        img.src = src;
-        // important: dataURLs and local frames should load fine without crossOrigin
-      });
-    }
-
-    // Called when a frame thumbnail is clicked
-    async function onFrameClick(index){
-      selectedFrameIndex = index;
-      confirmBtn.disabled = false;
-
-      const frameSrc = `frames/frame${index}.png`;
-      try {
-        selectedFrameImg = await loadImage(frameSrc);
-      } catch (e) {
-        alert('Failed loading frame image: ' + frameSrc);
-        console.error(e);
-        return;
-      }
-
-      // Determine whether this is GRID or STRIP
-      const isGrid = GRID_INDICES.includes(index);
-
-      // Compute canvas size for preview:
-      // we want preview to match frame's natural aspect ratio; preview canvas width limited by container.
-      const frameNaturalW = selectedFrameImg.naturalWidth || selectedFrameImg.width;
-      const frameNaturalH = selectedFrameImg.naturalHeight || selectedFrameImg.height;
-
-      // Choose preview display width in CSS pixels (fit into preview container)
-      const container = document.getElementById('preview-container');
-      const maxPreviewWidth = Math.min(540 - 24, container.clientWidth - 24); // small padding
-      // set canvas width to fit container while keeping aspect ratio
-      const displayW = Math.floor(maxPreviewWidth);
-      const displayH = Math.floor(displayW * (frameNaturalH / frameNaturalW));
-
-      previewCanvas.width = frameNaturalW;    // canvas internal (natural) size for crispness
-      previewCanvas.height = frameNaturalH;
-      previewCanvas.style.width = displayW + 'px';   // CSS display size
-      previewCanvas.style.height = displayH + 'px';
-
-      // Draw composite at natural resolution, then scaled via CSS
-      const ctx = previewCanvas.getContext('2d');
-      ctx.clearRect(0,0,previewCanvas.width, previewCanvas.height);
-
-      // Draw photos into their exact natural coordinates (based on your measurements)
-      if (isGrid) {
-        // positions: top-left, top-right, bottom-left, bottom-right
-        const coords = [
-          {x: GRID.x, y: GRID.y},
-          {x: GRID.x + GRID.gapX, y: GRID.y},
-          {x: GRID.x, y: GRID.y + GRID.gapY},
-          {x: GRID.x + GRID.gapX, y: GRID.y + GRID.gapY}
-        ];
-
-        for (let i=0;i<4;i++){
-          const pos = coords[i];
-          await drawPhotoToContext(ctx, photos[i], pos.x, pos.y, GRID.w, GRID.h);
-        }
-      } else {
-        // strip: four stacked boxes, starting at STRIP.x, STRIP.y
-        for (let i=0;i<4;i++){
-          const posY = STRIP.y + i * STRIP.gapY;
-          await drawPhotoToContext(ctx, photos[i], STRIP.x, posY, STRIP.w, STRIP.h);
-        }
-      }
-
-      // Finally draw the frame PNG on top (so transparency shows photos below)
-      ctx.drawImage(selectedFrameImg, 0, 0, previewCanvas.width, previewCanvas.height);
-
-      // Store current preview natural resolution in memory for confirm step
-      previewCanvas.dataset.naturalWidth = previewCanvas.width;
-      previewCanvas.dataset.naturalHeight = previewCanvas.height;
-      previewCanvas.dataset.frameSrc = frameSrc;
-    }
-
-    // Draw a photo (which may be a dataURL) into ctx at exact coordinates with cover-crop behavior
-    // We will do a cover fit: fill the target box while preserving aspect ratio, cropping overflow.
-    async function drawPhotoToContext(ctx, photoSrc, targetX, targetY, targetW, targetH){
-      const img = await loadImage(photoSrc);
-      // compute scale to cover
-      const imgW = img.naturalWidth;
-      const imgH = img.naturalHeight;
-      const scale = Math.max(targetW / imgW, targetH / imgH);
-      const drawW = Math.round(imgW * scale);
-      const drawH = Math.round(imgH * scale);
-      // center the image inside the target box
-      const offsetX = Math.round(targetX - (drawW - targetW) / 2);
-      const offsetY = Math.round(targetY - (drawH - targetH) / 2);
-      ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
-    }
-
-    // Confirm button: build a final composite at natural resolution and save to localStorage
-    confirmBtn.addEventListener('click', async () => {
-      if (!selectedFrameIndex || !previewCanvas.dataset.frameSrc) {
-        alert('Select a frame first');
-        return;
-      }
-
-      // Use the same natural resolution canvas (previewCanvas is already natural sized)
-      const finalCanvas = document.createElement('canvas');
-      finalCanvas.width = previewCanvas.width;
-      finalCanvas.height = previewCanvas.height;
-      const fctx = finalCanvas.getContext('2d');
-
-      // Load selected frame image again to ensure full-size drawing
-      const frameImg = await loadImage(previewCanvas.dataset.frameSrc);
-
-      // Determine group
-      const isGrid = GRID_INDICES.includes(selectedFrameIndex);
-
-      if (isGrid) {
-        const coords = [
-          {x: GRID.x, y: GRID.y},
-          {x: GRID.x + GRID.gapX, y: GRID.y},
-          {x: GRID.x, y: GRID.y + GRID.gapY},
-          {x: GRID.x + GRID.gapX, y: GRID.y + GRID.gapY}
-        ];
-        for (let i=0;i<4;i++) {
-          await drawPhotoToContext(fctx, photos[i], coords[i].x, coords[i].y, GRID.w, GRID.h);
-        }
-      } else {
-        for (let i=0;i<4;i++) {
-          const posY = STRIP.y + i * STRIP.gapY;
-          await drawPhotoToContext(fctx, photos[i], STRIP.x, posY, STRIP.w, STRIP.h);
-        }
-      }
-
-      // draw frame on top
-      fctx.drawImage(frameImg, 0, 0, finalCanvas.width, finalCanvas.height);
-
-      // Save final composite dataURL
-      const finalDataURL = finalCanvas.toDataURL('image/png');
-      localStorage.setItem('finalPhoto', finalDataURL);
-      localStorage.setItem('selectedFrame', `frames/frame${selectedFrameIndex}.png`);
-
-      // Optional: also save which layout used
-      localStorage.setItem('selectedFrameIndex', String(selectedFrameIndex));
-
-      // go to print page (exists or will be created). If you want different behavior, change this.
-      window.location.href = 'print.html';
-    });
-
-    // Back button
-    backBtn.addEventListener('click', () => {
-      window.location.href = 'snap.html';
-    });
-
-    // If user loaded on small screen and hasn't selected a frame, render the first one selected for clarity
-    // (optional) you may remove this to start blank
-    // onFrameClick(1);
-
-  })();
-  </script>
+nextBtn.addEventListener("click",()=>{
+  if(!selectedFrame){alert("Please select a frame first!");return;}
+  alert("Next / Print feature coming soon!");
+});
+</script>
 </body>
 </html>
