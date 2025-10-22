@@ -7,21 +7,51 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2&display=swap" rel="stylesheet" />
   <style>
-    body {
+    :root {
+      --primary: #3D5AF1;
+      --secondary: #1E3799;
+      --accent: #FFD93D;
+      --text-light: #EAF0FF;
+      --white: #ffffff;
+    }
+
+    /* RESET + BASE STYLES */
+    * {
       margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
       font-family: 'Baloo 2', cursive;
-      background: linear-gradient(180deg, #3D5AF1 0%, #1E3799 100%);
-      color: #ffffff;
+      background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
+      color: var(--text-light);
       display: flex;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      text-align: center;
+      padding: 1rem;
+      overflow: hidden;
     }
 
     .container {
-      padding: 2rem;
-      max-width: 600px;
+      background-color: rgba(255, 255, 255, 0.05);
+      padding: 2.5rem;
+      border-radius: 20px;
+      max-width: 500px;
+      width: 100%;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      text-align: center;
+      backdrop-filter: blur(10px);
+      z-index: 1;
+      opacity: 0;
+      animation: fadeIn 1s ease 0.5s forwards;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
     }
 
     .logo-wrapper {
@@ -34,64 +64,110 @@
     .logo-wrapper img {
       width: 60px;
       height: 60px;
-      object-fit: contain;
       margin-right: 0.8rem;
     }
 
     .logo-wrapper h1 {
-      font-size: 3rem;
-      margin: 0;
-      color: #FFD93D;
+      font-size: 2.8rem;
+      color: var(--accent);
     }
 
     p {
-      font-size: 1.2rem;
-      margin-bottom: 2.5rem;
-      color: #EAF0FF;
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+      line-height: 1.5;
     }
 
     .start-button {
-      background-color: #FFD93D;
-      color: #3D5AF1;
+      background-color: var(--accent);
+      color: var(--primary);
       padding: 1rem 2rem;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       border: none;
-      border-radius: 12px;
+      border-radius: 14px;
       text-decoration: none;
       font-weight: bold;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
+      transition: all 0.3s ease;
+      cursor: pointer;
       display: inline-block;
     }
 
     .start-button:hover {
-      transform: scale(1.05);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
     }
 
     footer {
-      margin-top: 3rem;
-      font-size: 0.9rem;
-      color: rgba(255, 255, 255, 0.8);
+      margin-top: 2.5rem;
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.75);
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 600px) {
+      .container {
+        padding: 2rem;
+      }
+
       .logo-wrapper h1 {
         font-size: 2.2rem;
       }
+
       .logo-wrapper img {
         width: 50px;
         height: 50px;
       }
+
       .start-button {
         font-size: 1rem;
         padding: 0.8rem 1.6rem;
+      }
+    }
+
+    /* === LOADING OVERLAY === */
+    .loader-wrapper {
+      position: fixed;
+      inset: 0;
+      background-color: #1E3799;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      animation: fadeOut 1s ease 0.8s forwards;
+      pointer-events: none;
+    }
+
+    .loader {
+      border: 6px solid rgba(255, 255, 255, 0.2);
+      border-top: 6px solid var(--accent);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes fadeOut {
+      to {
+        opacity: 0;
+        visibility: hidden;
       }
     }
   </style>
 </head>
 
 <body>
+  <!-- Loading Spinner -->
+  <div class="loader-wrapper">
+    <div class="loader"></div>
+  </div>
+
+  <!-- Main Content -->
   <main class="container">
     <div class="logo-wrapper">
       <img src="https://cdn-icons-png.flaticon.com/512/8795/8795821.png" alt="Camera Icon" />
