@@ -15,21 +15,22 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: flex-start;
       min-height: 100vh;
-      padding: 1.5rem;
+      padding: 2rem;
       box-sizing: border-box;
     }
 
     h1 {
       font-family: 'Baloo 2', cursive;
       color: #FFD93D;
-      font-size: 2.3rem;
+      font-size: 2.4rem;
       margin-bottom: 1rem;
     }
 
     p {
       color: rgba(255,255,255,0.85);
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
       text-align: center;
     }
 
@@ -39,25 +40,25 @@
       align-items: flex-start;
       gap: 2rem;
       width: 100%;
-      max-width: 1200px;
+      max-width: 1300px;
+      flex-wrap: nowrap;
     }
 
-    /* Left side: frame choices */
+    /* left: frame selector */
     .frame-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 1.2rem;
-      width: 100%;
-      max-width: 480px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      width: 40%;
+      max-width: 450px;
     }
 
     .frame {
-      position: relative;
       background: rgba(255,255,255,0.08);
       border-radius: 16px;
-      padding: 1rem;
+      padding: 0.8rem;
       cursor: pointer;
-      transition: all 0.25s ease;
+      transition: all 0.2s ease;
     }
 
     .frame:hover {
@@ -72,11 +73,12 @@
 
     .frame img {
       width: 100%;
-      border-radius: 12px;
+      border-radius: 10px;
       object-fit: contain;
+      background: rgba(255,255,255,0.1);
     }
 
-    /* Right side: preview */
+    /* right: preview */
     .preview {
       flex: 1;
       background: rgba(255,255,255,0.08);
@@ -87,12 +89,14 @@
       align-items: center;
       justify-content: center;
       box-shadow: 0 0 25px rgba(0,0,0,0.3);
+      height: 600px;
     }
 
     #previewCanvas {
       max-width: 100%;
-      height: auto;
+      max-height: 500px;
       border-radius: 12px;
+      background: #000;
     }
 
     #nextBtn {
@@ -100,7 +104,6 @@
       background-color: #FFD93D;
       color: #2A5298;
       font-weight: 600;
-      font-family: 'Poppins', sans-serif;
       border: none;
       padding: 0.9rem 2rem;
       border-radius: 25px;
@@ -115,52 +118,36 @@
     }
 
     @media (max-width: 900px) {
-      main {
-        flex-direction: column;
-        align-items: center;
-      }
-      .preview {
-        width: 100%;
-        margin-top: 2rem;
-      }
+      main { flex-direction: column; align-items: center; }
+      .frame-grid { width: 100%; max-width: 500px; }
+      .preview { width: 100%; height: auto; margin-top: 2rem; }
     }
   </style>
 </head>
 
 <body>
   <h1>🎨 Choose Your Frame</h1>
-  <p>Select a frame to see your photos placed perfectly inside it.</p>
+  <p>Select a frame — your photos will appear on the right in preview.</p>
 
   <main>
     <div class="frame-grid" id="frameGrid"></div>
-
     <div class="preview">
-      <canvas id="previewCanvas" width="1280" height="720"></canvas>
+      <canvas id="previewCanvas" width="1748" height="1240"></canvas>
       <button id="nextBtn" disabled>Next ➜</button>
     </div>
   </main>
 
   <script>
     const frameGrid = document.getElementById('frameGrid');
-    const frameCount = 6;
     const previewCanvas = document.getElementById('previewCanvas');
     const ctx = previewCanvas.getContext('2d');
     const nextBtn = document.getElementById('nextBtn');
 
+    const frameCount = 6;
     let selectedFrame = null;
-    let photos = JSON.parse(localStorage.getItem('photoArray')) || [];
-    let frameImage = new Image();
+    const photos = JSON.parse(localStorage.getItem('photoArray')) || [];
 
-    // build frame thumbnails
-    for (let i = 1; i <= frameCount; i++) {
-      const div = document.createElement('div');
-      div.classList.add('frame');
-      div.innerHTML = `<img src="frames/frame${i}.png" alt="Frame ${i}">`;
-      div.addEventListener('click', () => selectFrame(i, div));
-      frameGrid.appendChild(div);
-    }
-
-    // define coordinates for grid and strip
+    // Coordinates scaled to match 1748x1240 (grid) and 707x2000 (strip)
     const frameLayouts = {
       grid: [
         {x:55, y:515, w:798, h:461},
@@ -176,47 +163,54 @@
       ]
     };
 
-    function selectFrame(index, element) {
+    // Build frame thumbnails
+    for (let i = 1; i <= frameCount; i++) {
+      const div = document.createElement('div');
+      div.classList.add('frame');
+      div.innerHTML = `<img src="frames/frame${i}.png" alt="Frame ${i}">`;
+      div.addEventListener('click', () => selectFrame(i, div));
+      frameGrid.appendChild(div);
+    }
+
+    async function selectFrame(index, element) {
       document.querySelectorAll('.frame').forEach(f => f.classList.remove('selected'));
       element.classList.add('selected');
       selectedFrame = index;
       nextBtn.disabled = false;
-
-      drawPreview(index);
+      await drawPreview(index);
     }
 
     async function drawPreview(index) {
       const frameType = index <= 4 ? 'grid' : 'strip';
       const layout = frameLayouts[frameType];
 
-      // clear preview
+      // Clear canvas
       ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
 
-      // draw photos behind transparent areas
-      const imgPromises = photos.map((src) => new Promise((resolve) => {
-        const img = new Image();
-        img.src = src;
-        img.onload = () => resolve(img);
-      }));
-
-      const loadedImgs = await Promise.all(imgPromises);
+      // Draw photos first (behind transparent areas)
+      const loadedImages = await Promise.all(
+        photos.map(src => new Promise(resolve => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.src = src;
+        }))
+      );
 
       layout.forEach((pos, i) => {
-        const img = loadedImgs[i];
+        const img = loadedImages[i];
         if (img) ctx.drawImage(img, pos.x, pos.y, pos.w, pos.h);
       });
 
-      // overlay frame on top
-      frameImage = new Image();
-      frameImage.src = `frames/frame${index}.png`;
-      await new Promise(r => frameImage.onload = r);
-      ctx.drawImage(frameImage, 0, 0, previewCanvas.width, previewCanvas.height);
+      // Draw frame overlay
+      const frameImg = new Image();
+      frameImg.onload = () => ctx.drawImage(frameImg, 0, 0, previewCanvas.width, previewCanvas.height);
+      frameImg.src = `frames/frame${index}.png`;
     }
 
     nextBtn.addEventListener('click', () => {
       const finalImage = previewCanvas.toDataURL('image/png');
       localStorage.setItem('framedPhoto', finalImage);
-      alert("Frame applied successfully!");
+      alert("Frame applied! Ready for printing next.");
       // window.location.href = 'print.html';
     });
   </script>
