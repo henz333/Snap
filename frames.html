@@ -1,218 +1,196 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Select Frame - abcSnap</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Select Frame — abcSnap</title>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-
   <style>
-    body {
-      margin: 0;
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #1E3C72, #2A5298);
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
-      padding: 2rem;
-      box-sizing: border-box;
-    }
-
-    h1 {
-      font-family: 'Baloo 2', cursive;
-      color: #FFD93D;
-      font-size: 2.4rem;
-      margin-bottom: 1rem;
-    }
-
-    p {
-      color: rgba(255,255,255,0.85);
-      margin-bottom: 2rem;
-      text-align: center;
-    }
-
-    main {
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      gap: 2rem;
-      width: 100%;
-      max-width: 1300px;
-      flex-wrap: nowrap;
-    }
-
-    /* left: frame selector */
-    .frame-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-      width: 40%;
-      max-width: 450px;
-    }
-
-    .frame {
-      background: rgba(255,255,255,0.08);
-      border-radius: 16px;
-      padding: 0.8rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .frame:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 20px rgba(255, 217, 61, 0.6);
-    }
-
-    .frame.selected {
-      outline: 3px solid #FFD93D;
-      box-shadow: 0 0 20px rgba(255, 217, 61, 0.8);
-    }
-
-    .frame img {
-      width: 100%;
-      border-radius: 10px;
-      object-fit: contain;
-      background: rgba(255,255,255,0.1);
-    }
-
-    /* right: preview */
-    .preview {
-      flex: 1;
-      background: rgba(255,255,255,0.08);
-      border-radius: 20px;
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 25px rgba(0,0,0,0.3);
-      height: 600px;
-    }
-
-    #previewCanvas {
-      max-width: 100%;
-      max-height: 500px;
-      border-radius: 12px;
-      background: #000;
-    }
-
-    #nextBtn {
-      margin-top: 1.5rem;
-      background-color: #FFD93D;
-      color: #2A5298;
-      font-weight: 600;
-      border: none;
-      padding: 0.9rem 2rem;
-      border-radius: 25px;
-      font-size: 1.1rem;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      transition: transform 0.2s ease;
-    }
-
-    #nextBtn:hover {
-      transform: scale(1.05);
-    }
-
-    @media (max-width: 900px) {
-      main { flex-direction: column; align-items: center; }
-      .frame-grid { width: 100%; max-width: 500px; }
-      .preview { width: 100%; height: auto; margin-top: 2rem; }
-    }
+    :root{--blue1:#1E3C72;--blue2:#2A5298;--yellow:#FFD93D;--accent:#2A5298}
+    body{margin:0;font-family:'Poppins',sans-serif;background:linear-gradient(135deg,var(--blue1),var(--blue2));color:#fff;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:24px;box-sizing:border-box}
+    h1{font-family:'Baloo 2',cursive;color:var(--yellow);margin:0 0 8px;font-size:2rem}
+    p.lead{margin:0 0 18px;color:rgba(255,255,255,0.9)}
+    .layout{display:flex;gap:24px;width:100%;max-width:1400px;align-items:flex-start;justify-content:center;flex-wrap:wrap}
+    .frame-grid{width:480px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .frame{background:rgba(255,255,255,0.06);border-radius:12px;padding:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s,box-shadow .15s}
+    .frame:hover{transform:translateY(-6px);box-shadow:0 10px 30px rgba(0,0,0,0.35)}
+    .frame.selected{outline:3px solid var(--yellow);box-shadow:0 0 25px rgba(255,217,61,0.8)}
+    .frame img{width:100%;height:auto;border-radius:8px;object-fit:contain;display:block}
+    #preview-container{width:540px;min-height:640px;background:rgba(255,255,255,0.06);border-radius:14px;padding:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,0.35)}
+    #preview-title{color:rgba(255,255,255,0.9);margin-bottom:8px;font-weight:600}
+    #preview-canvas{background:#111;border-radius:8px;max-width:100%;height:auto;display:block}
+    .help{font-size:0.9rem;color:rgba(255,255,255,0.7);margin-top:10px;text-align:center}
+    .controls{margin-top:16px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+    button.primary{background:var(--yellow);color:var(--accent);border:none;padding:12px 18px;border-radius:10px;font-weight:700;cursor:pointer;box-shadow:0 10px 20px rgba(0,0,0,0.2)}
+    button.ghost{background:transparent;color:rgba(255,255,255,0.9);border:1px solid rgba(255,255,255,0.08);padding:10px 14px;border-radius:10px;cursor:pointer}
+    footer{margin-top:28px;color:rgba(255,255,255,0.7);font-size:0.9rem}
+    @media(max-width:1000px){.layout{flex-direction:column;align-items:center}.frame-grid{width:90%;grid-template-columns:repeat(3,1fr)}#preview-container{width:90%}}
   </style>
 </head>
-
 <body>
   <h1>🎨 Choose Your Frame</h1>
-  <p>Select a frame — your photos will appear on the right in preview.</p>
+  <p class="lead">Click a frame on the left — preview will show on the right. When it looks good, press <strong>Confirm Frame</strong>.</p>
 
-  <main>
+  <div class="layout">
     <div class="frame-grid" id="frameGrid"></div>
-    <div class="preview">
-      <canvas id="previewCanvas" width="1748" height="1240"></canvas>
-      <button id="nextBtn" disabled>Next ➜</button>
+
+    <div id="preview-container">
+      <div id="preview-title">Preview</div>
+      <canvas id="preview-canvas"></canvas>
+      <div class="help">Preview updates immediately when you click a frame. Confirm to continue.</div>
+
+      <div class="controls">
+        <button id="confirmBtn" class="primary" disabled>Confirm Frame</button>
+        <button id="backBtn" class="ghost">Back to Capture</button>
+      </div>
     </div>
-  </main>
+  </div>
+
+  <footer>abcSnap Booth — Business Week 2025</footer>
 
   <script>
-    const frameGrid = document.getElementById('frameGrid');
-    const previewCanvas = document.getElementById('previewCanvas');
-    const ctx = previewCanvas.getContext('2d');
-    const nextBtn = document.getElementById('nextBtn');
+  (function(){
+    // ---------- Frame Coordinates ----------
+    const GRID = {x:55,y:515,w:798,h:461,gapX:837,gapY:489};
+    const STRIP = {x:43,y:418,w:621,h:375,gapY:427};
 
-    const frameCount = 6;
-    let selectedFrame = null;
-    const photos = JSON.parse(localStorage.getItem('photoArray')) || [];
+    const GRID_INDICES=[1,2,3,4];
+    const STRIP_INDICES=[5,6];
+    const FRAME_COUNT=6;
 
-    // Coordinates scaled to match 1748x1240 (grid) and 707x2000 (strip)
-    const frameLayouts = {
-      grid: [
-        {x:55, y:515, w:798, h:461},
-        {x:55, y:1020, w:798, h:461},
-        {x:900, y:515, w:798, h:461},
-        {x:900, y:1020, w:798, h:461},
-      ],
-      strip: [
-        {x:43, y:418, w:621, h:375},
-        {x:43, y:845, w:621, h:375},
-        {x:43, y:1272, w:621, h:375},
-        {x:43, y:1699, w:621, h:375},
-      ]
-    };
+    const frameGrid=document.getElementById('frameGrid');
+    const previewCanvas=document.getElementById('preview-canvas');
+    const confirmBtn=document.getElementById('confirmBtn');
+    const backBtn=document.getElementById('backBtn');
 
-    // Build frame thumbnails
-    for (let i = 1; i <= frameCount; i++) {
-      const div = document.createElement('div');
-      div.classList.add('frame');
-      div.innerHTML = `<img src="frames/frame${i}.png" alt="Frame ${i}">`;
-      div.addEventListener('click', () => selectFrame(i, div));
+    const photos=JSON.parse(localStorage.getItem('photos')||'[]');
+    if(!photos||photos.length<4){
+      alert('No photos found — please take your 4 photos first.');
+      window.location.href='snap.html';
+      return;
+    }
+
+    for(let i=1;i<=FRAME_COUNT;i++){
+      const div=document.createElement('div');
+      div.className='frame';
+      div.innerHTML=`<img src="frames/frame${i}.png" alt="Frame ${i}" data-index="${i}">`;
+      div.addEventListener('click',()=>onFrameClick(i,div));
       frameGrid.appendChild(div);
     }
 
-    async function selectFrame(index, element) {
-      document.querySelectorAll('.frame').forEach(f => f.classList.remove('selected'));
-      element.classList.add('selected');
-      selectedFrame = index;
-      nextBtn.disabled = false;
-      await drawPreview(index);
-    }
+    let selectedFrameIndex=null;
+    let selectedFrameImg=null;
 
-    async function drawPreview(index) {
-      const frameType = index <= 4 ? 'grid' : 'strip';
-      const layout = frameLayouts[frameType];
-
-      // Clear canvas
-      ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
-
-      // Draw photos first (behind transparent areas)
-      const loadedImages = await Promise.all(
-        photos.map(src => new Promise(resolve => {
-          const img = new Image();
-          img.onload = () => resolve(img);
-          img.src = src;
-        }))
-      );
-
-      layout.forEach((pos, i) => {
-        const img = loadedImages[i];
-        if (img) ctx.drawImage(img, pos.x, pos.y, pos.w, pos.h);
+    function loadImage(src){
+      return new Promise((res,rej)=>{
+        const img=new Image();
+        img.onload=()=>res(img);
+        img.onerror=rej;
+        img.src=src;
       });
-
-      // Draw frame overlay
-      const frameImg = new Image();
-      frameImg.onload = () => ctx.drawImage(frameImg, 0, 0, previewCanvas.width, previewCanvas.height);
-      frameImg.src = `frames/frame${index}.png`;
     }
 
-    nextBtn.addEventListener('click', () => {
-      const finalImage = previewCanvas.toDataURL('image/png');
-      localStorage.setItem('framedPhoto', finalImage);
-      alert("Frame applied! Ready for printing next.");
-      // window.location.href = 'print.html';
+    async function onFrameClick(index,div){
+      document.querySelectorAll('.frame').forEach(f=>f.classList.remove('selected'));
+      div.classList.add('selected');
+      selectedFrameIndex=index;
+      confirmBtn.disabled=false;
+
+      const frameSrc=`frames/frame${index}.png`;
+      selectedFrameImg=await loadImage(frameSrc);
+
+      const isGrid=GRID_INDICES.includes(index);
+      const frameW=selectedFrameImg.naturalWidth;
+      const frameH=selectedFrameImg.naturalHeight;
+
+      const container=document.getElementById('preview-container');
+      const maxW=Math.min(540-24,container.clientWidth-24);
+      const displayW=Math.floor(maxW);
+      const displayH=Math.floor(displayW*(frameH/frameW));
+
+      previewCanvas.width=frameW;
+      previewCanvas.height=frameH;
+      previewCanvas.style.width=displayW+'px';
+      previewCanvas.style.height=displayH+'px';
+
+      const ctx=previewCanvas.getContext('2d');
+      ctx.clearRect(0,0,frameW,frameH);
+
+      // --- Draw Photos in Correct Positions ---
+      if(isGrid){
+        const coords=[
+          {x:GRID.x,y:GRID.y},
+          {x:GRID.x+GRID.gapX,y:GRID.y},
+          {x:GRID.x,y:GRID.y+GRID.gapY},
+          {x:GRID.x+GRID.gapX,y:GRID.y+GRID.gapY}
+        ];
+        for(let i=0;i<4;i++){
+          const c=coords[i];
+          await drawPhoto(ctx,photos[i],c.x,c.y,GRID.w,GRID.h);
+        }
+      }else{
+        for(let i=0;i<4;i++){
+          const posY=STRIP.y+i*STRIP.gapY;
+          await drawPhoto(ctx,photos[i],STRIP.x,posY,STRIP.w,STRIP.h);
+        }
+      }
+
+      // Draw frame on top (after all photos)
+      ctx.drawImage(selectedFrameImg,0,0,frameW,frameH);
+
+      previewCanvas.dataset.frameSrc=frameSrc;
+    }
+
+    async function drawPhoto(ctx,src,x,y,w,h){
+      const img=await loadImage(src);
+      const scale=Math.max(w/img.width,h/img.height);
+      const dw=img.width*scale;
+      const dh=img.height*scale;
+      const dx=x-(dw-w)/2;
+      const dy=y-(dh-h)/2;
+      ctx.drawImage(img,dx,dy,dw,dh);
+    }
+
+    confirmBtn.addEventListener('click',async()=>{
+      if(!selectedFrameIndex)return alert('Select a frame first.');
+      const finalCanvas=document.createElement('canvas');
+      const ctx=finalCanvas.getContext('2d');
+
+      const isGrid=GRID_INDICES.includes(selectedFrameIndex);
+      const baseImg=selectedFrameImg;
+      finalCanvas.width=baseImg.naturalWidth;
+      finalCanvas.height=baseImg.naturalHeight;
+
+      if(isGrid){
+        const coords=[
+          {x:GRID.x,y:GRID.y},
+          {x:GRID.x+GRID.gapX,y:GRID.y},
+          {x:GRID.x,y:GRID.y+GRID.gapY},
+          {x:GRID.x+GRID.gapX,y:GRID.y+GRID.gapY}
+        ];
+        for(let i=0;i<4;i++){
+          const c=coords[i];
+          await drawPhoto(ctx,photos[i],c.x,c.y,GRID.w,GRID.h);
+        }
+      }else{
+        for(let i=0;i<4;i++){
+          const posY=STRIP.y+i*STRIP.gapY;
+          await drawPhoto(ctx,photos[i],STRIP.x,posY,STRIP.w,STRIP.h);
+        }
+      }
+      ctx.drawImage(baseImg,0,0,finalCanvas.width,finalCanvas.height);
+
+      const finalData=finalCanvas.toDataURL('image/png');
+      localStorage.setItem('finalPhoto',finalData);
+      localStorage.setItem('selectedFrame',`frames/frame${selectedFrameIndex}.png`);
+      window.location.href='print.html';
     });
+
+    backBtn.addEventListener('click',()=>window.location.href='snap.html');
+
+    // Auto-preview first frame to avoid blank canvas
+    onFrameClick(1,document.querySelector('.frame'));
+  })();
   </script>
 </body>
 </html>
