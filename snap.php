@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Take Snap</title>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2&family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
-
   <style>
     body {
       margin: 0;
@@ -38,7 +37,7 @@
       justify-content: center;
       align-items: flex-start;
       padding: 2rem;
-      gap: 2rem;
+      gap: 1.5rem;
       width: 100%;
       max-width: 1200px;
       box-sizing: border-box;
@@ -82,25 +81,34 @@
       z-index: 5;
     }
 
-    #thumbnails img {
-      width: 160px;
-      height: 120px;
-      object-fit: contain;
-      background-color: rgba(0, 0, 0, 0.2);
-      border-radius: 14px;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.25);
-      border: 3px solid transparent;
-      cursor: pointer;
-      transition: transform 0.18s ease, border-color 0.18s ease;
-      display: block;
-      background: rgba(255,255,255,0.03);
+    #thumbnails {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      width: 320px;
+      padding: 0 4px;
+      max-height: 540px;
+      overflow: hidden;
+      box-sizing: border-box;
     }
 
-    #thumbnails::-webkit-scrollbar { width: 8px; }
-    #thumbnails::-webkit-scrollbar-thumb { background: #FFD93D; border-radius: 10px; }
+    #thumbnails img {
+      width: 150px;
+      height: 112px;
+      object-fit: cover;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.3s ease, border-color 0.3s ease, opacity 0.4s ease;
+      display: block;
+      background: rgba(255,255,255,0.03);
+      box-sizing: border-box;
+      opacity: 0;
+    }
 
     #thumbnails img.selected {
-      border-color: #FFD93D;
+      border: 3px solid #FFD93D;
       transform: scale(1.03);
     }
 
@@ -130,8 +138,14 @@
       transition: transform 0.15s ease;
     }
 
-    button:hover:not(:disabled) { transform: translateY(-3px); }
-    button:disabled { opacity: 0.55; cursor: not-allowed; }
+    button:hover:not(:disabled) {
+      transform: translateY(-3px);
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
 
     footer {
       margin-top: auto;
@@ -153,43 +167,36 @@
       }
 
       #thumbnails {
-        flex-direction: row;
-        width: auto;
-        max-width: none;
-        overflow-x: hidden;
-        flex-wrap: nowrap;
+        width: 100%;
+        max-width: 480px;
+        gap: 10px;
+        padding: 0 10px;
         justify-content: center;
-        gap: 12px;
       }
 
       #thumbnails img {
         width: 120px;
         height: 90px;
-        flex-shrink: 0;
+        border-radius: 10px;
       }
     }
   </style>
 </head>
-
 <body>
   <header>📸 abcSnap Booth — Business Week 2025</header>
-
   <main>
     <div id="video-container">
       <video id="video" autoplay playsinline></video>
       <div id="timer">3</div>
     </div>
-
     <div id="thumbnails" aria-hidden="false"></div>
   </main>
-
   <div id="controls">
     <button id="startBtn">Start Taking Photos</button>
     <button id="retakeBtn" disabled>Retake Selected Photo</button>
     <button id="retakeAllBtn" disabled>Retake All</button>
     <button id="nextButton" disabled>Next ➜</button>
   </div>
-
   <footer>Empowering Smiles & Innovation — Business Week 2025</footer>
   <footer>Bringing smiles all around the world!</footer>
 
@@ -250,7 +257,11 @@
       const img = document.createElement('img');
       img.src = dataURL;
       img.alt = "Shot";
+      img.style.opacity = '0';
       thumbnails.appendChild(img);
+      void img.offsetWidth;
+      img.style.opacity = '1';
+
       img.addEventListener('click', () => {
         [...thumbnails.children].forEach(i => i.classList.remove('selected'));
         img.classList.add('selected');
@@ -275,8 +286,6 @@
         addThumbnail(photo);
       }
 
-      localStorage.setItem('photos', JSON.stringify(photos));
-
       startBtn.textContent = "Start Taking Photos";
       startBtn.disabled = false;
       retakeAllBtn.disabled = false;
@@ -293,13 +302,16 @@
       await countdown(3);
       const newPhoto = takeSinglePhoto();
       photos[selectedIndex] = newPhoto;
-      thumbnails.children[selectedIndex].src = newPhoto;
-      thumbnails.children[selectedIndex].classList.remove('selected');
+      const img = thumbnails.children[selectedIndex];
+      img.style.opacity = '0';
+      setTimeout(() => {
+        img.src = newPhoto;
+        img.style.opacity = '1';
+      }, 300);
+      img.classList.remove('selected');
       selectedIndex = -1;
       retakeBtn.disabled = true;
       startBtn.disabled = false;
-
-      localStorage.setItem('photos', JSON.stringify(photos));
     }
 
     async function retakeAll() {
@@ -308,60 +320,21 @@
       selectedIndex = -1;
       retakeBtn.disabled = true;
       nextButton.disabled = true;
-      retakeAllBtn.disabled = true;
+      startBtn.disabled = true;
       await startTakingPhotos();
     }
 
-    async function uploadPhotos() {
-      if (photos.length !== 4) {
-        alert("You need exactly 4 photos to upload.");
-        return;
-      }
-
-      nextButton.disabled = true;
-      nextButton.textContent = "Uploading...";
-
-      try {
-        const formData = new URLSearchParams();
-        formData.append('photos', JSON.stringify(photos));
-
-        const response = await fetch('uploads.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: formData.toString()
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-          alert('Photos uploaded successfully!');
-          // Redirect or load choose.php now
-          window.location.href = 'choose.php';
-        } else {
-          alert('Upload error: ' + (result.error || 'Unknown error'));
-          nextButton.disabled = false;
-          nextButton.textContent = 'Next ➜';
-        }
-      } catch (err) {
-        alert('Fetch error: ' + err.message);
-        nextButton.disabled = false;
-        nextButton.textContent = 'Next ➜';
-      }
-    }
-
-    startBtn.addEventListener('click', async () => {
-      if (!stream) await startCamera();
-      await startTakingPhotos();
+    // Redirect to choose.php on Next button click and store photos in sessionStorage
+    nextButton.addEventListener('click', () => {
+      sessionStorage.setItem('photos', JSON.stringify(photos));
+      window.location.href = 'choose.php';
     });
 
+    startBtn.addEventListener('click', startTakingPhotos);
     retakeBtn.addEventListener('click', retakeSelectedPhoto);
     retakeAllBtn.addEventListener('click', retakeAll);
-    nextButton.addEventListener('click', uploadPhotos);
 
-    // On page load, start camera automatically (optional)
-    window.onload = async () => {
-      await startCamera();
-    };
+    startCamera();
   </script>
 </body>
 </html>
