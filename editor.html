@@ -125,21 +125,36 @@
       pointer-events: none;
     }
 
-    #saveBtn {
-      background-color: #FFD93D;
-      color: #2A5298;
+    #buttons {
+      display: none;
+      margin: 1.5rem auto;
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    button {
       border: none;
       padding: 14px 28px;
       font-size: 1rem;
       font-weight: 600;
       border-radius: 30px;
       cursor: pointer;
-      margin: 1.5rem auto;
       box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
-      display: none;
+      transition: transform 0.2s ease;
     }
 
-    #saveBtn:hover {
+    #saveBtn {
+      background-color: #FFD93D;
+      color: #2A5298;
+    }
+
+    #backBtn {
+      background-color: #ffffff;
+      color: #1E3C72;
+    }
+
+    button:hover {
       transform: translateY(-3px);
     }
 
@@ -170,7 +185,10 @@
     </div>
   </div>
 
-  <button id="saveBtn">Save My Collage</button>
+  <div id="buttons">
+    <button id="backBtn">⬅ Back</button>
+    <button id="saveBtn">💾 Save My Collage</button>
+  </div>
 
   <footer>abcSnap Booth © 2025</footer>
 
@@ -181,8 +199,9 @@
     const frameArea = document.getElementById('frame-area');
     const overlay = document.getElementById('overlay');
     const saveBtn = document.getElementById('saveBtn');
+    const backBtn = document.getElementById('backBtn');
+    const buttons = document.getElementById('buttons');
 
-    // Get photos (for testing — replace with real ones later)
     const photos = JSON.parse(sessionStorage.getItem('photos') || '[]');
     if (photos.length === 0) {
       alert("No photos found! Upload some to continue.");
@@ -249,8 +268,16 @@
 
         frameSelector.style.display = 'none';
         editor.style.display = 'flex';
-        saveBtn.style.display = 'block';
+        buttons.style.display = 'flex';
       });
+    });
+
+    backBtn.addEventListener('click', () => {
+      editor.style.display = 'none';
+      buttons.style.display = 'none';
+      frameSelector.style.display = 'flex';
+      frameArea.querySelectorAll('.slot').forEach(s => s.remove());
+      overlay.src = '';
     });
 
     saveBtn.addEventListener('click', async () => {
