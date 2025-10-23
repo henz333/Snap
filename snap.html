@@ -4,7 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Take Snap</title>
+
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2&family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
   <style>
     body {
       margin: 0;
@@ -14,325 +18,183 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
       min-height: 100vh;
-      overflow-x: hidden;
     }
-
     header {
       font-family: 'Baloo 2', cursive;
       font-size: 2rem;
       color: #FFD93D;
       text-align: center;
-      padding: 1.2rem;
+      padding: 1rem;
+      background: rgba(255,255,255,0.1);
       width: 100%;
-      background: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(10px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
-
     main {
       display: flex;
-      flex-wrap: nowrap;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 2rem;
-      gap: 1.5rem;
-      width: 100%;
-      max-width: 1200px;
-      box-sizing: border-box;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+      gap: 1rem;
     }
-
     #video-container {
       position: relative;
-      background: rgba(255, 255, 255, 0.06);
-      border-radius: 24px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      background: rgba(255,255,255,0.1);
+      border-radius: 16px;
       overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 960px;
-      height: 540px;
-      flex-shrink: 0;
+      width: 720px;
+      height: 405px;
     }
-
     video {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: 24px;
       transform: scaleX(-1);
-      display: block;
     }
-
     #timer {
       position: absolute;
-      top: 14px;
-      right: 14px;
-      background: rgba(255, 255, 255, 0.95);
+      top: 10px; right: 10px;
+      background: rgba(255,255,255,0.9);
       color: #2A5298;
-      font-size: 2rem;
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
       font-weight: 700;
-      border-radius: 12px;
-      padding: 0.2rem 0.8rem;
-      opacity: 0;
-      transition: opacity 0.2s ease;
-      z-index: 5;
-    }
-
-    #thumbnails {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 12px;
-      width: 320px;
-      padding: 0 4px;
-      max-height: 540px;
-      overflow: hidden;
-      box-sizing: border-box;
-    }
-
-    #thumbnails img {
-      width: 150px;
-      height: 112px;
-      object-fit: cover;
-      border-radius: 12px;
-      border: none;
-      cursor: pointer;
-      transition: transform 0.3s ease, border-color 0.3s ease, opacity 0.4s ease;
-      display: block;
-      background: rgba(255,255,255,0.03);
-      box-sizing: border-box;
+      font-size: 1.5rem;
       opacity: 0;
     }
-
-    #thumbnails img.selected {
-      border: 3px solid #FFD93D;
-      transform: scale(1.03);
+    #photos {
+      width: 90%;
+      max-width: 720px;
+      min-height: 150px;
+      position: relative;
     }
-
+    .photo-item {
+      cursor: grab;
+    }
     #controls {
-      text-align: center;
-      margin-top: 18px;
-      padding-bottom: 2rem;
-      width: 100%;
       display: flex;
-      justify-content: center;
-      gap: 18px;
       flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
     }
-
     button {
-      background-color: #FFD93D;
+      background: #FFD93D;
       color: #2A5298;
       border: none;
-      padding: 14px 26px;
-      font-size: 1.05rem;
-      border-radius: 30px;
-      margin: 0.5rem;
-      cursor: pointer;
-      font-family: 'Poppins', sans-serif;
+      padding: 10px 20px;
+      border-radius: 25px;
       font-weight: 600;
-      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
-      transition: transform 0.15s ease;
+      cursor: pointer;
     }
-
-    button:hover:not(:disabled) {
-      transform: translateY(-3px);
-    }
-
-    button:disabled {
-      opacity: 0.55;
-      cursor: not-allowed;
-    }
-
-    footer {
-      margin-top: auto;
-      text-align: center;
-      padding: 1rem;
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 0.9rem;
-    }
-
-    @media (max-width: 980px) {
-      main {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      #video-container {
-        width: 480px;
-        height: 270px;
-      }
-
-      #thumbnails {
-        width: 100%;
-        max-width: 480px;
-        gap: 10px;
-        padding: 0 10px;
-        justify-content: center;
-      }
-
-      #thumbnails img {
-        width: 120px;
-        height: 90px;
-        border-radius: 10px;
-      }
-    }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    footer { margin-top: 2rem; opacity: 0.8; }
   </style>
 </head>
+
 <body>
   <header>📸 abcSnap Booth — Business Week 2025</header>
+
   <main>
     <div id="video-container">
       <video id="video" autoplay playsinline></video>
       <div id="timer">3</div>
     </div>
-    <div id="thumbnails" aria-hidden="false"></div>
+
+    <!-- Photos go here -->
+    <div id="photos"></div>
+
+    <div id="controls">
+      <button id="startBtn">Start Taking Photos</button>
+      <button id="nextButton" disabled>Next ➜</button>
+    </div>
   </main>
-  <div id="controls">
-    <button id="startBtn">Start Taking Photos</button>
-    <button id="retakeBtn" disabled>Retake Selected Photo</button>
-    <button id="retakeAllBtn" disabled>Retake All</button>
-    <button id="nextButton" disabled>Next ➜</button>
-  </div>
-  <footer>Empowering Smiles & Innovation — Business Week 2025</footer>
-  <footer>Bringing smiles all around the world!</footer>
+
+  <footer>© 2025 abcSnap</footer>
+
+  <!-- Sortable Photos plugin (your pasted code simplified) -->
+  <script>
+    (function($){
+      $.widget('glekli.sortablePhotos', {
+        options: {selector: '> *', sortable:true, padding:2},
+        arrange:function(){
+          var container=this.element, width=container.width(), pad=this.options.padding, x=0,y=0,rowH=0;
+          container.find(this.options.selector).each(function(){
+            var img=$(this).find('img')[0];
+            if(!img.complete)return;
+            var w=img.naturalWidth, h=img.naturalHeight, aspect=w/h;
+            var targetH=150; var targetW=targetH*aspect;
+            $(this).css({position:'absolute',top:y,left:x});
+            $(this).find('img').css({width:targetW,height:targetH});
+            x+=targetW+pad; rowH=Math.max(rowH,targetH);
+            if(x+targetW>width){ x=0; y+=rowH+pad; rowH=0; }
+          });
+          container.height(y+rowH);
+        },
+        _create:function(){
+          var self=this; this.arrange();
+          $(window).on('resize',()=>self.arrange());
+          if(this.options.sortable){
+            this.element.children().draggable({containment:'parent',opacity:0.7});
+            this.element.children().droppable({
+              drop:function(e,ui){ $(ui.draggable).insertBefore(this); self.arrange(); }
+            });
+          }
+        }
+      });
+    })(jQuery);
+  </script>
 
   <script>
-    const layout = localStorage.getItem('layout') || 'landscape';
-    const video = document.getElementById('video');
-    const startBtn = document.getElementById('startBtn');
-    const retakeBtn = document.getElementById('retakeBtn');
-    const retakeAllBtn = document.getElementById('retakeAllBtn');
-    const nextButton = document.getElementById('nextButton');
-    const thumbnails = document.getElementById('thumbnails');
-    const timerEl = document.getElementById('timer');
+    const video=document.getElementById('video');
+    const timer=document.getElementById('timer');
+    const startBtn=document.getElementById('startBtn');
+    const nextBtn=document.getElementById('nextButton');
+    const photosDiv=$('#photos');
+    let stream,photos=[];
 
-    let stream;
-    let photos = [];
-    let selectedIndex = -1;
+    async function startCamera(){
+      try{
+        stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:"user"},audio:false});
+        video.srcObject=stream;
+      }catch(err){alert('Camera error');}
+    }
 
-    async function startCamera() {
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            aspectRatio: layout === 'landscape' ? 16/9 : 3/4,
-            facingMode: "user"
-          },
-          audio: false
-        });
-        video.srcObject = stream;
-      } catch (err) {
-        alert("Unable to access camera.");
-        console.error(err);
+    function takePhoto(){
+      const canvas=document.createElement('canvas');
+      canvas.width=video.videoWidth; canvas.height=video.videoHeight;
+      const ctx=canvas.getContext('2d');
+      ctx.translate(canvas.width,0); ctx.scale(-1,1);
+      ctx.drawImage(video,0,0,canvas.width,canvas.height);
+      return canvas.toDataURL('image/jpeg',0.5); // compressed
+    }
+
+    async function countdown(s){
+      timer.style.opacity='1';
+      for(let i=s;i>0;i--){timer.textContent=i; await new Promise(r=>setTimeout(r,1000));}
+      timer.style.opacity='0';
+    }
+
+    async function startCapture(){
+      startBtn.disabled=true; nextBtn.disabled=true; photos=[];
+      photosDiv.empty();
+      for(let i=0;i<4;i++){
+        await countdown(3);
+        const data=takePhoto();
+        photos.push(data);
+        const item=$(`<div class="photo-item"><img src="${data}" alt="shot"/></div>`);
+        photosDiv.append(item);
       }
+      nextBtn.disabled=false;
+      photosDiv.sortablePhotos();
     }
 
-    function takeSinglePhoto() {
-      const canvas = document.createElement('canvas');
-      const vw = video.videoWidth || 1280;
-      const vh = video.videoHeight || 720;
-      canvas.width = vw;
-      canvas.height = vh;
-      const ctx = canvas.getContext('2d');
-      ctx.translate(canvas.width, 0);
-      ctx.scale(-1, 1);
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      return canvas.toDataURL('image/png');
-    }
+    startBtn.onclick=startCapture;
 
-    async function countdown(seconds) {
-      timerEl.style.opacity = '1';
-      for (let i = seconds; i > 0; i--) {
-        timerEl.textContent = i;
-        await new Promise(r => setTimeout(r, 1000));
-      }
-      timerEl.style.opacity = '0';
-    }
-
-    function addThumbnail(dataURL) {
-      const img = document.createElement('img');
-      img.src = dataURL;
-      img.alt = "Shot";
-      img.style.opacity = '0';
-      thumbnails.appendChild(img);
-      void img.offsetWidth;
-      img.style.opacity = '1';
-
-      img.addEventListener('click', () => {
-        [...thumbnails.children].forEach(i => i.classList.remove('selected'));
-        img.classList.add('selected');
-        selectedIndex = [...thumbnails.children].indexOf(img);
-        retakeBtn.disabled = false;
-      });
-    }
-
-    async function startTakingPhotos() {
-      startBtn.disabled = true;
-      retakeBtn.disabled = true;
-      retakeAllBtn.disabled = true;
-      nextButton.disabled = true;
-      photos = [];
-      thumbnails.innerHTML = '';
-      startBtn.textContent = "Taking Photos...";
-
-      for (let i = 0; i < 4; i++) {
-        await countdown(5);
-        const photo = takeSinglePhoto();
-        photos.push(photo);
-        addThumbnail(photo);
-      }
-
-      startBtn.textContent = "Start Taking Photos";
-      startBtn.disabled = false;
-      retakeAllBtn.disabled = false;
-      nextButton.disabled = false;
-    }
-
-    async function retakeSelectedPhoto() {
-      if (selectedIndex === -1) {
-        alert("Select a thumbnail to retake.");
-        return;
-      }
-      retakeBtn.disabled = true;
-      startBtn.disabled = true;
-      await countdown(3);
-      const newPhoto = takeSinglePhoto();
-      photos[selectedIndex] = newPhoto;
-      const img = thumbnails.children[selectedIndex];
-      img.style.opacity = '0';
-      setTimeout(() => {
-        img.src = newPhoto;
-        img.style.opacity = '1';
-      }, 300);
-      img.classList.remove('selected');
-      selectedIndex = -1;
-      retakeBtn.disabled = true;
-      startBtn.disabled = false;
-    }
-
-    async function retakeAll() {
-      photos = [];
-      thumbnails.innerHTML = '';
-      selectedIndex = -1;
-      retakeBtn.disabled = true;
-      nextButton.disabled = true;
-      startBtn.disabled = true;
-      await startTakingPhotos();
-    }
-
-    // Redirect to frames.html on Next button click and store photos in sessionStorage
-    nextButton.addEventListener('click', () => {
-      sessionStorage.setItem('photos', JSON.stringify(photos));
-      window.location.href = 'editor.html';
-    });
-
-    startBtn.addEventListener('click', startTakingPhotos);
-    retakeBtn.addEventListener('click', retakeSelectedPhoto);
-    retakeAllBtn.addEventListener('click', retakeAll);
+    nextBtn.onclick=()=>{
+      try{
+        sessionStorage.setItem('photoSet',JSON.stringify(photos));
+        window.location.href='frames.html';
+      }catch(e){alert('Save error: '+e.message);}
+    };
 
     startCamera();
   </script>
