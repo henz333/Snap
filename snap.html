@@ -376,9 +376,9 @@
         const finalCanvas = await combinePhotos();
         const photoData = finalCanvas.toDataURL('image/png');
         
-        localStorage.setItem('photoSet', JSON.stringify(photos));
+        sessionStorage.setItem('photoSet', JSON.stringify(photos));
 
-        localStorage.setItem('finalPhoto', photoData);
+        sessionStorage.setItem('finalPhoto', photoData);
         
         window.location.href = 'frames.html';
       } catch (err) {
