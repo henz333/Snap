@@ -139,7 +139,7 @@
 
 <body>
   <h1>🎨 Choose Your Frame</h1>
-  <p class="lead">Click a frame — preview will update. When ready, press <strong>Confirm Frame</strong>.</p>
+  <p class="lead">Click a frame — preview updates immediately. Press <strong>Confirm Frame</strong> when ready.</p>
 
   <div class="layout">
     <div class="frame-grid" id="frameGrid"></div>
@@ -147,7 +147,7 @@
     <div id="preview-container">
       <div id="preview-title">Preview</div>
       <canvas id="preview-canvas"></canvas>
-      <div class="help">Preview updates immediately when you click a frame. Confirm to continue.</div>
+      <div class="help">Confirm when satisfied.</div>
 
       <div class="controls">
         <button id="confirmBtn" class="primary" disabled>Confirm Frame</button>
@@ -160,6 +160,7 @@
 
   <script>
   (function(){
+    // Frame coordinates
     const COORDS = {
       1: [
         {x:54, y:508, w:800, h:457},
@@ -199,14 +200,23 @@
       ]
     };
 
+    const FRAME_SIZE = {
+      1: {w:1748, h:1240},
+      2: {w:1748, h:1240},
+      3: {w:1748, h:1240},
+      4: {w:1748, h:1240},
+      5: {w:707, h:2000},
+      6: {w:707, h:2000}
+    };
+
     const frameGrid = document.getElementById('frameGrid');
     const previewCanvas = document.getElementById('preview-canvas');
     const confirmBtn = document.getElementById('confirmBtn');
     const backBtn = document.getElementById('backBtn');
-
     const photos = JSON.parse(sessionStorage.getItem('photos') || '[]');
+
     if (!photos || photos.length < 4) {
-      alert('No photos found — please take photos first.');
+      alert('No photos found — please retake photos.');
       window.location.href = 'snap.html';
       return;
     }
@@ -228,48 +238,63 @@
       });
     }
 
+    async function drawPhotoToFit(ctx, photoSrc, x, y, w, h){
+      const img = await loadImage(photoSrc);
+      const photoRatio = img.naturalWidth / img.naturalHeight;
+      const frameRatio = w / h;
+
+      let drawW, drawH;
+      if (photoRatio > frameRatio) {
+        drawH = h;
+        drawW = img.naturalWidth * (h / img.naturalHeight);
+      } else {
+        drawW = w;
+        drawH = img.naturalHeight * (w / img.naturalWidth);
+      }
+
+      const offsetX = x + (w - drawW) / 2;
+      const offsetY = y + (h - drawH) / 2;
+      ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
+    }
+
     async function onFrameClick(index){
       confirmBtn.disabled = false;
-      const frameImg = await loadImage(`frames/frame${index}.png`);
-      previewCanvas.width = frameImg.naturalWidth;
-      previewCanvas.height = frameImg.naturalHeight;
+      const frameSrc = `frames/frame${index}.png`;
+      const frameImg = await loadImage(frameSrc);
+      const size = FRAME_SIZE[index];
+
+      previewCanvas.width = size.w;
+      previewCanvas.height = size.h;
+
       const ctx = previewCanvas.getContext('2d');
-      ctx.clearRect(0,0,previewCanvas.width,previewCanvas.height);
+      ctx.clearRect(0,0,size.w,size.h);
 
       for (let i=0;i<4;i++){
         const s = COORDS[index][i];
         await drawPhotoToFit(ctx, photos[i], s.x, s.y, s.w, s.h);
       }
 
-      ctx.drawImage(frameImg, 0, 0, previewCanvas.width, previewCanvas.height);
-      previewCanvas.dataset.frameSrc = `frames/frame${index}.png`;
-    }
-
-    async function drawPhotoToFit(ctx, photoSrc, x, y, w, h){
-      const img = await loadImage(photoSrc);
-      const scale = Math.min(w / img.naturalWidth, h / img.naturalHeight);
-      const drawW = img.naturalWidth * scale;
-      const drawH = img.naturalHeight * scale;
-      const offsetX = x + (w - drawW) / 2;
-      const offsetY = y + (h - drawH) / 2;
-      ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
+      ctx.drawImage(frameImg, 0, 0, size.w, size.h);
+      previewCanvas.dataset.frameSrc = frameSrc;
     }
 
     confirmBtn.addEventListener('click', async () => {
       const frameSrc = previewCanvas.dataset.frameSrc;
       const frameImg = await loadImage(frameSrc);
+      const index = Number(frameSrc.match(/frame(\d+)/)[1]);
+      const size = FRAME_SIZE[index];
+
       const finalCanvas = document.createElement('canvas');
-      finalCanvas.width = previewCanvas.width;
-      finalCanvas.height = previewCanvas.height;
+      finalCanvas.width = size.w;
+      finalCanvas.height = size.h;
       const fctx = finalCanvas.getContext('2d');
 
-      const index = Number(frameSrc.match(/frame(\d+)/)[1]);
       for (let i=0;i<4;i++){
         const s = COORDS[index][i];
         await drawPhotoToFit(fctx, photos[i], s.x, s.y, s.w, s.h);
       }
 
-      fctx.drawImage(frameImg, 0, 0, finalCanvas.width, finalCanvas.height);
+      fctx.drawImage(frameImg, 0, 0, size.w, size.h);
       const finalDataURL = finalCanvas.toDataURL('image/png');
       sessionStorage.setItem('finalPhoto', finalDataURL);
       window.location.href = 'print.html';
