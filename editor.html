@@ -177,26 +177,26 @@ const frameData = {
 };
 
   // 🎯 Scaling + per-frame + per-slot offsets
-  const gridAScale = 3.2;  // Frames 1–2
-  const gridBScale = 2.9;  // Frames 3–4
+  const gridAScale = 3.1;  // Frames 1–2
+  const gridBScale = 3.1;  // Frames 3–4
   const stripScale = 2.0;  // Frames 5–6
 
   // 🧭 Offsets for each frame type (per slot)
   const offsets = {
     // Frame 1–2: Grid Type A (2x2 boxes)
     gridA: [
-      {x: 25,  y: 17},   // Slot 1
-      {x: 65,  y: 17},   // Slot 2
-      {x: 30,  y: 30},   // Slot 3
-      {x: 100, y: 30}    // Slot 4
+      {x: 20,  y: 10},   // Slot 1
+      {x: 40,  y: 10},   // Slot 2
+      {x: 25,  y: 15},   // Slot 3
+      {x: 50, y: 15}    // Slot 4
     ],
 
     // Frame 3–4: Grid Type B (1 large + 3 small)
     gridB: [
-      {x: 40,  y: 40},   // Slot 1
-      {x: 50,  y: 60},   // Slot 2
-      {x: 50,  y: 100},   // Slot 3
-      {x: 30,  y: 100}    // Slot 4
+      {x: 40,  y: 35},   // Slot 1
+      {x: 35,  y: 55},   // Slot 2
+      {x: 55,  y: 85},   // Slot 3
+      {x: 60,  y: 85}    // Slot 4
     ],
 
     // Frame 5–6: Strip Type (vertical strip)
