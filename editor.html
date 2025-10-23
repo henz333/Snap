@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Select Frame — abcSnap</title>
-  <link href="https://fonts.googleapis.com/css2?family=Baloo+2&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Select Frame | abcSnap</title>
 
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2&family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     body {
       margin: 0;
@@ -15,206 +15,268 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: flex-start;
       min-height: 100vh;
-      padding: 24px;
+      overflow-x: hidden;
     }
-    h1 {
+
+    header {
       font-family: 'Baloo 2', cursive;
+      font-size: 2rem;
       color: #FFD93D;
-      margin-bottom: 8px;
+      text-align: center;
+      padding: 1.2rem;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
-    .layout {
-      display: flex;
-      gap: 24px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    .frame-grid {
-      width: 480px;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-    }
-    .frame {
-      background: rgba(255,255,255,0.06);
-      border-radius: 12px;
-      padding: 12px;
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      transition: transform 0.15s;
-    }
-    .frame:hover { transform: translateY(-6px); }
-    .frame img { width: 100%; border-radius: 8px; }
-    #preview-container {
-      width: 540px;
-      min-height: 640px;
-      background: rgba(255,255,255,0.06);
-      border-radius: 14px;
-      padding: 12px;
+
+    main {
       display: flex;
       flex-direction: column;
       align-items: center;
+      padding: 2rem;
+      width: 100%;
+      max-width: 1000px;
+      box-sizing: border-box;
     }
-    #preview-canvas {
+
+    #preview-area {
+      position: relative;
+      width: 700px;
+      aspect-ratio: 7 / 10;
       background: #111;
-      border-radius: 8px;
-      max-width: 100%;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      margin-bottom: 2rem;
+      transition: all 0.4s ease;
     }
-    button {
-      margin-top: 16px;
-      background: #FFD93D;
+
+    #preview {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    h2 {
+      margin-bottom: 1rem;
+      color: #FFD93D;
+      font-size: 1.5rem;
+    }
+
+    #frames {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+
+    .frame-option {
+      width: 150px;
+      height: 100px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 3px solid transparent;
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+      background: rgba(255,255,255,0.08);
+    }
+
+    .frame-option img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .frame-option:hover {
+      transform: scale(1.05);
+    }
+
+    .frame-option.selected {
+      border-color: #FFD93D;
+      transform: scale(1.07);
+    }
+
+    #downloadBtn {
+      background-color: #FFD93D;
       color: #2A5298;
       border: none;
-      padding: 10px 18px;
-      border-radius: 10px;
-      font-weight: 600;
+      padding: 14px 26px;
+      font-size: 1.05rem;
+      border-radius: 30px;
       cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+      transition: transform 0.15s ease;
     }
-    button.ghost {
-      background: transparent;
-      color: white;
-      border: 1px solid rgba(255,255,255,0.2);
+
+    #downloadBtn:hover {
+      transform: translateY(-3px);
+    }
+
+    footer {
+      margin-top: auto;
+      text-align: center;
+      padding: 1rem;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 900px) {
+      #preview-area {
+        width: 95%;
+      }
     }
   </style>
 </head>
+
 <body>
-  <h1>🎨 Choose Your Frame</h1>
-  <p>Click a frame to preview, then confirm.</p>
+  <header>🎞️ Choose Your Frame — abcSnap</header>
 
-  <div class="layout">
-    <div class="frame-grid" id="frameGrid"></div>
-
-    <div id="preview-container">
-      <canvas id="preview-canvas"></canvas>
-      <div>
-        <button id="confirmBtn" disabled>Confirm Frame</button>
-        <button id="backBtn" class="ghost">Back</button>
-      </div>
+  <main>
+    <div id="preview-area">
+      <img id="preview" alt="Preview" />
     </div>
-  </div>
+
+    <h2>Select a Frame</h2>
+    <div id="frames">
+      <div class="frame-option"><img src="frames/frame1.png" alt="Frame 1"></div>
+      <div class="frame-option"><img src="frames/frame2.png" alt="Frame 2"></div>
+      <div class="frame-option"><img src="frames/frame3.png" alt="Frame 3"></div>
+      <div class="frame-option"><img src="frames/frame4.png" alt="Frame 4"></div>
+      <div class="frame-option"><img src="frames/frame5.png" alt="Frame 5"></div>
+      <div class="frame-option"><img src="frames/frame6.png" alt="Frame 6"></div>
+    </div>
+
+    <button id="downloadBtn">Download Framed Photo</button>
+  </main>
+
+  <footer>© 2025 abcSnap | Business Week</footer>
 
   <script>
-    (function(){
-      // 🟨 1. Coordinates for all frames (you can adjust later)
-      const FRAME_SPECS = {
-        1: [
-          {x:54, y:508, w:800, h:457},
-          {x:890, y:508, w:800, h:457},
-          {x:54, y:1000, w:800, h:457},
-          {x:890, y:1000, w:800, h:457}
-        ],
-        2: [
-          {x:54, y:508, w:800, h:457},
-          {x:890, y:508, w:800, h:457},
-          {x:54, y:1000, w:800, h:457},
-          {x:890, y:1000, w:800, h:457}
-        ],
-        3: [
-          {x:60, y:668, w:854, h:567},
-          {x:60, y:1136, w:516, h:412},
-          {x:626, y:1135, w:516, h:412},
-          {x:1186, y:1135, w:516, h:412}
-        ],
-        4: [
-          {x:60, y:668, w:854, h:567},
-          {x:60, y:1136, w:516, h:412},
-          {x:626, y:1135, w:516, h:412},
-          {x:1186, y:1135, w:516, h:412}
-        ],
-        5: [
-          {x:41, y:420, w:623, h:378},
-          {x:41, y:840, w:623, h:378},
-          {x:41, y:1265, w:623, h:378},
-          {x:41, y:1689, w:623, h:378}
-        ],
-        6: [
-          {x:41, y:420, w:623, h:378},
-          {x:41, y:840, w:623, h:378},
-          {x:41, y:1265, w:623, h:378},
-          {x:41, y:1689, w:623, h:378}
-        ]
-      };
+    const preview = document.getElementById('preview');
+    const frameOptions = document.querySelectorAll('.frame-option');
+    const downloadBtn = document.getElementById('downloadBtn');
 
-      // 🟨 2. Frame sizes
-      const FRAME_SIZES = {
-        1: {w:1748, h:1240},
-        2: {w:1748, h:1240},
-        3: {w:1748, h:1240},
-        4: {w:1748, h:1240},
-        5: {w:707, h:2000},
-        6: {w:707, h:2000}
-      };
+    // === Frame coordinates data ===
+    const frameData = {
+      1: { w: 1748, h: 1240, slots: [
+        {x:54, y:508, w:800, h:457},
+        {x:890, y:508, w:800, h:457},
+        {x:54, y:1000, w:800, h:457},
+        {x:890, y:1000, w:800, h:457}
+      ]},
+      2: { w: 1748, h: 1240, slots: [
+        {x:54, y:508, w:800, h:457},
+        {x:890, y:508, w:800, h:457},
+        {x:54, y:1000, w:800, h:457},
+        {x:890, y:1000, w:800, h:457}
+      ]},
+      3: { w: 1748, h: 1240, slots: [
+        {x:60, y:668, w:854, h:567},
+        {x:60, y:1136, w:516, h:412},
+        {x:626, y:1135, w:516, h:412},
+        {x:1186, y:1135, w:516, h:412}
+      ]},
+      4: { w: 1748, h: 1240, slots: [
+        {x:60, y:668, w:854, h:567},
+        {x:60, y:1136, w:516, h:412},
+        {x:626, y:1135, w:516, h:412},
+        {x:1186, y:1135, w:516, h:412}
+      ]},
+      5: { w: 707, h: 2000, slots: [
+        {x:41, y:420, w:623, h:378},
+        {x:41, y:840, w:623, h:378},
+        {x:41, y:1265, w:623, h:378},
+        {x:41, y:1689, w:623, h:378}
+      ]},
+      6: { w: 707, h: 2000, slots: [
+        {x:41, y:420, w:623, h:378},
+        {x:41, y:840, w:623, h:378},
+        {x:41, y:1265, w:623, h:378},
+        {x:41, y:1689, w:623, h:378}
+      ]}
+    };
 
-      const photos = JSON.parse(sessionStorage.getItem('photos') || '[]');
-      if (!photos.length) {
-        alert("No photos found. Please take photos first.");
-        window.location.href = 'snap.html';
+    // === Get photos from snap.html ===
+    let photos = [];
+    try {
+      photos = JSON.parse(sessionStorage.getItem('photoSet') || '[]');
+    } catch {
+      alert("No photos found! Please retake.");
+      window.location.href = "snap.html";
+    }
+
+    if (photos.length < 4) {
+      alert("No valid photos found. Returning to camera.");
+      window.location.href = "snap.html";
+    }
+
+    let selectedFrame = null;
+    let currentCanvas = null;
+
+    frameOptions.forEach((option, index) => {
+      option.addEventListener('click', async () => {
+        frameOptions.forEach(f => f.classList.remove('selected'));
+        option.classList.add('selected');
+        selectedFrame = index + 1;
+
+        // Adjust preview area ratio dynamically
+        const data = frameData[selectedFrame];
+        const previewArea = document.getElementById('preview-area');
+        previewArea.style.aspectRatio = `${data.w}/${data.h}`;
+
+        const frameSrc = option.querySelector('img').src;
+        await composeFrame(frameSrc, selectedFrame);
+      });
+    });
+
+    async function composeFrame(frameSrc, frameNum) {
+      const { w, h, slots } = frameData[frameNum];
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = w;
+      canvas.height = h;
+
+      // Draw photos under frame
+      for (let i = 0; i < 4; i++) {
+        const img = await loadImage(photos[i]);
+        const s = slots[i];
+        ctx.drawImage(img, s.x, s.y, s.w, s.h);
+      }
+
+      // Draw frame PNG on top
+      const frameImg = await loadImage(frameSrc);
+      ctx.drawImage(frameImg, 0, 0, w, h);
+
+      const dataURL = canvas.toDataURL('image/png');
+      preview.src = dataURL;
+      currentCanvas = canvas;
+    }
+
+    function loadImage(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+      });
+    }
+
+    downloadBtn.addEventListener('click', () => {
+      if (!currentCanvas) {
+        alert("Please select a frame first!");
         return;
       }
-
-      const frameGrid = document.getElementById('frameGrid');
-      const previewCanvas = document.getElementById('preview-canvas');
-      const confirmBtn = document.getElementById('confirmBtn');
-      const backBtn = document.getElementById('backBtn');
-
-      // 🟨 Load all 6 frame thumbnails
-      for (let i = 1; i <= 6; i++) {
-        const div = document.createElement('div');
-        div.className = 'frame';
-        div.innerHTML = `<img src="frames/frame${i}.png" alt="Frame ${i}">`;
-        div.onclick = () => renderFrame(i);
-        frameGrid.appendChild(div);
-      }
-
-      async function loadImage(src) {
-        return new Promise((res, rej) => {
-          const img = new Image();
-          img.onload = () => res(img);
-          img.onerror = rej;
-          img.src = src;
-        });
-      }
-
-      async function renderFrame(index) {
-        const frameImg = await loadImage(`frames/frame${index}.png`);
-        const coords = FRAME_SPECS[index];
-        const size = FRAME_SIZES[index];
-
-        previewCanvas.width = size.w;
-        previewCanvas.height = size.h;
-        const ctx = previewCanvas.getContext('2d');
-        ctx.clearRect(0, 0, size.w, size.h);
-
-        // draw photos into frame
-        for (let i = 0; i < coords.length; i++) {
-          const img = await loadImage(photos[i]);
-          const c = coords[i];
-          const scale = Math.min(c.w / img.width, c.h / img.height);
-          const dw = img.width * scale;
-          const dh = img.height * scale;
-          const dx = c.x + (c.w - dw) / 2;
-          const dy = c.y + (c.h - dh) / 2;
-          ctx.drawImage(img, dx, dy, dw, dh);
-        }
-
-        // draw frame overlay last
-        ctx.drawImage(frameImg, 0, 0, size.w, size.h);
-        confirmBtn.disabled = false;
-        previewCanvas.dataset.frame = index;
-      }
-
-      confirmBtn.onclick = async () => {
-        const index = Number(previewCanvas.dataset.frame);
-        if (!index) return alert("Please select a frame first.");
-        const final = previewCanvas.toDataURL('image/png');
-        sessionStorage.setItem('finalPhoto', final);
-        sessionStorage.setItem('selectedFrame', `frames/frame${index}.png`);
-        window.location.href = 'print.html';
-      };
-
-      backBtn.onclick = () => window.location.href = 'snap.html';
-    })();
+      const link = document.createElement('a');
+      link.download = 'abcSnap-Framed.png';
+      link.href = currentCanvas.toDataURL('image/png');
+      link.click();
+    });
   </script>
 </body>
 </html>
