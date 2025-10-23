@@ -326,7 +326,7 @@
 
     // Redirect to frames.html on Next button click and store photos in sessionStorage
     nextButton.addEventListener('click', () => {
-      sessionStorage.setItem('photos', JSON.stringify(photos));
+      sessionStorage.setItem('photoSet', JSON.stringify(photos));
       window.location.href = 'editor.html';
     });
 
