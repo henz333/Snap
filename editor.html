@@ -175,29 +175,67 @@ const frameData = {
     {x:24, y:738, w:349, h:210}
   ]}
 };
-  const gridScale = 2.9;
-  const stripScale = 2.0;
 
-  const gridOffsetX = 0;   // + moves right, - moves left
-  const gridOffsetY = 20;  // + moves down, - moves up
-  const stripOffsetX = 5; // + moves right, - moves left
-  const stripOffsetY = -90; // + moves down, - moves up
+  // 🎯 Scaling + per-frame + per-slot offsets
+  const gridAScale = 2.9;  // Frames 1–2
+  const gridBScale = 2.9;  // Frames 3–4
+  const stripScale = 2.0;  // Frames 5–6
 
+  // 🧭 Offsets for each frame type (per slot)
+  const offsets = {
+    // Frame 1–2: Grid Type A (2x2 boxes)
+    gridA: [
+      {x: 0,  y: 0},   // Slot 1
+      {x: 0,  y: 0},   // Slot 2
+      {x: 0,  y: 0},   // Slot 3
+      {x: 0,  y: 0}    // Slot 4
+    ],
+
+    // Frame 3–4: Grid Type B (1 large + 3 small)
+    gridB: [
+      {x: 0,  y: 0},   // Slot 1
+      {x: 0,  y: 0},   // Slot 2
+      {x: 0,  y: 0},   // Slot 3
+      {x: 0,  y: 0}    // Slot 4
+    ],
+
+    // Frame 5–6: Strip Type (vertical strip)
+    strip: [
+      {x: 0,  y: 0},   // Slot 1
+      {x: 0,  y: 0},   // Slot 2
+      {x: 0,  y: 0},   // Slot 3
+      {x: 0,  y: 0}    // Slot 4
+    ]
+  };
+
+  // 🧩 Apply scaling + offset adjustments
   for (const key in frameData) {
-    const isStrip = frameData[key].w === 707;
-    const scale = isStrip ? stripScale : gridScale;
-    const offsetX = isStrip ? stripOffsetX : gridOffsetX;
-    const offsetY = isStrip ? stripOffsetY : gridOffsetY;
+    const frameNum = parseInt(key);
+    let scale, slotOffsets;
 
-    frameData[key].slots = frameData[key].slots.map(s => ({
-      x: s.x * scale + offsetX,
-      y: s.y * scale + offsetY,
+    if (frameNum <= 2) {
+      // Frames 1–2: Grid Type A
+      scale = gridAScale;
+      slotOffsets = offsets.gridA;
+    } else if (frameNum <= 4) {
+      // Frames 3–4: Grid Type B
+      scale = gridBScale;
+      slotOffsets = offsets.gridB;
+    } else {
+      // Frames 5–6: Strip Type
+      scale = stripScale;
+      slotOffsets = offsets.strip;
+    }
+
+    frameData[key].slots = frameData[key].slots.map((s, i) => ({
+      x: s.x * scale + (slotOffsets[i]?.x || 0),
+      y: s.y * scale + (slotOffsets[i]?.y || 0),
       w: s.w * scale,
       h: s.h * scale
     }));
   }
 
-  
+       
 
 // --- Load photos from sessionStorage ---
 let photos = [];
