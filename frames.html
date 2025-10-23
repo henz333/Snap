@@ -43,8 +43,8 @@
 
     #preview-area {
       position: relative;
-      width: 800px;
-      height: 600px;
+      width: 600px;
+      aspect-ratio: 7/10;
       background: #111;
       border-radius: 16px;
       overflow: hidden;
@@ -52,17 +52,11 @@
       margin-bottom: 2rem;
     }
 
-    #user-photo, #frame-overlay {
-      position: absolute;
+    #preview {
       width: 100%;
       height: 100%;
       object-fit: contain;
-      top: 0;
-      left: 0;
-    }
-
-    #frame-overlay {
-      pointer-events: none;
+      border-radius: 12px;
     }
 
     h2 {
@@ -87,7 +81,6 @@
       border: 3px solid transparent;
       cursor: pointer;
       transition: transform 0.2s ease, border-color 0.2s ease;
-      position: relative;
       background: rgba(255,255,255,0.08);
     }
 
@@ -130,18 +123,6 @@
       color: rgba(255, 255, 255, 0.7);
       font-size: 0.9rem;
     }
-
-    @media (max-width: 900px) {
-      #preview-area {
-        width: 90%;
-        height: auto;
-        aspect-ratio: 4 / 3;
-      }
-      .frame-option {
-        width: 120px;
-        height: 80px;
-      }
-    }
   </style>
 </head>
 
@@ -150,13 +131,11 @@
 
   <main>
     <div id="preview-area">
-      <img id="user-photo" alt="Your Photo" />
-      <img id="frame-overlay" alt="Frame Preview" />
+      <img id="preview" alt="Preview of final image" />
     </div>
 
     <h2>Select a Frame</h2>
     <div id="frames">
-      <!-- Replace frame image links with your actual frame image URLs -->
       <div class="frame-option"><img src="frames/frame1.png" alt="Frame 1"></div>
       <div class="frame-option"><img src="frames/frame2.png" alt="Frame 2"></div>
       <div class="frame-option"><img src="frames/frame3.png" alt="Frame 3"></div>
@@ -171,57 +150,115 @@
   <footer>© 2025 abcSnap | Business Week</footer>
 
   <script>
-    const userPhoto = document.getElementById('user-photo');
-    const frameOverlay = document.getElementById('frame-overlay');
     const frameOptions = document.querySelectorAll('.frame-option');
+    const preview = document.getElementById('preview');
     const downloadBtn = document.getElementById('downloadBtn');
 
-    // Load user photo from localStorage
-    const finalPhoto = localStorage.getItem('finalPhoto');
-    if (!finalPhoto) {
-      alert('No photo found! Redirecting...');
+    // Frame coordinate data
+    const frameData = {
+      1: { w: 1748, h: 1240, slots: [
+        {x:54, y:508, w:800, h:457},
+        {x:890, y:508, w:800, h:457},
+        {x:54, y:1000, w:800, h:457},
+        {x:890, y:1000, w:800, h:457}
+      ]},
+      2: { w: 1748, h: 1240, slots: [
+        {x:54, y:508, w:800, h:457},
+        {x:890, y:508, w:800, h:457},
+        {x:54, y:1000, w:800, h:457},
+        {x:890, y:1000, w:800, h:457}
+      ]},
+      3: { w: 1748, h: 1240, slots: [
+        {x:60, y:668, w:854, h:567},
+        {x:60, y:1136, w:516, h:412},
+        {x:626, y:1135, w:516, h:412},
+        {x:1186, y:1135, w:516, h:412}
+      ]},
+      4: { w: 1748, h: 1240, slots: [
+        {x:60, y:668, w:854, h:567},
+        {x:60, y:1136, w:516, h:412},
+        {x:626, y:1135, w:516, h:412},
+        {x:1186, y:1135, w:516, h:412}
+      ]},
+      5: { w: 707, h: 2000, slots: [
+        {x:41, y:420, w:623, h:378},
+        {x:41, y:840, w:623, h:378},
+        {x:41, y:1265, w:623, h:378},
+        {x:41, y:1689, w:623, h:378}
+      ]},
+      6: { w: 707, h: 2000, slots: [
+        {x:41, y:420, w:623, h:378},
+        {x:41, y:840, w:623, h:378},
+        {x:41, y:1265, w:623, h:378},
+        {x:41, y:1689, w:623, h:378}
+      ]}
+    };
+
+    // Load photo set from snap.html
+    let photos = [];
+    try {
+      photos = JSON.parse(localStorage.getItem('photoSet') || '[]');
+    } catch {
+      const single = localStorage.getItem('finalPhoto');
+      if (single) photos = [single, single, single, single];
+    }
+
+    if (photos.length < 4) {
+      alert("No valid photos found! Returning...");
       window.location.href = 'snap.html';
-    } else {
-      userPhoto.src = finalPhoto;
     }
 
     let selectedFrame = null;
+    let currentCanvas = null;
 
     frameOptions.forEach((option, index) => {
-      option.addEventListener('click', () => {
+      option.addEventListener('click', async () => {
         frameOptions.forEach(f => f.classList.remove('selected'));
         option.classList.add('selected');
-        selectedFrame = option.querySelector('img').src;
-        frameOverlay.src = selectedFrame;
+        selectedFrame = index + 1;
+        const frameSrc = option.querySelector('img').src;
+        await composeFrame(frameSrc, selectedFrame);
       });
     });
 
-    downloadBtn.addEventListener('click', () => {
-      if (!selectedFrame) {
-        alert('Please select a frame first.');
-        return;
-      }
-
+    async function composeFrame(frameSrc, frameNum) {
+      const { w, h, slots } = frameData[frameNum];
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      const img1 = new Image();
-      const img2 = new Image();
+      canvas.width = w;
+      canvas.height = h;
 
-      img1.src = userPhoto.src;
-      img2.src = selectedFrame;
+      const frameImg = await loadImage(frameSrc);
+      ctx.drawImage(frameImg, 0, 0, w, h);
 
-      img1.onload = () => {
-        canvas.width = img1.width;
-        canvas.height = img1.height;
-        ctx.drawImage(img1, 0, 0, canvas.width, canvas.height);
-        img2.onload = () => {
-          ctx.drawImage(img2, 0, 0, canvas.width, canvas.height);
-          const link = document.createElement('a');
-          link.download = 'abcSnap-Framed.png';
-          link.href = canvas.toDataURL('image/png');
-          link.click();
-        };
-      };
+      for (let i = 0; i < 4; i++) {
+        if (!photos[i]) continue;
+        const img = await loadImage(photos[i]);
+        const s = slots[i];
+        ctx.drawImage(img, s.x, s.y, s.w, s.h);
+      }
+
+      const dataURL = canvas.toDataURL('image/png');
+      preview.src = dataURL;
+      currentCanvas = canvas;
+    }
+
+    function loadImage(src) {
+      return new Promise((res, rej) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => res(img);
+        img.onerror = rej;
+        img.src = src;
+      });
+    }
+
+    downloadBtn.addEventListener('click', () => {
+      if (!currentCanvas) return alert("Please select a frame first!");
+      const link = document.createElement('a');
+      link.download = 'abcSnap-Framed.png';
+      link.href = currentCanvas.toDataURL('image/png');
+      link.click();
     });
   </script>
 </body>
