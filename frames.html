@@ -1,247 +1,279 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Select Frame — abcSnap</title>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-<style>
-  :root{--blue1:#1E3C72;--blue2:#2A5298;--yellow:#FFD93D;--accent:#2A5298}
-  body{margin:0;font-family:'Poppins',sans-serif;background:linear-gradient(135deg,var(--blue1),var(--blue2));color:#fff;display:flex;flex-direction:column;align-items:center;min-height:100vh;padding:24px;box-sizing:border-box}
-  h1{font-family:'Baloo 2',cursive;color:var(--yellow);margin:0 0 8px;font-size:2rem}
-  p.lead{margin:0 0 18px;color:rgba(255,255,255,.9)}
-  .layout{display:flex;gap:24px;width:100%;max-width:1400px;align-items:flex-start;justify-content:center;flex-wrap:wrap}
-  .frame-grid{width:480px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-  .frame{background:rgba(255,255,255,.06);border-radius:12px;padding:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-  .frame img{width:100%;height:auto;border-radius:8px;display:block;object-fit:contain}
-  #preview-container{width:540px;min-height:640px;background:rgba(255,255,255,.06);border-radius:14px;padding:12px;display:flex;flex-direction:column;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,.35)}
-  #preview-canvas{background:#111;border-radius:8px;max-width:100%;display:block}
-  .controls{margin-top:16px;display:flex;gap:12px}
-  button.primary{background:var(--yellow);color:var(--accent);border:none;padding:12px 18px;border-radius:10px;font-weight:700}
-  button.ghost{background:transparent;color:rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.08);padding:8px 12px;border-radius:10px}
-  footer{margin-top:28px;color:rgba(255,255,255,.7)}
-  @media (max-width:1000px){.layout{flex-direction:column}.frame-grid{width:90%}.preview-container{width:90%}}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Select Frame — abcSnap</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blue1: #1E3C72;
+      --blue2: #2A5298;
+      --yellow: #FFD93D;
+      --accent: #2A5298;
+    }
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, var(--blue1), var(--blue2));
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+    h1 {
+      font-family: 'Baloo 2', cursive;
+      color: var(--yellow);
+      margin: 0 0 8px;
+      font-size: 2rem;
+    }
+    p.lead {
+      margin: 0 0 18px;
+      color: rgba(255, 255, 255, 0.9);
+    }
+    .layout {
+      display: flex;
+      gap: 24px;
+      width: 100%;
+      max-width: 1400px;
+      align-items: flex-start;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .frame-grid {
+      width: 480px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .frame {
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform .15s, box-shadow .15s;
+    }
+    .frame:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+    .frame img {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      object-fit: contain;
+      display: block;
+    }
+    #preview-container {
+      width: 540px;
+      min-height: 640px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+    #preview-canvas {
+      background: #111;
+      border-radius: 8px;
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+    .controls {
+      margin-top: 16px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    button.primary {
+      background: var(--yellow);
+      color: var(--accent);
+      border: none;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+    button.ghost {
+      background: transparent;
+      color: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    footer {
+      margin-top: 28px;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.9rem;
+    }
+  </style>
 </head>
+
 <body>
-<h1>🎨 Choose Your Frame</h1>
-<p class="lead">Click a frame on the left — preview will show on the right. When it looks good, press <strong>Confirm Frame</strong>.</p>
+  <h1>🎨 Choose Your Frame</h1>
+  <p class="lead">Click a frame on the left — preview will show on the right. When it looks good, press <strong>Confirm Frame</strong>.</p>
 
-<div class="layout">
-  <div class="frame-grid" id="frameGrid"></div>
+  <div class="layout">
+    <div class="frame-grid" id="frameGrid"></div>
 
-  <div id="preview-container" aria-live="polite">
-    <div id="preview-title" style="margin-bottom:8px;">Preview</div>
-    <canvas id="preview-canvas"></canvas>
-    <div class="help" style="margin-top:10px;color:rgba(255,255,255,.8)">Preview updates immediately when you click a frame. Confirm to continue.</div>
-    <div class="controls">
-      <button id="confirmBtn" class="primary" disabled>Confirm Frame</button>
-      <button id="backBtn" class="ghost">Back to Capture</button>
+    <div id="preview-container" aria-live="polite">
+      <canvas id="preview-canvas"></canvas>
+      <div class="controls">
+        <button id="confirmBtn" class="primary" disabled>Confirm Frame</button>
+        <button id="backBtn" class="ghost">Back</button>
+      </div>
     </div>
   </div>
-</div>
 
-<footer>abcSnap Booth — Business Week 2025</footer>
+  <footer>abcSnap Booth — Business Week 2025</footer>
 
-<script>
-/*
- - Reads compressed photos from sessionStorage 'photos' (array of dataURLs).
- - Uses exact coordinates provided by you for each frame (1..6).
- - Uses cover-fit (scale to fill + center) when drawing each photo into each slot.
- - Draws frame image on top (so transparent holes show the photos).
- - Saves final composite as 'finalPhoto' in sessionStorage and navigates to print.html.
-*/
+  <script>
+  const FRAME_DIMENSIONS = {
+    1: {w:1748, h:1240},
+    2: {w:1748, h:1240},
+    3: {w:1748, h:1240},
+    4: {w:1748, h:1240},
+    5: {w:707,  h:2000},
+    6: {w:707,  h:2000}
+  };
 
-const FRAME_DIMENSIONS = {
-  // natural image sizes you gave later:
-  // frames 1..4: 1748 x 1240
-  // frames 5..6: 707 x 2000
-  1: {w:1748, h:1240},
-  2: {w:1748, h:1240},
-  3: {w:1748, h:1240},
-  4: {w:1748, h:1240},
-  5: {w:707, h:2000},
-  6: {w:707, h:2000}
-};
+  const FRAME_SLOTS = {
+    1: [
+      {x:54, y:508, w:800, h:457},
+      {x:890, y:508, w:800, h:457},
+      {x:54, y:1000, w:800, h:457},
+      {x:890, y:1000, w:800, h:457}
+    ],
+    2: [
+      {x:54, y:508, w:800, h:457},
+      {x:890, y:508, w:800, h:457},
+      {x:54, y:1000, w:800, h:457},
+      {x:890, y:1000, w:800, h:457}
+    ],
+    3: [
+      {x:60, y:668, w:854, h:567},
+      {x:60, y:1136, w:516, h:412},
+      {x:626, y:1135, w:516, h:412},
+      {x:1186, y:1135, w:516, h:412}
+    ],
+    4: [
+      {x:60, y:668, w:854, h:567},
+      {x:60, y:1136, w:516, h:412},
+      {x:626, y:1135, w:516, h:412},
+      {x:1186, y:1135, w:516, h:412}
+    ],
+    5: [
+      {x:41, y:420, w:623, h:378},
+      {x:41, y:840, w:623, h:378},
+      {x:41, y:1265, w:623, h:378},
+      {x:41, y:1689, w:623, h:378}
+    ],
+    6: [
+      {x:41, y:420, w:623, h:378},
+      {x:41, y:840, w:623, h:378},
+      {x:41, y:1265, w:623, h:378},
+      {x:41, y:1689, w:623, h:378}
+    ]
+  };
 
-// slot coordinates you provided (frame1->frame6)
-const FRAME_SLOTS = {
-  1: [
-    {x:54, y:508, w:800, h:457},
-    {x:890, y:508, w:800, h:457},
-    {x:54, y:1000, w:800, h:457},
-    {x:890, y:1000, w:800, h:457}
-  ],
-  2: [
-    {x:54, y:508, w:800, h:457},
-    {x:890, y:508, w:800, h:457},
-    {x:54, y:1000, w:800, h:457},
-    {x:890, y:1000, w:800, h:457}
-  ],
-  3: [
-    {x:60, y:668, w:854, h:567},
-    {x:60, y:1136, w:516, h:412},
-    {x:626, y:1135, w:516, h:412},
-    {x:1186, y:1135, w:516, h:412}
-  ],
-  4: [
-    {x:60, y:668, w:854, h:567},
-    {x:60, y:1136, w:516, h:412},
-    {x:626, y:1135, w:516, h:412},
-    {x:1186, y:1135, w:516, h:412}
-  ],
-  5: [
-    {x:41, y:420, w:623, h:378},
-    {x:41, y:840, w:623, h:378},
-    {x:41, y:1265, w:623, h:378},
-    {x:41, y:1689, w:623, h:378}
-  ],
-  6: [
-    {x:41, y:420, w:623, h:378},
-    {x:41, y:840, w:623, h:378},
-    {x:41, y:1265, w:623, h:378},
-    {x:41, y:1689, w:623, h:378}
-  ]
-};
+  const frameGrid = document.getElementById('frameGrid');
+  const previewCanvas = document.getElementById('preview-canvas');
+  const confirmBtn = document.getElementById('confirmBtn');
+  const backBtn = document.getElementById('backBtn');
 
-const frameGrid = document.getElementById('frameGrid');
-const previewCanvas = document.getElementById('preview-canvas');
-const confirmBtn = document.getElementById('confirmBtn');
-const backBtn = document.getElementById('backBtn');
-
-const photos = JSON.parse(sessionStorage.getItem('photos') || '[]');
-if (!photos || photos.length < 4) {
-  alert('No photos found — please take your 4 photos first.');
-  window.location.href = 'snap.html';
-}
-
-// Build thumbnails for frames (frame images must be in frames/frame1.png ... frame6.png)
-for (let i=1;i<=6;i++){
-  const div = document.createElement('div');
-  div.className = 'frame';
-  const img = document.createElement('img');
-  img.src = `frames/frame${i}.png`;
-  img.alt = `Frame ${i}`;
-  img.dataset.index = i;
-  img.style.maxWidth = '140px';
-  img.addEventListener('click', () => onFrameClick(i));
-  div.appendChild(img);
-  frameGrid.appendChild(div);
-}
-
-function loadImage(src){
-  return new Promise((res, rej) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = ()=>res(img);
-    img.onerror = (e)=>rej(e);
-    img.src = src;
-  });
-}
-
-// draw image with "cover" (scale to fill, center crop)
-function drawImageCover(ctx, img, targetX, targetY, targetW, targetH){
-  const iw = img.naturalWidth;
-  const ih = img.naturalHeight;
-  const scale = Math.max(targetW / iw, targetH / ih);
-  const drawW = iw * scale;
-  const drawH = ih * scale;
-  const offsetX = targetX - (drawW - targetW) / 2;
-  const offsetY = targetY - (drawH - targetH) / 2;
-  ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
-}
-
-let currentFrameIndex = null;
-
-async function onFrameClick(index){
-  confirmBtn.disabled = false;
-  currentFrameIndex = index;
-
-  const frameSrc = `frames/frame${index}.png`;
-  const frameImg = await loadImage(frameSrc);
-
-  // use the frame's natural size so slot coords match exactly
-  const dims = FRAME_DIMENSIONS[index] || {w: frameImg.naturalWidth, h: frameImg.naturalHeight};
-  const frameW = dims.w;
-  const frameH = dims.h;
-
-  previewCanvas.width = frameW;
-  previewCanvas.height = frameH;
-  // scale canvas display to fit container width while maintaining aspect ratio
-  previewCanvas.style.width = Math.min(540, frameW * (540 / frameW)) + 'px';
-  previewCanvas.style.height = 'auto';
-
-  const ctx = previewCanvas.getContext('2d');
-  ctx.clearRect(0,0,frameW,frameH);
-
-  const slots = FRAME_SLOTS[index];
-
-  // draw 4 photos into their slots with cover fit
-  if (!slots || slots.length < 4) {
-    console.error('No slot config for frame', index);
-    return;
+  const photos = JSON.parse(sessionStorage.getItem('photos') || '[]');
+  if (!photos || photos.length < 4) {
+    alert('No photos found — please take your 4 photos first.');
+    window.location.href = 'snap.html';
   }
 
-  // Load photo images in parallel
-  const loadedPhotos = await Promise.all(photos.map(src => loadImage(src).catch(e=>null)));
+  // Create frame thumbnails
+  for (let i = 1; i <= 6; i++) {
+    const div = document.createElement('div');
+    div.className = 'frame';
+    const img = document.createElement('img');
+    img.src = `frames/frame${i}.png`;
+    img.alt = `Frame ${i}`;
+    img.addEventListener('click', () => onFrameClick(i));
+    div.appendChild(img);
+    frameGrid.appendChild(div);
+  }
 
-  for (let i=0;i<4;i++){
-    const slot = slots[i];
-    const ph = loadedPhotos[i];
-    if (!ph) {
-      // draw nothing (leave black as in frame)
-      continue;
+  function loadImage(src) {
+    return new Promise((res, rej) => {
+      const img = new Image();
+      img.onload = () => res(img);
+      img.onerror = rej;
+      img.src = src;
+    });
+  }
+
+  function drawImageCover(ctx, img, x, y, w, h) {
+    const iw = img.naturalWidth;
+    const ih = img.naturalHeight;
+    const scale = Math.max(w / iw, h / ih);
+    const dw = iw * scale;
+    const dh = ih * scale;
+    const dx = x + (w - dw) / 2;
+    const dy = y + (h - dh) / 2;
+    ctx.drawImage(img, dx, dy, dw, dh);
+  }
+
+  async function onFrameClick(index) {
+    confirmBtn.disabled = false;
+    const frame = await loadImage(`frames/frame${index}.png`);
+    const {w, h} = FRAME_DIMENSIONS[index];
+    previewCanvas.width = w;
+    previewCanvas.height = h;
+    const ctx = previewCanvas.getContext('2d');
+    ctx.clearRect(0, 0, w, h);
+
+    const slots = FRAME_SLOTS[index];
+    const loaded = await Promise.all(photos.map(src => loadImage(src)));
+    for (let i = 0; i < 4; i++) {
+      const s = slots[i];
+      drawImageCover(ctx, loaded[i], s.x, s.y, s.w, s.h);
     }
-    drawImageCover(ctx, ph, slot.x, slot.y, slot.w, slot.h);
+
+    ctx.drawImage(frame, 0, 0, w, h);
+    previewCanvas.dataset.index = index;
   }
 
-  // draw the frame PNG on top
-  ctx.drawImage(frameImg, 0, 0, frameW, frameH);
-
-  // store the chosen frame (for confirm step)
-  previewCanvas.dataset.frameSrc = frameSrc;
-  previewCanvas.dataset.frameIndex = String(index);
-}
-
-confirmBtn.addEventListener('click', async () => {
-  const frameSrc = previewCanvas.dataset.frameSrc;
-  const index = Number(previewCanvas.dataset.frameIndex || 0);
-  if (!frameSrc || !index) return alert('Select a frame first');
-
-  const frameImg = await loadImage(frameSrc);
-  const finalCanvas = document.createElement('canvas');
-  finalCanvas.width = previewCanvas.width;
-  finalCanvas.height = previewCanvas.height;
-  const fctx = finalCanvas.getContext('2d');
-
-  const slots = FRAME_SLOTS[index];
-  const loadedPhotos = await Promise.all(photos.map(src => loadImage(src).catch(e=>null)));
-
-  for (let i=0;i<4;i++){
-    const slot = slots[i];
-    const ph = loadedPhotos[i];
-    if (!ph) continue;
-    drawImageCover(fctx, ph, slot.x, slot.y, slot.w, slot.h);
-  }
-
-  fctx.drawImage(frameImg, 0, 0, finalCanvas.width, finalCanvas.height);
-  // save final result compressed to sessionStorage
-  try {
-    const finalData = finalCanvas.toDataURL('image/png');
+  confirmBtn.addEventListener('click', async () => {
+    const idx = previewCanvas.dataset.index;
+    if (!idx) return alert('Select a frame first!');
+    const frame = await loadImage(`frames/frame${idx}.png`);
+    const {w, h} = FRAME_DIMENSIONS[idx];
+    const final = document.createElement('canvas');
+    final.width = w;
+    final.height = h;
+    const ctx = final.getContext('2d');
+    const slots = FRAME_SLOTS[idx];
+    const loaded = await Promise.all(photos.map(src => loadImage(src)));
+    for (let i = 0; i < 4; i++) {
+      const s = slots[i];
+      drawImageCover(ctx, loaded[i], s.x, s.y, s.w, s.h);
+    }
+    ctx.drawImage(frame, 0, 0, w, h);
+    const finalData = final.toDataURL('image/png');
     sessionStorage.setItem('finalPhoto', finalData);
-    sessionStorage.setItem('selectedFrame', frameSrc);
-  } catch (e) {
-    console.warn('Could not save final image to sessionStorage', e);
-  }
+    sessionStorage.setItem('selectedFrame', `frames/frame${idx}.png`);
+    window.location.href = 'print.html';
+  });
 
-  // go to print page or wherever
-  window.location.href = 'print.html';
-});
-
-backBtn.addEventListener('click', ()=> window.location.href = 'snap.html');
-
-// Optionally auto-select first frame for convenience
-// onFrameClick(1);
-</script>
+  backBtn.addEventListener('click', () => window.location.href = 'snap.html');
+  </script>
 </body>
 </html>
