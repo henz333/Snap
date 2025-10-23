@@ -1,42 +1,182 @@
-const printBtn = document.getElementById('printBtn');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Select Frame — abcSnap</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blue1: #1E3C72;
+      --blue2: #2A5298;
+      --yellow: #FFD93D;
+      --accent: #2A5298;
+    }
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, var(--blue1), var(--blue2));
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+    h1 { font-family: 'Baloo 2', cursive; color: var(--yellow); margin: 0 0 8px; font-size: 2rem; }
+    p.lead { margin: 0 0 18px; color: rgba(255, 255, 255, 0.9); }
+    .layout { display: flex; gap: 24px; width: 100%; max-width: 1400px; align-items: flex-start; justify-content: center; flex-wrap: wrap; }
+    .frame-grid { width: 480px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .frame { background: rgba(255, 255, 255, 0.06); border-radius: 12px; padding: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform .15s, box-shadow .15s; }
+    .frame:hover { transform: translateY(-6px); box-shadow: 0 10px 30px rgba(0,0,0,0.35); }
+    .frame img { width: 100%; height: auto; border-radius: 8px; object-fit: contain; display: block; }
+    #preview-container { width: 540px; min-height: 640px; background: rgba(255, 255, 255, 0.06); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(0,0,0,0.35); }
+    #preview-canvas { background: #111; border-radius: 8px; max-width: 100%; height: auto; display: block; }
+    .controls { margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap; }
+    button.primary { background: var(--yellow); color: var(--accent); border: none; padding: 12px 18px; border-radius: 10px; font-weight: 700; cursor: pointer; }
+    button.ghost { background: transparent; color: rgba(255, 255, 255, 0.9); border: 1px solid rgba(255, 255, 255, 0.08); padding: 10px 14px; border-radius: 10px; cursor: pointer; }
+  </style>
+</head>
 
-// Enable Print button when a frame is selected and preview rendered
-function updatePrintButtonState(enabled) {
-  printBtn.disabled = !enabled;
-}
+<body>
+  <h1>🎨 Choose Your Frame</h1>
+  <p class="lead">Click a frame on the left — preview will show on the right. Confirm to continue.</p>
 
-// Modify onFrameClick to enable Print button
-async function onFrameClick(index, div) {
-  // existing code...
+  <div class="layout">
+    <div class="frame-grid" id="frameGrid"></div>
+    <div id="preview-container">
+      <canvas id="preview-canvas"></canvas>
+      <div class="controls">
+        <button id="confirmBtn" class="primary" disabled>Confirm Frame</button>
+        <button id="printBtn" class="ghost" disabled>🖨️ Print</button> <!-- ✅ Added Print button -->
+        <button id="backBtn" class="ghost">Back</button>
+      </div>
+    </div>
+  </div>
 
-  printBtn.disabled = false; // enable print button when frame selected and preview loaded
-}
+  <footer>abcSnap Booth — Business Week 2025</footer>
 
-// Print canvas function
-printBtn.addEventListener('click', () => {
-  if (!selectedFrameImg) return alert('Please select a frame first.');
+  <script>
+  (function(){
+    const GRID = { x: 55, y: 515, w: 798, h: 461, gapX: 837, gapY: 489 };
+    const STRIP = { x: 43, y: 418, w: 621, h: 375, gapY: 427 };
+    const GRID_INDICES = [1,2,3,4];
+    const FRAME_COUNT = 6;
 
-  const dataUrl = previewCanvas.toDataURL('image/png');
-  const printWindow = window.open('', '_blank');
+    const frameGrid = document.getElementById('frameGrid');
+    const previewCanvas = document.getElementById('preview-canvas');
+    const confirmBtn = document.getElementById('confirmBtn');
+    const printBtn = document.getElementById('printBtn'); // ✅
+    const backBtn = document.getElementById('backBtn');
 
-  printWindow.document.write(`
-    <html>
-      <head>
-        <title>Print Preview</title>
-        <style>
-          body { margin: 0; padding: 0; text-align: center; }
-          img { max-width: 100%; height: auto; }
-          @media print {
-            body { margin: 0; }
-            img { max-width: 100%; }
-          }
-        </style>
-      </head>
-      <body>
-        <img src="${dataUrl}" onload="window.print(); window.close();" />
-      </body>
-    </html>
-  `);
+    const photos = JSON.parse(sessionStorage.getItem('photos') || '[]');
 
-  printWindow.document.close();
-});
+    if (!photos || photos.length < 4) {
+      alert('No photos found — please take your 4 photos first.');
+      window.location.href = 'snap.html';
+      return;
+    }
+
+    for (let i = 1; i <= FRAME_COUNT; i++) {
+      const div = document.createElement('div');
+      div.className = 'frame';
+      div.innerHTML = `<img src="frames/frame${i}.png" alt="Frame ${i}">`;
+      div.addEventListener('click', () => onFrameClick(i));
+      frameGrid.appendChild(div);
+    }
+
+    async function loadImage(src) {
+      return new Promise((res, rej) => {
+        const img = new Image();
+        img.onload = () => res(img);
+        img.onerror = rej;
+        img.src = src;
+      });
+    }
+
+    async function onFrameClick(index) {
+      confirmBtn.disabled = false;
+      printBtn.disabled = false; // ✅ Enable print button
+      const frameSrc = `frames/frame${index}.png`;
+      const frameImg = await loadImage(frameSrc);
+      const isGrid = GRID_INDICES.includes(index);
+      const frameW = frameImg.naturalWidth;
+      const frameH = frameImg.naturalHeight;
+
+      previewCanvas.width = frameW;
+      previewCanvas.height = frameH;
+      const ctx = previewCanvas.getContext('2d');
+      ctx.clearRect(0,0,frameW,frameH);
+
+      if (isGrid) {
+        const coords = [
+          {x: GRID.x, y: GRID.y},
+          {x: GRID.x + GRID.gapX, y: GRID.y},
+          {x: GRID.x, y: GRID.y + GRID.gapY},
+          {x: GRID.x + GRID.gapX, y: GRID.y + GRID.gapY}
+        ];
+        for (let i=0;i<4;i++){
+          await drawPhoto(ctx, photos[i], coords[i].x, coords[i].y, GRID.w, GRID.h);
+        }
+      } else {
+        for (let i=0;i<4;i++){
+          const posY = STRIP.y + i * STRIP.gapY;
+          await drawPhoto(ctx, photos[i], STRIP.x, posY, STRIP.w, STRIP.h);
+        }
+      }
+
+      ctx.drawImage(frameImg, 0, 0, frameW, frameH);
+      previewCanvas.dataset.frameSrc = frameSrc;
+      previewCanvas.dataset.index = index;
+    }
+
+    async function drawPhoto(ctx, src, x, y, w, h){
+      const img = await loadImage(src);
+      const scale = Math.min(w / img.width, h / img.height);
+      const dw = img.width * scale, dh = img.height * scale;
+      ctx.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
+    }
+
+    confirmBtn.addEventListener('click', async () => {
+      const frameSrc = previewCanvas.dataset.frameSrc;
+      if (!frameSrc) return alert('Select a frame first.');
+
+      const finalCanvas = document.createElement('canvas');
+      finalCanvas.width = previewCanvas.width;
+      finalCanvas.height = previewCanvas.height;
+      const ctx = finalCanvas.getContext('2d');
+      ctx.drawImage(previewCanvas, 0, 0);
+      const finalDataURL = finalCanvas.toDataURL('image/png');
+
+      sessionStorage.setItem('finalPhoto', finalDataURL);
+      sessionStorage.setItem('selectedFrame', frameSrc);
+      window.location.href = 'print.html';
+    });
+
+    // ✅ PRINT FUNCTIONALITY
+    printBtn.addEventListener('click', () => {
+      const dataURL = previewCanvas.toDataURL('image/png');
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <html>
+        <head>
+          <title>Print Photo</title>
+          <style>
+            body { margin: 0; text-align: center; background: #fff; }
+            img { max-width: 100%; height: auto; }
+          </style>
+        </head>
+        <body>
+          <img src="${dataURL}" onload="window.print();window.close();">
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+    });
+
+    backBtn.addEventListener('click', () => window.location.href = 'snap.html');
+  })();
+  </script>
+</body>
+</html>
