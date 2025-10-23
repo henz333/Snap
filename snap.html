@@ -280,7 +280,7 @@
       startBtn.textContent = "Taking Photos...";
 
       for (let i = 0; i < 4; i++) {
-        await countdown(5);
+        await countdown(2);
         const photo = takeSinglePhoto();
         photos.push(photo);
         addThumbnail(photo);
@@ -326,7 +326,7 @@
 
     // Redirect to frames.html on Next button click and store photos in sessionStorage
     nextButton.addEventListener('click', () => {
-      sessionStorage.setItem('photo', JSON.stringify(photos));
+      sessionStorage.setItem('photoSet', JSON.stringify(photos));
       window.location.href = 'editor.html';
     });
 
