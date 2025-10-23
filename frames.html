@@ -199,7 +199,7 @@
     try {
       photos = JSON.parse(localStorage.getItem('photoSet') || '[]');
     } catch {
-      const single = localStorage.getItem('finalPhoto');
+      const single = sessionStorage.getItem('finalPhoto');
       if (single) photos = [single, single, single, single];
     }
 
