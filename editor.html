@@ -175,15 +175,22 @@ const frameData = {
     {x:24, y:738, w:349, h:210}
   ]}
 };
+  const gridScale = 5.0;
+  const stripScale = 5.5;
+
   for (const key in frameData) {
+    const isStrip = frameData[key].w === 707;
+    const scale = isStrip ? stripScale : gridScale;
+
     frameData[key].slots = frameData[key].slots.map(s => ({
-      x: s.x * 5.3,
-      y: s.y * 5.3,
-      w: s.w * 5.3,
-      h: s.h * 5.3
+      x: s.x * scale,
+      y: s.y * scale,
+      w: s.w * scale,
+      h: s.h * scale
     }));
   }
-      
+
+  
 
 // --- Load photos from sessionStorage ---
 let photos = [];
