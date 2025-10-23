@@ -155,17 +155,17 @@
   <header>🎨 Choose Your Frame</header>
 
   <div id="frame-selector">
-    <?php for ($i = 1; $i <= 6; $i++): ?>
-      <div class="frame-option" data-frame="des<?php echo $i; ?>">
-        <img src="resources/designs/des<?php echo $i; ?>.png" alt="Frame <?php echo $i; ?>">
-      </div>
-    <?php endfor; ?>
+    <div class="frame-option" data-frame="des1"><img src="resources/designs/des1.png" alt="Frame 1"></div>
+    <div class="frame-option" data-frame="des2"><img src="resources/designs/des2.png" alt="Frame 2"></div>
+    <div class="frame-option" data-frame="des3"><img src="resources/designs/des3.png" alt="Frame 3"></div>
+    <div class="frame-option" data-frame="des4"><img src="resources/designs/des4.png" alt="Frame 4"></div>
+    <div class="frame-option" data-frame="des5"><img src="resources/designs/des5.png" alt="Frame 5"></div>
+    <div class="frame-option" data-frame="des6"><img src="resources/designs/des6.png" alt="Frame 6"></div>
   </div>
 
   <div id="editor">
     <div id="photos"></div>
     <div id="frame-area">
-      <!-- Slots will be dynamically generated -->
       <img id="overlay" src="" alt="Frame Overlay">
     </div>
   </div>
@@ -182,13 +182,12 @@
     const overlay = document.getElementById('overlay');
     const saveBtn = document.getElementById('saveBtn');
 
+    // Get photos (for testing — replace with real ones later)
     const photos = JSON.parse(sessionStorage.getItem('photos') || '[]');
     if (photos.length === 0) {
-      alert("No photos found! Returning to camera.");
-      window.location.href = 'index.html';
+      alert("No photos found! Upload some to continue.");
     }
 
-    // Populate draggable photos
     photos.forEach((src, index) => {
       const img = document.createElement('img');
       img.src = src;
@@ -200,7 +199,6 @@
       photosContainer.appendChild(img);
     });
 
-    // Example layouts — adjust these based on your frame openings
     const layouts = {
       des1: [
         { top: '10%', left: '10%', width: '35%', height: '35%' },
@@ -226,37 +224,27 @@
       ]
     };
 
-    // Handle frame selection
     document.querySelectorAll('.frame-option').forEach(option => {
       option.addEventListener('click', () => {
         document.querySelectorAll('.frame-option').forEach(o => o.classList.remove('selected'));
         option.classList.add('selected');
 
         const frame = option.dataset.frame;
-        const layout = layouts[frame] || layouts.des1;
         overlay.src = `resources/designs/${frame}.png`;
 
-        // Clear old slots
         frameArea.querySelectorAll('.slot').forEach(s => s.remove());
-
-        // Generate new slots
-        layout.forEach((pos, i) => {
-          const div = document.createElement('div');
-          div.classList.add('slot');
-          div.style.top = pos.top;
-          div.style.left = pos.left;
-          div.style.width = pos.width;
-          div.style.height = pos.height;
-
-          div.addEventListener('dragover', e => e.preventDefault());
-          div.addEventListener('drop', e => {
+        (layouts[frame] || []).forEach(pos => {
+          const slot = document.createElement('div');
+          slot.classList.add('slot');
+          Object.assign(slot.style, pos);
+          slot.addEventListener('dragover', e => e.preventDefault());
+          slot.addEventListener('drop', e => {
             e.preventDefault();
             const index = e.dataTransfer.getData('text/plain');
             const src = photos[index];
-            div.innerHTML = `<img src="${src}" alt="photo">`;
+            slot.innerHTML = `<img src="${src}" alt="photo">`;
           });
-
-          frameArea.appendChild(div);
+          frameArea.appendChild(slot);
         });
 
         frameSelector.style.display = 'none';
@@ -265,18 +253,16 @@
       });
     });
 
-    // Save collage as image
     saveBtn.addEventListener('click', async () => {
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       canvas.width = 960;
       canvas.height = 1280;
 
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      const slots = document.querySelectorAll('.slot');
       const frameRect = frameArea.getBoundingClientRect();
+      const slots = document.querySelectorAll('.slot');
 
       for (const slot of slots) {
         const img = slot.querySelector('img');
