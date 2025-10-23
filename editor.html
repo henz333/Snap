@@ -170,12 +170,12 @@
   <header>🎨 Choose Your Frame</header>
 
   <div id="frame-selector">
-    <div class="frame-option" data-frame="des1"><img src="resources/designs/des1.png" alt="Frame 1"></div>
-    <div class="frame-option" data-frame="des2"><img src="resources/designs/des2.png" alt="Frame 2"></div>
-    <div class="frame-option" data-frame="des3"><img src="resources/designs/des3.png" alt="Frame 3"></div>
-    <div class="frame-option" data-frame="des4"><img src="resources/designs/des4.png" alt="Frame 4"></div>
-    <div class="frame-option" data-frame="des5"><img src="resources/designs/des5.png" alt="Frame 5"></div>
-    <div class="frame-option" data-frame="des6"><img src="resources/designs/des6.png" alt="Frame 6"></div>
+    <div class="frame-option" data-frame="frame1"><img src="frames/frame1.png" alt="Frame 1"></div>
+    <div class="frame-option" data-frame="frame2"><img src="frames/frame2.png" alt="Frame 2"></div>
+    <div class="frame-option" data-frame="frame3"><img src="frames/frame3.png" alt="Frame 3"></div>
+    <div class="frame-option" data-frame="frame4"><img src="frames/frame4.png" alt="Frame 4"></div>
+    <div class="frame-option" data-frame="frame5"><img src="frames/frame5.png" alt="Frame 5"></div>
+    <div class="frame-option" data-frame="frame6"><img src="frames/frame6.png" alt="Frame 6"></div>
   </div>
 
   <div id="editor">
@@ -219,25 +219,25 @@
     });
 
     const layouts = {
-      des1: [
+      frame1: [
         { top: '10%', left: '10%', width: '35%', height: '35%' },
         { top: '10%', left: '55%', width: '35%', height: '35%' },
         { top: '55%', left: '10%', width: '35%', height: '35%' },
         { top: '55%', left: '55%', width: '35%', height: '35%' },
       ],
-      des2: [
+      frame2: [
         { top: '5%', left: '10%', width: '80%', height: '20%' },
         { top: '28%', left: '10%', width: '80%', height: '20%' },
         { top: '51%', left: '10%', width: '80%', height: '20%' },
         { top: '74%', left: '10%', width: '80%', height: '20%' },
       ],
-      des3: [{ top: '10%', left: '20%', width: '60%', height: '60%' }],
-      des4: [{ top: '10%', left: '10%', width: '80%', height: '80%' }],
-      des5: [
+      frame3: [{ top: '10%', left: '20%', width: '60%', height: '60%' }],
+      frame4: [{ top: '10%', left: '10%', width: '80%', height: '80%' }],
+      frame5: [
         { top: '10%', left: '10%', width: '80%', height: '35%' },
         { top: '55%', left: '10%', width: '80%', height: '35%' }
       ],
-      des6: [
+      frame6: [
         { top: '5%', left: '10%', width: '80%', height: '40%' },
         { top: '55%', left: '10%', width: '80%', height: '40%' }
       ]
@@ -249,7 +249,7 @@
         option.classList.add('selected');
 
         const frame = option.dataset.frame;
-        overlay.src = `resources/designs/${frame}.png`;
+        overlay.src = `frames/${frame}.png`;
 
         frameArea.querySelectorAll('.slot').forEach(s => s.remove());
         (layouts[frame] || []).forEach(pos => {
