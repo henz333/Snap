@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -85,6 +85,24 @@
   .frame-option:hover { transform: scale(1.05); }
   .frame-option.selected { border-color: #FFD93D; transform: scale(1.07); }
 
+  #confirm-snap {
+    margin-top: 1rem;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    background-color: #FFD93D;
+    color: #111;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+
+  #confirm-snap:hover {
+    transform: scale(1.05);
+    background-color: #FFC107;
+  }
+
   footer {
     margin-top: auto;
     text-align: center;
@@ -110,6 +128,8 @@
       <div class="frame-option"><img src="resources/designs/des5.png" alt="Frame 5"></div>
       <div class="frame-option"><img src="resources/designs/des6.png" alt="Frame 6"></div>
     </div>
+
+    <button id="confirm-snap">CONFIRM SNAP</button>
   </main>
 
   <footer>© 2025 abcSnap | Business Week</footer>
@@ -270,6 +290,26 @@ frameOptions.forEach((option, i) => {
     option.classList.add('selected');
     await composeFrame(option.querySelector('img').src, i + 1);
   });
+});
+
+// --- Confirm Snap Button ---
+const confirmBtn = document.getElementById('confirm-snap');
+confirmBtn.addEventListener('click', () => {
+  if (currentCanvas) {
+    // Convert canvas to data URL
+    const snapData = currentCanvas.toDataURL('image/png');
+    
+    // Store in sessionStorage for later use
+    sessionStorage.setItem('confirmedSnap', snapData);
+    
+    // Feedback to user
+    alert("Snap confirmed!");
+    
+    // Optional: navigate to next page
+    // window.location.href = "nextPage.html";
+  } else {
+    alert("Please select a frame first!");
+  }
 });
 </script>
 </body>
