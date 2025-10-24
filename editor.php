@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -85,7 +85,7 @@
   .frame-option:hover { transform: scale(1.05); }
   .frame-option.selected { border-color: #FFD93D; transform: scale(1.07); }
 
-  #downloadBtn, #printBtn {
+  #downloadBtn {
     background: #FFD93D;
     color: #2A5298;
     border: none;
@@ -95,10 +95,9 @@
     font-size: 1rem;
     cursor: pointer;
     box-shadow: 0 6px 14px rgba(0,0,0,0.2);
-    margin: 0.4rem;
   }
 
-  #downloadBtn:hover, #printBtn:hover { transform: translateY(-2px); }
+  #downloadBtn:hover { transform: translateY(-2px); }
 
   footer {
     margin-top: auto;
@@ -126,10 +125,7 @@
       <div class="frame-option"><img src="frames/frame6.png" alt="Frame 6"></div>
     </div>
 
-    <div>
-      <button id="downloadBtn">Download Final Photo</button>
-      <button id="printBtn">Print</button>
-    </div>
+    <button id="downloadBtn">Download Final Photo</button>
   </main>
 
   <footer>© 2025 abcSnap | Business Week</footer>
@@ -139,12 +135,173 @@ const preview = document.getElementById('preview');
 const frameOptions = document.querySelectorAll('.frame-option');
 const previewArea = document.getElementById('preview-area');
 const downloadBtn = document.getElementById('downloadBtn');
-const printBtn = document.getElementById('printBtn');
 
 // === Your frame coordinate data (converted from cm to px) ===
-const frameData = { /* (keep all existing frameData code here unchanged) */ };
+const frameData = {
+  1: { w:1748, h:1240, slots:[
+    {x:18, y:18, w:256, h:146},
+    {x:286, y:18, w:256, h:146},
+    {x:18, y:175, w:256, h:146},
+    {x:286, y:175, w:256, h:146}
+  ]},
+  2: { w:1748, h:1240, slots:[
+    {x:18, y:18, w:256, h:146},
+    {x:286, y:18, w:256, h:146},
+    {x:18, y:175, w:256, h:146},
+    {x:286, y:175, w:256, h:146}
+  ]},
+  3: { w:1748, h:1240, slots:[
+    {x:18, y:31, w:276, h:184},
+    {x:18, y:231, w:168, h:134},
+    {x:200, y:231, w:164, h:134},
+    {x:378, y:231, w:163, h:134}
+  ]},
+  4: { w:1748, h:1240, slots:[
+    {x:18, y:31, w:276, h:184},
+    {x:18, y:231, w:168, h:134},
+    {x:200, y:231, w:164, h:134},
+    {x:378, y:231, w:163, h:134}
+  ]},
+  5: { w:707, h:2000, slots:[
+    {x:24, y:25, w:349, h:210},
+    {x:24, y:264, w:349, h:210},
+    {x:24, y:501, w:349, h:210},
+    {x:24, y:738, w:349, h:210}
+  ]},
+  6: { w:707, h:2000, slots:[
+    {x:24, y:25, w:349, h:210},
+    {x:24, y:264, w:349, h:210},
+    {x:24, y:501, w:349, h:210},
+    {x:24, y:738, w:349, h:210}
+  ]}
+};
 
-// (keep all existing scaling, offsets, logic, etc. unchanged)
+  // 🎯 Scaling + per-frame + per-slot offsets
+  const gridAScale = 3.1;  // Frames 1–2
+  const gridBScale = 3.1;  // Frames 3–4
+  const stripScale = 2.0;  // Frames 5–6
+
+  // 🧭 Offsets for each frame type (per slot)
+  const offsets = {
+    // Frame 1–2: Grid Type A (2x2 boxes)
+    gridA: [
+      {x: 9,  y: 4},   // Slot 1
+      {x: 10,  y: 4},   // Slot 2
+      {x: 8,  y: 8},   // Slot 3
+      {x: 8, y: 8}    // Slot 4
+    ],
+
+    // Frame 3–4: Grid Type B (1 large + 3 small)
+    gridB: [
+      {x: 10,  y: 10},   // Slot 1
+      {x: 10,  y: 10},   // Slot 2
+      {x: 10,  y: 10},   // Slot 3
+      {x: 13,  y: 10}    // Slot 4
+    ],
+
+    // Frame 5–6: Strip Type (vertical strip)
+    strip: [
+      {x: 0,  y: -6},   // Slot 1
+      {x: 0,  y: -57},   // Slot 2
+      {x: 0,  y: -110},   // Slot 3
+      {x: 0,  y: -160}    // Slot 4
+    ]
+  };
+
+  // 🧩 Apply scaling + offset adjustments
+  for (const key in frameData) {
+    const frameNum = parseInt(key);
+    let scale, slotOffsets;
+
+    if (frameNum <= 2) {
+      // Frames 1–2: Grid Type A
+      scale = gridAScale;
+      slotOffsets = offsets.gridA;
+    } else if (frameNum <= 4) {
+      // Frames 3–4: Grid Type B
+      scale = gridBScale;
+      slotOffsets = offsets.gridB;
+    } else {
+      // Frames 5–6: Strip Type
+      scale = stripScale;
+      slotOffsets = offsets.strip;
+    }
+
+    frameData[key].slots = frameData[key].slots.map((s, i) => ({
+      x: s.x * scale + (slotOffsets[i]?.x || 0),
+      y: s.y * scale + (slotOffsets[i]?.y || 0),
+      w: s.w * scale,
+      h: s.h * scale
+    }));
+  }
+
+       
+
+// --- Load photos from sessionStorage ---
+let photos = [];
+try {
+  photos = JSON.parse(sessionStorage.getItem('photos') || '[]');
+} catch {
+  alert("No photos found — please retake.");
+  window.location.href = "snap.php";
+}
+
+if (photos.length < 4) {
+  alert("No valid photos found. Returning...");
+  window.location.href = "snap.php";
+}
+
+let currentCanvas = null;
+
+// --- Main composition logic ---
+async function composeFrame(frameSrc, frameNum) {
+  const { w, h, slots } = frameData[frameNum];
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = w;
+  canvas.height = h;
+
+  // Draw photos first (under frame)
+  for (let i = 0; i < 4; i++) {
+    const img = await loadImage(photos[i]);
+    const s = slots[i];
+    ctx.drawImage(img, s.x, s.y, s.w, s.h);
+  }
+
+  // Draw the PNG frame on top
+  const frameImg = await loadImage(frameSrc);
+  ctx.drawImage(frameImg, 0, 0, w, h);
+
+  // Preview image
+  const dataURL = canvas.toDataURL('image/png');
+  preview.src = dataURL;
+
+  // Resize preview container dynamically
+  const ratio = w / h;
+  previewArea.style.width = ratio > 1 ? "900px" : "400px";
+  previewArea.style.aspectRatio = `${w}/${h}`;
+
+  currentCanvas = canvas;
+}
+
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+// --- Frame selection logic ---
+frameOptions.forEach((option, i) => {
+  option.addEventListener('click', async () => {
+    frameOptions.forEach(f => f.classList.remove('selected'));
+    option.classList.add('selected');
+    await composeFrame(option.querySelector('img').src, i+1);
+  });
+});
 
 // --- Download final image ---
 downloadBtn.addEventListener('click', () => {
@@ -156,30 +313,6 @@ downloadBtn.addEventListener('click', () => {
   link.download = 'abcSnap-Framed.png';
   link.href = currentCanvas.toDataURL('image/png');
   link.click();
-});
-
-// --- Print/Upload image to server ---
-printBtn.addEventListener('click', async () => {
-  if (!currentCanvas) {
-    alert("Select a frame first!");
-    return;
-  }
-  const blob = await new Promise(resolve => currentCanvas.toBlob(resolve, 'image/png'));
-  const formData = new FormData();
-  const filename = 'framed_' + Date.now() + '.png';
-  formData.append('file', blob, filename);
-
-  fetch('upload.php', {
-    method: 'POST',
-    body: formData
-  })
-  .then(res => res.text())
-  .then(response => {
-    alert(response);
-  })
-  .catch(err => {
-    alert('Upload failed: ' + err);
-  });
 });
 </script>
 </body>
