@@ -174,10 +174,12 @@
     const confirmBtn = document.getElementById('confirmBtn');
     const backBtn = document.getElementById('backBtn');
 
+    // Get photos from sessionStorage
     const photos = JSON.parse(sessionStorage.getItem('photos') || '[]');
     console.log("Loaded photos:", photos);
     
-    if (!photos || photos.length < 4) {
+    // Validate photos length
+    if (!Array.isArray(photos) || photos.length !== 4) {
       alert('No photos found — please take your 4 photos first.');
       window.location.href = 'snap.html';
       return;
