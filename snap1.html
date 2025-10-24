@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>abcSnap Booth — Capture</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body { margin:0; font-family:'Poppins',sans-serif; background:#1E3C72; color:#fff; display:flex; flex-direction:column; align-items:center; padding:24px; }
+    h1 { font-family:'Baloo 2',cursive; color:#FFD93D; }
+    #camera { width: 640px; max-width: 90%; margin-top: 20px; }
+    .controls { margin-top: 16px; display:flex; gap:12px; flex-wrap:wrap; }
+    button { padding:12px 18px; border-radius:10px; cursor:pointer; font-weight:700; }
+    button.primary { background:#FFD93D; color:#2A5298; border:none; }
+    button.ghost { background:transparent; color:#fff; border:1px solid rgba(255,255,255,0.3); }
+    .photos-preview { display:flex; gap:12px; margin-top:16px; flex-wrap:wrap; }
+    .photos-preview img { width:140px; border-radius:8px; object-fit:cover; }
+  </style>
+</head>
+<body>
+  <h1>📸 Take Your 4 Photos</h1>
+
+  <video id="camera" autoplay playsinline></video>
+
+  <div class="controls">
+    <button id="captureBtn" class="primary">Capture Photo</button>
+    <button id="startBtn" class="ghost">Start Editor</button>
+  </div>
+
+  <div class="photos-preview" id="photosPreview"></div>
+
+  <script>
+    const video = document.getElementById('camera');
+    const captureBtn = document.getElementById('captureBtn');
+    const startBtn = document.getElementById('startBtn');
+    const photosPreview = document.getElementById('photosPreview');
+
+    let photos = [];
+
+    // Access camera
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => video.srcObject = stream)
+      .catch(err => alert('Camera access denied: ' + err));
+
+    captureBtn.addEventListener('click', () => {
+      if (photos.length >= 4) return alert('You already took 4 photos.');
+
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const dataUrl = canvas.toDataURL('image/png');
+
+      photos.push(dataUrl);
+      sessionStorage.setItem('photos', JSON.stringify(photos)); // ✅ Save photos to sessionStorage
+
+      const img = document.createElement('img');
+      img.src = dataUrl;
+      photosPreview.appendChild(img);
+    });
+
+    startBtn.addEventListener('click', () => {
+      if (photos.length < 4) {
+        return alert('Please take 4 photos first.');
+      }
+      window.location.href = 'editor.html';
+    });
+  </script>
+</body>
+</html>
