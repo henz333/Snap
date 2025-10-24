@@ -85,20 +85,6 @@
   .frame-option:hover { transform: scale(1.05); }
   .frame-option.selected { border-color: #FFD93D; transform: scale(1.07); }
 
-  #downloadBtn {
-    background: #FFD93D;
-    color: #2A5298;
-    border: none;
-    padding: 14px 26px;
-    border-radius: 30px;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    box-shadow: 0 6px 14px rgba(0,0,0,0.2);
-  }
-
-  #downloadBtn:hover { transform: translateY(-2px); }
-
   footer {
     margin-top: auto;
     text-align: center;
@@ -125,7 +111,6 @@
       <div class="frame-option"><img src="frames/frame6.png" alt="Frame 6"></div>
     </div>
 
-    <button id="downloadBtn">Download Final Photo</button>
   </main>
 
   <footer>© 2025 abcSnap | Business Week</footer>
@@ -301,18 +286,6 @@ frameOptions.forEach((option, i) => {
     option.classList.add('selected');
     await composeFrame(option.querySelector('img').src, i+1);
   });
-});
-
-// --- Download final image ---
-downloadBtn.addEventListener('click', () => {
-  if (!currentCanvas) {
-    alert("Select a frame first!");
-    return;
-  }
-  const link = document.createElement('a');
-  link.download = 'abcSnap-Framed.png';
-  link.href = currentCanvas.toDataURL('image/png');
-  link.click();
 });
 </script>
 </body>
