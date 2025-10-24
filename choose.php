@@ -95,10 +95,9 @@
     font-size: 1rem;
     cursor: pointer;
     box-shadow: 0 6px 14px rgba(0,0,0,0.2);
-    margin-top: 1rem;
   }
 
-  #confirmBtn:hover { transform: translateY(-2px); }
+  #confimBtn:hover { transform: translateY(-2px); }
 
   footer {
     margin-top: auto;
@@ -118,12 +117,12 @@
 
     <h2>Select Your Frame</h2>
     <div id="frames">
-      <div class="frame-option"><img src="resources/designs/des1.png" alt="Frame 1"></div>
-      <div class="frame-option"><img src="resources/designs/des2.png" alt="Frame 2"></div>
-      <div class="frame-option"><img src="resources/designs/des3.png" alt="Frame 3"></div>
-      <div class="frame-option"><img src="resources/designs/des4.png" alt="Frame 4"></div>
-      <div class="frame-option"><img src="resources/designs/des5.png" alt="Frame 5"></div>
-      <div class="frame-option"><img src="resources/designs/des6.png" alt="Frame 6"></div>
+      <div class="frame-option"><img src="frames/frame1.png" alt="Frame 1"></div>
+      <div class="frame-option"><img src="frames/frame2.png" alt="Frame 2"></div>
+      <div class="frame-option"><img src="frames/frame3.png" alt="Frame 3"></div>
+      <div class="frame-option"><img src="frames/frame4.png" alt="Frame 4"></div>
+      <div class="frame-option"><img src="frames/frame5.png" alt="Frame 5"></div>
+      <div class="frame-option"><img src="frames/frame6.png" alt="Frame 6"></div>
     </div>
 
     <button id="confirmBtn">Confirm Snap</button>
@@ -135,7 +134,7 @@
 const preview = document.getElementById('preview');
 const frameOptions = document.querySelectorAll('.frame-option');
 const previewArea = document.getElementById('preview-area');
-const confirmBtn = document.getElementById('confirmBtn');
+const downloadBtn = document.getElementById('downloadBtn');
 
 // === Your frame coordinate data (converted from cm to px) ===
 const frameData = {
@@ -177,61 +176,71 @@ const frameData = {
   ]}
 };
 
-// 🎯 Scaling + per-frame + per-slot offsets
-const gridAScale = 3.1;
-const gridBScale = 3.1;
-const stripScale = 2.0;
+  // 🎯 Scaling + per-frame + per-slot offsets
+  const gridAScale = 3.1;  // Frames 1–2
+  const gridBScale = 3.1;  // Frames 3–4
+  const stripScale = 2.0;  // Frames 5–6
 
-// 🧭 Offsets for each frame type (per slot)
-const offsets = {
-  gridA: [
-    {x: 9,  y: 4},
-    {x: 10, y: 4},
-    {x: 8,  y: 8},
-    {x: 8,  y: 8}
-  ],
-  gridB: [
-    {x: 10, y: 10},
-    {x: 10, y: 10},
-    {x: 10, y: 10},
-    {x: 13, y: 10}
-  ],
-  strip: [
-    {x: 0,  y: -6},
-    {x: 0,  y: -57},
-    {x: 0,  y: -110},
-    {x: 0,  y: -160}
-  ]
-};
+  // 🧭 Offsets for each frame type (per slot)
+  const offsets = {
+    // Frame 1–2: Grid Type A (2x2 boxes)
+    gridA: [
+      {x: 9,  y: 4},   // Slot 1
+      {x: 10,  y: 4},   // Slot 2
+      {x: 8,  y: 8},   // Slot 3
+      {x: 8, y: 8}    // Slot 4
+    ],
 
-// Apply scaling + offsets
-for (const key in frameData) {
-  const frameNum = parseInt(key);
-  let scale, slotOffsets;
+    // Frame 3–4: Grid Type B (1 large + 3 small)
+    gridB: [
+      {x: 10,  y: 10},   // Slot 1
+      {x: 10,  y: 10},   // Slot 2
+      {x: 10,  y: 10},   // Slot 3
+      {x: 13,  y: 10}    // Slot 4
+    ],
 
-  if (frameNum <= 2) {
-    scale = gridAScale;
-    slotOffsets = offsets.gridA;
-  } else if (frameNum <= 4) {
-    scale = gridBScale;
-    slotOffsets = offsets.gridB;
-  } else {
-    scale = stripScale;
-    slotOffsets = offsets.strip;
+    // Frame 5–6: Strip Type (vertical strip)
+    strip: [
+      {x: 0,  y: -6},   // Slot 1
+      {x: 0,  y: -57},   // Slot 2
+      {x: 0,  y: -110},   // Slot 3
+      {x: 0,  y: -160}    // Slot 4
+    ]
+  };
+
+  // 🧩 Apply scaling + offset adjustments
+  for (const key in frameData) {
+    const frameNum = parseInt(key);
+    let scale, slotOffsets;
+
+    if (frameNum <= 2) {
+      // Frames 1–2: Grid Type A
+      scale = gridAScale;
+      slotOffsets = offsets.gridA;
+    } else if (frameNum <= 4) {
+      // Frames 3–4: Grid Type B
+      scale = gridBScale;
+      slotOffsets = offsets.gridB;
+    } else {
+      // Frames 5–6: Strip Type
+      scale = stripScale;
+      slotOffsets = offsets.strip;
+    }
+
+    frameData[key].slots = frameData[key].slots.map((s, i) => ({
+      x: s.x * scale + (slotOffsets[i]?.x || 0),
+      y: s.y * scale + (slotOffsets[i]?.y || 0),
+      w: s.w * scale,
+      h: s.h * scale
+    }));
   }
 
-  frameData[key].slots = frameData[key].slots.map((s, i) => ({
-    x: s.x * scale + (slotOffsets[i]?.x || 0),
-    y: s.y * scale + (slotOffsets[i]?.y || 0),
-    w: s.w * scale,
-    h: s.h * scale
-  }));
-}
+       
 
 // --- Load photos from sessionStorage ---
 let photos = [];
 try {
-  photos = JSON.parse(sessionStorage.getItem('photos') || '[]');
+  photos = JSON.parse(sessionStorage.getItem('photoSet') || '[]');
 } catch {
   alert("No photos found — please retake.");
   window.location.href = "snap.php";
@@ -252,18 +261,22 @@ async function composeFrame(frameSrc, frameNum) {
   canvas.width = w;
   canvas.height = h;
 
+  // Draw photos first (under frame)
   for (let i = 0; i < 4; i++) {
     const img = await loadImage(photos[i]);
     const s = slots[i];
     ctx.drawImage(img, s.x, s.y, s.w, s.h);
   }
 
+  // Draw the PNG frame on top
   const frameImg = await loadImage(frameSrc);
   ctx.drawImage(frameImg, 0, 0, w, h);
 
+  // Preview image
   const dataURL = canvas.toDataURL('image/png');
   preview.src = dataURL;
 
+  // Resize preview container dynamically
   const ratio = w / h;
   previewArea.style.width = ratio > 1 ? "900px" : "400px";
   previewArea.style.aspectRatio = `${w}/${h}`;
@@ -290,23 +303,6 @@ frameOptions.forEach((option, i) => {
   });
 });
 
-// --- Confirm Snap upload ---
-confirmBtn.addEventListener('click', () => {
-  if (!currentCanvas) {
-    alert("Select a frame first!");
-    return;
-  }
-
-  currentCanvas.toBlob(blob => {
-    const formData = new FormData();
-    formData.append('image', blob, 'abcSnap-Framed.png');
-
-    fetch('uploads.php', { method: 'POST', body: formData })
-      .then(res => res.text())
-      .then(resp => alert("Image uploaded successfully!"))
-      .catch(err => alert("Upload failed."));
-  }, 'image/png');
-});
 </script>
 </body>
 </html>
