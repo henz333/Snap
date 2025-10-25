@@ -134,6 +134,39 @@
       .frame-grid { width: 90%; grid-template-columns: repeat(3, 1fr); }
       #preview-container { width: 90%; }
     }
+
+    /* 🔄 Added loading overlay styles */
+    #loadingOverlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 9999;
+    }
+    .spinner {
+      border: 6px solid rgba(255,255,255,0.3);
+      border-top: 6px solid var(--yellow);
+      border-radius: 50%;
+      width: 70px;
+      height: 70px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 16px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .loading-text {
+      font-size: 1.2rem;
+      color: #fff;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
@@ -156,6 +189,12 @@
   </div>
 
   <footer>abcSnap Booth — Business Week 2025</footer>
+
+  <!-- 🔄 Loading Overlay HTML -->
+  <div id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Uploading, please wait...</div>
+  </div>
 
   <script>
   (function(){
@@ -201,52 +240,42 @@
     };
      
       // 🎯 Scaling + per-frame + per-slot offsets
-    const gridAScale = 3.1;  // Frames 1–2
-    const gridBScale = 3.1;  // Frames 3–4
-    const stripScale = 2.0;  // Frames 5–6
+    const gridAScale = 3.1;  
+    const gridBScale = 3.1;  
+    const stripScale = 2.0;  
     
-    // 🧭 Offsets for each frame type (per slot)
     const offsets = {
-      // Frame 1–2: Grid Type A (2x2 boxes)
       gridA: [
-        {x: 9,  y: 4},   // Slot 1
-        {x: 10,  y: 4},   // Slot 2
-        {x: 8,  y: 8},   // Slot 3
-        {x: 8, y: 8}    // Slot 4
+        {x: 9,  y: 4},
+        {x: 10,  y: 4},
+        {x: 8,  y: 8},
+        {x: 8, y: 8}
       ],
-      
-      // Frame 3–4: Grid Type B (1 large + 3 small)
       gridB: [
-        {x: 10,  y: 10},   // Slot 1
-        {x: 10,  y: 10},   // Slot 2
-        {x: 10,  y: 10},   // Slot 3
-        {x: 13,  y: 10}    // Slot 4
+        {x: 10,  y: 10},
+        {x: 10,  y: 10},
+        {x: 10,  y: 10},
+        {x: 13,  y: 10}
       ],
-
-      // Frame 5–6: Strip Type (vertical strip)
       strip: [
-        {x: 0,  y: -6},   // Slot 1
-        {x: 0,  y: -57},   // Slot 2
-        {x: 0,  y: -110},   // Slot 3
-        {x: 0,  y: -160}    // Slot 4
+        {x: 0,  y: -6},
+        {x: 0,  y: -57},
+        {x: 0,  y: -110},
+        {x: 0,  y: -160}
       ]
     };
     
-    // 🧩 Apply scaling + offset adjustments
     for (const key in frameData) {
       const frameNum = parseInt(key);
       let scale, slotOffsets;
 
       if (frameNum <= 2) {
-        // Frames 1–2: Grid Type A
         scale = gridAScale;
         slotOffsets = offsets.gridA;
       } else if (frameNum <= 4) {
-        // Frames 3–4: Grid Type B
         scale = gridBScale;
         slotOffsets = offsets.gridB;
       } else {
-        // Frames 5–6: Strip Type
         scale = stripScale;
         slotOffsets = offsets.strip;
       }
@@ -263,6 +292,7 @@
     const previewCanvas = document.getElementById('preview-canvas');
     const confirmBtn = document.getElementById('confirmBtn');
     const backBtn = document.getElementById('backBtn');
+    const loadingOverlay = document.getElementById('loadingOverlay');
 
     const photos = JSON.parse(sessionStorage.getItem('photos') || '[]');
     console.log("Loaded photos:", photos);
@@ -273,7 +303,6 @@
       return;
     }
 
-    // Build frame grid
     for (let i = 1; i <= FRAME_COUNT; i++) {
       const div = document.createElement('div');
       div.className = 'frame';
@@ -303,19 +332,16 @@
       const ctx = previewCanvas.getContext("2d");
       ctx.clearRect(0, 0, frame.w, frame.h);
 
-      // Draw the 4 photos in their respective slots
       for (let i = 0; i < 4; i++) {
         const slot = frame.slots[i];
         const img = await loadImage(photos[i]);
         ctx.drawImage(img, slot.x, slot.y, slot.w, slot.h);
       }
 
-      // Overlay the frame design on top
       ctx.drawImage(frameImg, 0, 0, frame.w, frame.h);
 
       previewCanvas.dataset.index = index;
       previewCanvas.dataset.frameSrc = `resources/designs/des${index}.png`;
-
     }
 
     async function drawPhotoToFit(ctx, photoSrc, x, y, w, h){
@@ -333,6 +359,8 @@
       const index = Number(previewCanvas.dataset.index);
       if (!frameSrc) return alert('Select a frame first.');
 
+      loadingOverlay.style.display = 'flex'; // 🔄 Show loading
+
       const frameImg = await loadImage(frameSrc);
       const finalCanvas = document.createElement('canvas');
       finalCanvas.width = previewCanvas.width;
@@ -340,14 +368,12 @@
       const fctx = finalCanvas.getContext('2d');
 
       const frame = frameData[index];
-      // Draw photos using frameData slot positions
       for (let i = 0; i < 4; i++) {
         const slot = frame.slots[i];
         const img = await loadImage(photos[i]);
         fctx.drawImage(img, slot.x, slot.y, slot.w, slot.h);
       }
 
-      // Draw the selected frame overlay
       fctx.drawImage(frameImg, 0, 0, frame.w, frame.h);
 
       const finalDataURL = finalCanvas.toDataURL('image/png');
@@ -357,6 +383,7 @@
         formData.append('image', finalDataURL);
         const res = await fetch('upload_snap.php', { method: 'POST', body: formData });
         const result = await res.json();
+        loadingOverlay.style.display = 'none'; // 🔄 Hide loading
         if (result.success) {
           alert('Upload successful!');
           sessionStorage.setItem('finalPhoto', finalDataURL);
@@ -366,6 +393,7 @@
           alert('Upload failed: ' + result.message);
         }
       } catch (err) {
+        loadingOverlay.style.display = 'none'; // 🔄 Hide on error
         alert('Error uploading image.');
         console.error(err);
       }
