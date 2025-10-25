@@ -306,7 +306,11 @@
     for (let i = 1; i <= FRAME_COUNT; i++) {
       const div = document.createElement('div');
       div.className = 'frame';
-      div.innerHTML = `<img src="resources/designs/des${i}.png" alt="Frame ${i}" data-index="${i}">`;
+      
+      // 👇 Custom filenames for frames 5 and 6
+      const fileName = (i <= 4) ? `des${i}.png` : `frame${i}.png`;
+        
+      div.innerHTML = `<img src="resources/designs/${fileName}" alt="Frame ${i}" data-index="${i}">`;
       div.addEventListener('click', () => onFrameClick(i));
       frameGrid.appendChild(div);
     }
@@ -324,24 +328,29 @@
       confirmBtn.disabled = false;
 
       const frame = frameData[index];
-      const frameImg = await loadImage(`resources/designs/des${index}.png`);
-
+        
+      // 👇 Match file names (des1–4, frame5–6)  
+      const fileName = (index <= 4) ? `des${index}.png` : `frame${index}.png`; 
+      const frameImg = await loadImage(`resources/designs/${fileName}`);
+        
       previewCanvas.width = frame.w;
-      previewCanvas.height = frame.h;
-
+      previewCanvas.height = frame.h; 
+        
       const ctx = previewCanvas.getContext("2d");
       ctx.clearRect(0, 0, frame.w, frame.h);
-
+        
+      // Draw the 4 photos in their respective slots
       for (let i = 0; i < 4; i++) {
         const slot = frame.slots[i];
         const img = await loadImage(photos[i]);
-        ctx.drawImage(img, slot.x, slot.y, slot.w, slot.h);
-      }
+        ctx.drawImage(img, slot.x, slot.y, slot.w, slot.h);  
+     }
+        
+     // Overlay the frame design 
+     ctx.drawImage(frameImg, 0, 0, frame.w, frame.h);
 
-      ctx.drawImage(frameImg, 0, 0, frame.w, frame.h);
-
-      previewCanvas.dataset.index = index;
-      previewCanvas.dataset.frameSrc = `resources/designs/des${index}.png`;
+     previewCanvas.dataset.index = index;
+     previewCanvas.dataset.frameSrc = `resources/designs/${fileName}`;
     }
 
     async function drawPhotoToFit(ctx, photoSrc, x, y, w, h){
