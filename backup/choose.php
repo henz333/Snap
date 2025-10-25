@@ -359,7 +359,7 @@
       const index = Number(previewCanvas.dataset.index);
       if (!frameSrc) return alert('Select a frame first.');
 
-      loadingOverlay.style.display = 'flex'; // 🔄 Show loading
+      loadingOverlay.style.display = 'flex';
 
       const frameImg = await loadImage(frameSrc);
       const finalCanvas = document.createElement('canvas');
@@ -383,17 +383,17 @@
         formData.append('image', finalDataURL);
         const res = await fetch('upload_snap.php', { method: 'POST', body: formData });
         const result = await res.json();
-        loadingOverlay.style.display = 'none'; // 🔄 Hide loading
+        loadingOverlay.style.display = 'none';
         if (result.success) {
           alert('Upload successful!');
           sessionStorage.setItem('finalPhoto', finalDataURL);
           sessionStorage.setItem('selectedFrame', frameSrc);
           window.location.href = 'print.html';
-        } else {
+        } else if (result.message && result.message.trim() !== 'Upload complete.') {
           alert('Upload failed: ' + result.message);
         }
       } catch (err) {
-        loadingOverlay.style.display = 'none'; // 🔄 Hide on error
+        loadingOverlay.style.display = 'none';
         alert('Error uploading image.');
         console.error(err);
       }
